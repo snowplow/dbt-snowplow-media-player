@@ -1,0 +1,41 @@
+name: 'snowplow_media_player'
+version: '0.1.0'
+config-version: 2
+require-dbt-version: ">=1.0.0"
+
+profile: 'default'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+docs-paths: ["docs"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+vars:
+  snowplow__percent_progress_boundaries: [10, 25, 50, 75]
+  snowplow__valid_play_sec: 30
+  snowplow__complete_play_rate: 0.99
+  snowplow__max_media_pv_window: 10
+
+models:
+  snowplow_media_player:
+    +bind: false
+    +materialized: view
+    web:
+      +schema: "derived"
+      +tags: "snowplow_web_incremental"
+      +enabled: true
+      scratch:
+        +schema: "scratch"
+        +tags: "scratch"
+    custom:
+      +schema: "scratch"
+      +tags: "snowplow_web_incremental"
+      +enabled: false
