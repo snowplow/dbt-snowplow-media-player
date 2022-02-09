@@ -1,0 +1,19 @@
+version: 2
+
+sources:
+  - name: atomic
+    schema: atomic
+    database: snplow5
+    tables:
+      - name: events
+      - name: com_snowplowanalytics_snowplow_web_page_1
+      - name: com_snowplowanalytics_snowplow_media_player_event_1
+      - name: com_snowplowanalytics_snowplow_media_player_1
+      - name: com_youtube_youtube_1
+      - name: org_whatwg_media_element_1
+      - name: org_whatwg_video_element_1
+      - name: com_roku_video_1
+      - name: com_roku_device_info_1
+      - name: com_snowplowanalytics_snowplow_client_session_1 # to get the session_id for Roku
+      - name: com_snowplowanalytics_mobile_screen_view_1' # to get the screen_view_id for Roku
+      - name: snowplow_mobile_base_session_context # to get the device_user_id for Roku

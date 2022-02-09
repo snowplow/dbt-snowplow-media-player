@@ -1,0 +1,27 @@
+name: 'snowplow_media_player'
+version: '1.0.0'
+config-version: 2
+require-dbt-version: ">=1.0.0"
+
+profile: 'default'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  +bind: false
+  +materialized: view
+
+vars:
+  snowplow__percent_progress_boundaries: {15: 0.15, 25: 0.1, 50: 0.25, 75: 0.25, 100: 0.25}
+  snowplow__valid_play_sec: 30 
+  snowplow__complete_play_rate: 0.99

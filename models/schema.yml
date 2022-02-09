@@ -1,0 +1,67 @@
+version: 2
+
+models:    
+  - name: mp_events
+    description: "This table collects all media player events as a base table"
+    columns:
+      - name: event_id
+        description: "The primary key of this table"
+        tests:
+          - unique
+          - not_null
+  - name: interactions
+    description: "This table shows all media player events and calculates respective time periods"
+    columns:
+      - name: event_id
+        description: "The primary key of this table"
+        tests:
+          - unique
+          - not_null
+  - name: plays_by_pageview
+    description: "This table aggregates media player interactions to a pageview level"
+    columns:
+      - name: play_id
+        description: "The primary key of this table that is unique for each media_id and pageview"
+        tests:
+          - unique
+          - not_null
+  - name: plays_by_session
+    description: "This table aggregates the pageview level interactions to show session level media stats"
+    columns:
+      - name: domain_sessionid
+        description: "The primary key of this table"
+        tests:
+          - unique
+          - not_null
+  - name: plays_by_user
+    description: "This table aggregates the pageview level interactions to show user by media level media stats"
+    columns:
+      - name: user_media_id
+        description: "The primary key of this table that is unique for each media_id and domain_userid"
+        tests:
+          - unique
+          - not_null 
+  - name: user_stats
+    description: "This table aggregates the pageview level interactions to show user level media stats"
+    columns:
+      - name: domain_userid
+        description: "The primary key of this table"
+        tests:
+          - unique
+          - not_null
+  - name: media_stats
+    description: "This table aggregates the pageview level interactions to show overall media stats"
+    columns:
+      - name: media_id
+        description: "The primary key of this table"
+        tests:
+          - unique
+          - not_null
+  - name: pivot_base
+    description: "This table serves as a base to add percent_progress_passed fields to tables"
+    columns:
+      - name: percent_progress
+        description: "The primary key of this table"
+        tests:
+          - unique
+          - not_null       
