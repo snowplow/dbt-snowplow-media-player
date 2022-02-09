@@ -1,0 +1,77 @@
+version: 2
+
+models:
+  - name: snowplow_media_player_plays_by_session
+    description: '{{ doc("table_plays_by_session") }}'
+    columns:
+      - name: domain_sessionid
+        description: '{{ doc("col_domain_sessionid") }}'
+        tags:
+          - primary-key
+        tests:
+          - unique
+          - not_null
+      - name: domain_userid
+        description: '{{ doc("col_domain_userid") }}'
+      - name: impressions
+        description: '{{ doc("col_impressions") }}'
+      - name: videos_played
+        description: '{{ doc("col_videos_played") }}'
+      - name: audio_played
+        description: '{{ doc("col_audio_played") }}'
+      - name: video_plays
+        description: '{{ doc("col_video_plays") }}'
+      - name: audio_plays
+        description: '{{ doc("col_audio_plays") }}'
+      - name: valid_video_plays
+        description: '{{ doc("col_valid_video_plays") }}'
+      - name: valid_audio_plays
+        description: '{{ doc("col_valid_audio_plays") }}'
+      - name: start_tstamp
+        description: '{{ doc("col_start_tstamp") }}'
+      - name: end_tstamp
+        description: '{{ doc("col_end_tstamp") }}'
+      - name: seeks
+        description: '{{ doc("col_seeks") }}'
+      - name: play_time_sec
+        description: '{{ doc("col_play_time_sec") }}'
+      - name: play_time_sec_muted
+        description: '{{ doc("col_play_time_sec_muted") }}'
+      - name: avg_play_time_sec
+        description: '{{ doc("col_avg_play_time_sec") }}'
+      - name: avg_percent_played
+        description: '{{ doc("col_avg_percent_played") }}'
+      - name: complete_plays
+        description: '{{ doc("col_complete_plays") }}'
+  - name: snowplow_media_player_user_stats
+    description: '{{ doc("table_user_stats") }}'
+    columns:
+      - name: domain_userid
+        description: '{{ doc("col_domain_userid") }}'
+        tags:
+          - primary-key
+        tests:
+          - unique
+          - not_null
+      - name: first_play
+        description: '{{ doc("col_first_play") }}'
+      - name: last_play
+        description: '{{ doc("col_last_play") }}'
+      - name: video_plays
+        description: '{{ doc("col_video_plays") }}'
+      - name: audio_plays
+        description: '{{ doc("col_audio_plays") }}'
+      - name: valid_video_plays
+        description: '{{ doc("col_valid_video_plays") }}'
+      - name: valid_audio_plays
+        description: '{{ doc("col_valid_audio_plays") }}'
+      - name: complete_plays
+        description: '{{ doc("col_complete_plays") }}'
+      - name: seeks
+        description: '{{ doc("col_seeks") }}'
+      - name: play_time_min
+        description: '{{ doc("col_play_time_min") }}'
+      - name: avg_session_play_time_min
+        description: '{{ doc("col_avg_session_play_time_min") }}'
+      - name: avg_percent_played
+        description: '{{ doc("col_avg_percent_played") }}'
