@@ -1,5 +1,5 @@
 name: 'snowplow_media_player'
-version: '1.0.0'
+version: '0.1.0'
 config-version: 2
 require-dbt-version: ">=1.0.0"
 
@@ -10,6 +10,7 @@ analysis-paths: ["analyses"]
 test-paths: ["tests"]
 seed-paths: ["seeds"]
 macro-paths: ["macros"]
+docs-paths: ["docs"]
 snapshot-paths: ["snapshots"]
 
 target-path: "target"
@@ -17,11 +18,13 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
+vars:
+  snowplow__percent_progress_boundaries: [10, 25, 50, 75]
+  snowplow__valid_play_sec: 30
+  snowplow__complete_play_rate: 0.99
+  snowplow__mp_start_date: '2022-01-18'
+  snowplow__mp_lookback_hours: 6
+
 models:
   +bind: false
-  +materialized: view
-
-vars:
-  snowplow__percent_progress_boundaries: {15: 0.15, 25: 0.1, 50: 0.25, 75: 0.25, 100: 0.25}
-  snowplow__valid_play_sec: 30 
-  snowplow__complete_play_rate: 0.99
+  +materialized: table
