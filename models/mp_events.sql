@@ -29,7 +29,7 @@ with prep as (
   on pvc.root_id = e.event_id and pvc.root_tstamp = e.collector_tstamp
 
   where e.collector_tstamp >= {{ var("snowplow__mp_start_date") }}
-  and e.event_name = 'media_player_event' and pvc.page_view_id is not null
+  and e.event_name = 'media_player_event' and pvc.id is not null
 
   {% if is_incremental() %}
   and e.collector_tstamp > (select dateadd(hour, -{{ var("snowplow__mp_lookback_hours") }}, max(derived_tstamp)) from {{ this }})
