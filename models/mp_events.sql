@@ -21,7 +21,8 @@ with prep as (
     e.dvce_type,
     e.os_name,
     e.os_timezone,
-    e.derived_tstamp
+    e.derived_tstamp,
+    e.collector_tstamp
 
   from {{ source('atomic', 'events') }} as e
 
@@ -38,17 +39,18 @@ with prep as (
 )
 
 select
-    event_id,
-    page_view_id,
-    domain_sessionid,
-    domain_userid,
-    page_referrer,
-    page_url,
-    geo_region_name,
-    br_name,
-    dvce_type,
-    os_name,
-    os_timezone,
-    derived_tstamp
+  event_id,
+  page_view_id,
+  domain_sessionid,
+  domain_userid,
+  page_referrer,
+  page_url,
+  geo_region_name,
+  br_name,
+  dvce_type,
+  os_name,
+  os_timezone,
+  derived_tstamp,
+  collector_tstamp
 
 from prep

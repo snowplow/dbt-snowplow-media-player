@@ -86,14 +86,6 @@ The percent of the way through the media.
 If the media element is muted.
 {% enddocs %}
 
-{% docs col_media_start_pos %}
-Calculated from 'current_time' field of the media_player context, which refers to the playback time.
-{% enddocs %}
-
-{% docs col_media_end_pos %}
-Calculated from 'current_time' field of the media_player context, which refers to the playback time.
-{% enddocs %}
-
 {% docs col_start_tstamp %}
 The `derived_tstamp` denoting the time when the event started.
 {% enddocs %}
@@ -102,15 +94,7 @@ The `derived_tstamp` denoting the time when the event started.
 The `derived_tstamp` denoting the time when the event started.
 {% enddocs %}
 
-{% docs col_elapsed_time_sec %}
-The time passed between two consequtive media player events.
-{% enddocs %}
-
 {% docs col_play_time_sec %}
-Calculated duration of play in seconds.
-{% enddocs %}
-
-{% docs col_play_time_sec_amended %}
 Calculated duration of play in seconds.
 {% enddocs %}
 
@@ -138,8 +122,8 @@ The derived_tstamp of the beginning of the last valid_play of a media element.
 The sum of all media plays that exceeds the limit set within the variable `snowplow__valid_play_sec`, it is defaulted to 30 (seconds).
 {% enddocs %}
 
-{% docs col_unique_users %}
-The number of domain_userids who played a specific media element.
+{% docs col_users %}
+The number of domain_userids who played a specific media element regardless of percentage progresses reached.
 {% enddocs %}
 
 {% docs col_returning_users %}
@@ -148,10 +132,6 @@ The number of domain_userids with more than one page_view with play of a specifi
 
 {% docs col_impressions %}
 The number of pageviews where a media content was displayed regardless of whether the media was actually played or not.
-{% enddocs %}
-
-{% docs col_sessions_with_valid_plays %}
-The count of domain_session_ids with valid plays.
 {% enddocs %}
 
 {% docs col_avg_playback_rate %}
@@ -175,15 +155,23 @@ The number of complete plays divided by the domain_userids with plays of any dur
 {% enddocs %}
 
 {% docs col_retention_rate %}
-Total play_time divided by the total media duration.
+The maximum percent progress reached before any seek event.
+{% enddocs %}
+
+{% docs col_avg_percentage_played %}
+Average of total play_time divided by the media duration.
 {% enddocs %}
 
 {% docs col__percent_passed %}
-Field(s) calculated based on the `snowplow_mp_percent_progress` list, which shows as a boolean whether that percent progress has been reached.
+Field(s) calculated based on the `snowplow_mp_percent_progress` list, which shows how many times a certain percent progress has been reached.
 {% enddocs %}
 
 {% docs col_derived_tstamp %}
 Timestamp making allowance for innaccurate device clock e.g. `2013-11-26 00:02:04`.
+{% enddocs %}
+
+{% docs col_collector_tstamp %}
+Time stamp for the event recorded by the collector e.g. `2013-11-26 00:02:05`.
 {% enddocs %}
 
 {% docs col_weight_rate %}
@@ -192,10 +180,6 @@ The weight given for each percent progress used for the calculation of the play_
 
 {% docs col_play_time_sec_muted %}
 Calculated duration of muted play in seconds.
-{% enddocs %}
-
-{% docs col_play_time_sec_estimated %}
-Calculated duration of play in seconds based on the percent_progresses reached.
 {% enddocs %}
 
 {% docs col_is_played %}
@@ -212,10 +196,6 @@ A boolean value to show whether the view retention_rate has reached the rate giv
 
 {% docs col_seeks %}
 The count of seek events within a certain aggregation level. The seek event occurs when a user moves/skips to a new position in the media content.
-{% enddocs %}
-
-{% docs col_max_percent_progress %}
-The highest percent_progress thas has been reached within the specific aggregated view. In case there was an ended event, it will equal to 100.
 {% enddocs %}
 
 {% docs col_videos_played %}
@@ -243,19 +223,15 @@ Calculated duration of muted play in minutes.
 {% enddocs %}
 
 {% docs col_avg_retention_rate %}
-The average retention rate (play_time divided by the media durations).
+The average percent progress reached that is played before any seek event.
 {% enddocs %}
 
 {% docs col_plays %}
 The number or pageviews with plays of any duration.
 {% enddocs %}
 
-{% docs col_unique_users_with_plays %}
-The number of domain_userids with plays of any duration of a specific media element.
-{% enddocs %}
-
-{% docs col_unique_users_with_valid_plays %}
-The number of domain_userids with valid_plays of a specific media element.
+{% docs col_users_w_complete_plays %}
+The number of domain_userids who played the specific media element end to end.
 {% enddocs %}
 
 {% docs col_video_plays %}

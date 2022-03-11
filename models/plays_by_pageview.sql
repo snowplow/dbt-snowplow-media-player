@@ -12,9 +12,9 @@ with prep as (
     i.play_id,
     i.page_view_id,
     i.media_id,
-    max(i.domain_sessionid) as domain_sessionid,
+    i.domain_sessionid,
     i.domain_userid,
-    max(round(i.duration)) as duration,
+    max(i.duration) as duration,
     i.media_type,
     i.media_player_type,
     i.page_referrer,
@@ -25,33 +25,38 @@ with prep as (
     i.dvce_type,
     i.os_name,
     i.os_timezone,
-    cast(coalesce(sum(p.weight_rate * i.duration / 100), 0) as {{ dbt_utils.type_int() }}) as play_time_sec_estimated,
-    min(start_tstamp) start_tstamp,
+    min(start_tstamp) as start_tstamp,
+    max(start_tstamp) as end_tstamp,
+    sum(case when i.event_type = 'play' then 1 else 0 end) as plays,
     sum(case when i.event_type in ('seek', 'seeked') then 1 else 0 end) as seeks,
-    max(i.percent_progress) as max_percent_progress,
-    max(i.end_tstamp) end_tstamp,
-    sum(i.play_time_sec_amended) as play_time_sec,
-    sum(case when i.is_muted then i.play_time_sec_amended else 0 end) as play_time_sec_muted,
+    sum(i.play_time_sec) as play_time_sec,
+    sum(i.play_time_sec_muted) as play_time_sec_muted,
     sum(i.playback_rate * i.play_time_sec) / nullif(sum(i.play_time_sec), 0) as avg_playback_rate,
-    sum(i.play_time_sec_amended)/ nullif(max(i.duration), 0) as retention_rate,
-    {{ dbt_utils.pivot(
-        column='i.percent_progress',
-        values=dbt_utils.get_column_values( table=ref('pivot_base'), column='percent_progress', default=[]) | sort,
-        alias=True,
-        agg='bool_or',
-        cmp='=',
-        prefix='_',
-        suffix='_percent_passed',
-        else_value='0',
-        quote_identifiers=FALSE
-        ) }}
+    listagg(distinct percent_progress, ',') within group (order by percent_progress) as percent_progress_reached,
+    min(case when i.event_type in ('seek', 'seeked') then start_tstamp end) as first_seek_time,
+    max(i.percent_progress) as max_percent_progress
 
   from {{ ref("interactions") }} i
 
-  left join {{ ref("pivot_base") }} p
-  on i.percent_progress = p.percent_progress
+  group by 1,2,3,4,5,7,8,9,10,12,13,14,15,16
 
-  group by 1,2,3,5,7,8,9,10,12,13,14,15,16
+)
+
+, retention_rate as (
+
+    select
+      p.play_id,
+      max(i.percent_progress) as retention_rate
+
+    from prep p
+    inner join {{ ref("interactions") }} i
+    on i.play_id = p.play_id
+
+    where i.event_type in ('percentprogress') and (i.start_tstamp <= p.first_seek_time or p.first_seek_time is null)
+
+    group by 1
+
+    order by 2
 
 )
 
@@ -71,7 +76,7 @@ select
   d.media_id,
   d.domain_sessionid,
   d.domain_userid,
-  cast(d.duration as {{ dbt_utils.type_int() }}) as duration,
+  d.duration,
   d.media_type,
   d.media_player_type,
   d.page_referrer,
@@ -86,25 +91,20 @@ select
   d.end_tstamp,
   d.play_time_sec,
   d.play_time_sec_muted,
-  d.play_time_sec_estimated,
-  case when d.play_time_sec > 0 then true else false end is_played,
-  case when d.play_time_sec >= {{ var('snowplow__valid_play_sec') }} then true else false end is_valid_play,
-  d.retention_rate,
+  case when d.plays > 0 then true else false end is_played,
+  case when d.play_time_sec > {{ var("snowplow__valid_play_sec") }} then true else false end is_valid_play,
+  case when play_time_sec / duration >= {{ var("snowplow__complete_play_rate") }} then true else false end as is_complete_play,
   d.avg_playback_rate,
-  case when d.retention_rate >= {{ var('snowplow__complete_play_rate') }} then true else false end is_complete_play,
+  coalesce(case when r.retention_rate > max_percent_progress
+          then max_percent_progress / cast(100 as {{ dbt_utils.type_float() }})
+          else r.retention_rate / cast(100 as {{ dbt_utils.type_float() }})
+          end, 0) as retention_rate, -- to correct incorrect result due to duplicate session_id (one removed)
   d.seeks,
-  coalesce(d.max_percent_progress, 0) as max_percent_progress,
-{% for element in var('snowplow__percent_progress_boundaries') %}
-  d._{{ element }}_percent_passed as _{{ element }}_percent_passed
-  {% if not loop.last %}
-    ,
-  {% endif %}
-{% endfor %}
-
-{% if 100 not in var("snowplow__percent_progress_boundaries") %}
-  , d._100_percent_passed as _100_percent_passed
-{% endif %}
+  d.percent_progress_reached
 
 from dedupe d
+
+left join retention_rate r
+on r.play_id = d.play_id
 
 where d.duplicate_count = 1

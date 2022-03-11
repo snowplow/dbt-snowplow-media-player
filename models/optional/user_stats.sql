@@ -1,6 +1,6 @@
 {{
   config(
-    materialized = 'ephemeral',
+    materialized = 'table',
     unique_key = 'domain_userid',
     sort = 'first_play',
     dist = 'domain_userid'
@@ -15,7 +15,7 @@ with prep as (
     min(start_tstamp) as first_play,
     max(start_tstamp) as last_play,
     sum(play_time_sec) / 60 as total_play_time_min,
-    avg(avg_retention_rate)  as avg_retention_rate,
+    avg(avg_percentage_played) as avg_percentage_played,
     sum(video_plays) as video_plays,
     sum(audio_plays) as audio_plays,
     sum(seeks) as seeks,
@@ -24,8 +24,6 @@ with prep as (
     sum(valid_audio_plays) as valid_audio_plays
 
   from {{ ref("plays_by_session") }}
-
-  where play_time_sec > 0
 
   group by domain_userid
 
@@ -41,7 +39,7 @@ select
   valid_audio_plays,
   cast(total_play_time_min as {{ dbt_utils.type_int() }}) as play_time_min,
   cast(avg_play_time_min as {{ dbt_utils.type_int() }}) as avg_play_time_min,
-  avg_retention_rate,
+  avg_percentage_played,
   seeks,
   complete_plays
 

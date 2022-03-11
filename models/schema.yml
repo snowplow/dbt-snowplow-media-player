@@ -31,6 +31,8 @@ models:
         description: '{{ doc("col_os_timezone") }}'
       - name: derived_tstamp
         description: '{{ doc("col_derived_tstamp") }}'
+      - name: collector_tstamp
+        description: '{{ doc("col_collector_tstamp") }}'
   - name: interactions
     description: This table shows all media player events and calculates respective time periods
     columns:
@@ -39,16 +41,16 @@ models:
         tests:
           - unique
           - not_null
-      - name: media_id
-        description: '{{ doc("col_media_id") }}'
-      - name: play_id
-        description: '{{ doc("col_play_id") }}'
       - name: page_view_id
         description: '{{ doc("col_page_view_id") }}'
       - name: domain_sessionid
         description: '{{ doc("col_domain_sessionid") }}'
       - name: domain_userid
         description: '{{ doc("col_domain_userid") }}'
+      - name: media_id
+        description: '{{ doc("col_media_id") }}'
+      - name: play_id
+        description: '{{ doc("col_play_id") }}'
       - name: event_type
         description: '{{ doc("col_event_type") }}'
       - name: media_type
@@ -81,19 +83,12 @@ models:
         description: '{{ doc("col_percent_progress") }}'
       - name: is_muted
         description: '{{ doc("col_is_muted") }}'
-      - name: media_start_pos
-        description: '{{ doc("col_media_start_pos") }}'
-      - name: media_end_pos
-        description: '{{ doc("col_media_end_pos") }}'
       - name: start_tstamp
         description: '{{ doc("col_start_tstamp") }}'
-      - name: end_tstamp
-        description: '{{ doc("col_end_tstamp") }}'
-      - name: elapsed_time_sec
-        description: '{{ doc("col_elapsed_time_sec") }}'
       - name: play_time_sec
         description: '{{ doc("col_play_time_sec") }}'
-      - name: play_time_sec_amended
+      - name: play_time_sec_muted
+        description: '{{ doc("col_play_time_sec_muted") }}'
   - name: plays_by_pageview
     description: This table aggregates media player interactions to a pageview level
     columns:
@@ -140,8 +135,6 @@ models:
         description: '{{ doc("col_play_time_sec") }}'
       - name: play_time_sec_muted
         description: '{{ doc("col_play_time_sec_muted") }}'
-      - name: play_time_sec_estimated
-        description: '{{ doc("col_play_time_sec_estimated") }}'
       - name: is_played
         description: '{{ doc("col_is_played") }}'
       - name: is_valid_play
@@ -154,8 +147,6 @@ models:
         description: '{{ doc("col_is_complete_play") }}'
       - name: seeks
         description: '{{ doc("col_seeks") }}'
-      - name: max_percent_progress
-        description: '{{ doc("col_max_percent_progress") }}'
       - name: x_percent_passed
         description: '{{ doc("col__percent_passed") }}'
 
@@ -195,8 +186,8 @@ models:
         description: '{{ doc("col_play_time_sec_muted") }}'
       - name: avg_play_time_sec
         description: '{{ doc("col_avg_play_time_sec") }}'
-      - name: avg_retention_rate
-        description: '{{ doc("col_avg_retention_rate") }}'
+      - name: avg_percentage_played
+        description: '{{ doc("col_avg_percentage_played") }}'
       - name: complete_plays
         description: '{{ doc("col_complete_plays") }}'
   - name: user_stats
@@ -223,8 +214,8 @@ models:
         description: '{{ doc("col_play_time_min") }}'
       - name: avg_play_time_min
         description: '{{ doc("col_avg_play_time_min") }}'
-      - name: avg_retention_rate
-        description: '{{ doc("col_avg_retention_rate") }}'
+      - name: avg_percentage_played
+        description: '{{ doc("col_avg_percentage_played") }}'
       - name: seeks
         description: '{{ doc("col_seeks") }}'
       - name: complete_plays
@@ -257,16 +248,14 @@ models:
         description: '{{ doc("col_valid_plays") }}'
       - name: complete_plays
         description: '{{ doc("col_complete_plays") }}'
-      - name: unique_users_with_plays
-        description: '{{ doc("col_unique_users_with_plays") }}'
-      - name: unique_users_with_valid_plays
-        description: '{{ doc("col_unique_users_with_valid_plays") }}'
+      - name: users
+        description: '{{ doc("col_users") }}'
+      - name: users_w_complete_plays
+        description: '{{ doc("col_users_w_complete_plays") }}'
       - name: returning_users
         description: '{{ doc("col_returning_users") }}'
       - name: impressions
         description: '{{ doc("col_impressions") }}'
-      - name: sessions_with_valid_plays
-        description: '{{ doc("col_sessions_with_valid_plays") }}'
       - name: avg_playback_rate
         description: '{{ doc("col_avg_playback_rate") }}'
       - name: play_rate
@@ -275,8 +264,10 @@ models:
         description: '{{ doc("col_completion_rate_by_plays") }}'
       - name: completion_rate_by_user
         description: '{{ doc("col_completion_rate_by_user") }}'
-      - name: retention_rate
-        description: '{{ doc("col_retention_rate") }}'
+      - name: avg_percentage_played
+        description: '{{ doc("col_avg_percentage_played") }}'
+      - name: avg_retention_rate
+        description: '{{ doc("col_avg_retention_rate") }}'
       - name: x_percent_passed
         description: '{{ doc("col__percent_passed") }}'
   - name: pivot_base

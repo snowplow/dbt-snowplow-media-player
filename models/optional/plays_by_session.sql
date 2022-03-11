@@ -1,6 +1,6 @@
 {{
   config(
-    materialized = 'ephemeral',
+    materialized = 'table',
     unique_key = 'domain_sessionid',
     sort = 'start_tstamp',
     dist = 'domain_sessionid'
@@ -25,7 +25,7 @@ with prep as (
     sum(play_time_sec) as play_time_sec,
     sum(play_time_sec_muted) as play_time_sec_muted,
     avg(play_time_sec) as avg_play_time_sec,
-    avg(play_time_sec / duration) as avg_retention_rate,
+    avg(play_time_sec / duration) as avg_percentage_played,
     sum(case when is_complete_play then 1 else 0 end) as complete_plays
 
   from {{ ref("plays_by_pageview") }}
@@ -52,7 +52,7 @@ select
   play_time_sec,
   play_time_sec_muted,
   avg_play_time_sec,
-  avg_retention_rate,
+  avg_percentage_played,
   complete_plays
 
 from prep

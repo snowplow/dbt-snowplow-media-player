@@ -1,25 +1,18 @@
 with prep as (
 
-{% for element in var("snowplow__percent_progress_boundaries") %}
-  {% if element < 0 or element > 100 %}
-    {{ exceptions.raise_compiler_error("`snowplow__percent_progress_boundary` is outside the accepted range 0-100. Got: " ~ element) }}
-  {% endif %}
+   {% for element in get_percentage_boundaries(var("snowplow__percent_progress_boundaries")) %}
 
-  {% if element % 1 != 0 %}
-    {{ exceptions.raise_compiler_error("`snowplow__percent_progress_boundary` needs to be a whole number. Got: " ~ element) }}
-  {% endif %}
+    select
 
-  select
-    {{ element }} as percent_progress
-  {% if not loop.last %}
-  union all
-  {% endif %}
-{% endfor %}
+     {{ element }} as percent_progress
 
-{% if 100 not in var("snowplow__percent_progress_boundaries") %}
-  union all
-  select 100 as percent_progress
-{% endif %}
+    {% if not loop.last %}
+
+      union all
+
+    {% endif %}
+
+  {% endfor %}
 
 )
 
