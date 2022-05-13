@@ -1,0 +1,3 @@
+snowplow-media-player 0.1.0 (2022-05-13)
+---------------------------------------
+Add Media Player model with Redshift and Postgres support (Close #3)
