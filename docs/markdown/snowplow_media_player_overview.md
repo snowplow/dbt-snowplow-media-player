@@ -34,7 +34,7 @@ The additional `_pivot_base` table is there to calculate the percent_progress bo
 
 ## Adapter Support
 
-The Snowplow Media Player v0.1.0 package currently supports Redshift & Postgres.
+The Snowplow Media Player v0.2.0 package currently supports Redshift, Postgres, Snowflake and BigQuery.
 
 ## Requirements
 
@@ -90,6 +90,18 @@ The rate to set what percentage of a media needs to be played in order to consid
 > `snowplow__max_media_pv_window`: 10
 
 The number of hours that needs to pass before new page_view level media player metrics from the snowplow_media_palyer_base table are safe to be processed by the model downstream in the snowplow_media_player_media_stats table. Please note that even if new events are added later on ( e.g. new percentprogress events are fired indicading potential replay) and the snowplow_media_player_base table is changed, the model will not update them in the media_stats table, therefore it is safer to set as big of a number as still convenient for analysis and reporting.
+
+ > `snowplow__enable_youtube`: false
+
+Set to true if the HTML5 media element context schema is enabled. This variable is used to handle syntax depending on whether the context fields are available in the database or not.
+
+> `snowplow__enable_whatwg_media`: false
+
+Set to true if the HTML5 video element context schema is enabled. This variable is used to handle syntax depending on whether the context fields are available in the database or not.
+
+> `snowplow__enable_whatwg_video`: false
+
+Set to true if the HTML5 video element context schema is enabled. This variable is used to handle syntax depending on whether the context fields are available in the database or not.
 
 ### 2. Configuring the web model (in case it has not been run before)
 
