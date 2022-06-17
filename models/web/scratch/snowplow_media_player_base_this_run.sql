@@ -2,8 +2,14 @@
   config(
     materialized='table',
     tags=["this_run"],
+    partition_by = snowplow_utils.get_partition_by(bigquery_partition_by={
+      "field": "start_tstamp",
+      "data_type": "timestamp"
+    }),
+    cluster_by=snowplow_utils.get_cluster_by(bigquery_cols=["media_id"]),
     sort = 'start_tstamp',
-    dist = 'play_id'
+    dist = 'play_id',
+    sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt'))
   )
 }}
 
@@ -35,14 +41,17 @@ with prep as (
     sum(i.play_time_sec_muted) as play_time_sec_muted,
     coalesce(sum(i.playback_rate * i.play_time_sec) / nullif(sum(i.play_time_sec), 0), max(i.playback_rate)) as avg_playback_rate,
 
-    {%- if target.type == 'redshift' -%}
-    listagg(percent_progress, ',') within group (order by percent_progress) as percent_progress_reached,
+    {%- if target.type in ('redshift', 'snowflake') -%}
+    listagg(i.percent_progress, ',') within group (order by i.percent_progress) as percent_progress_reached,
 
     {%- elif target.type == 'postgres' -%}
     string_agg(i.percent_progress::varchar(10), ',' order by i.percent_progress) as percent_progress_reached,
 
+    {%- elif target.type == 'bigquery' %}
+    string_agg(cast(i.percent_progress as string), ',' order by i.percent_progress) as percent_progress_reached,
+
     {%- else -%}
-    {{ exceptions.raise_compiler_error("Currently Redshift and Postgres targets are supported by the model. Got: " ~ target.type) }}
+    {{ exceptions.raise_compiler_error("Target is not supported. Got: " ~ target.type) }}
 
     {%- endif -%}
 

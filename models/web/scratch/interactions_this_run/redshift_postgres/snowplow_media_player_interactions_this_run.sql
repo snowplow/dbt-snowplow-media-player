@@ -37,7 +37,40 @@ with prep as (
     mp.muted as is_muted,
     mp.is_live,
     mp.loop,
-    mp.volume
+    mp.volume,
+    {% if var("snowplow__enable_whatwg_media") is false and var("snowplow__enable_whatwg_video") %}
+       {{ exceptions.raise_compiler_error("variable: snowplow__enable_whatwg_video is enabled but variable: snowplow__enable_whatwg_media is not, both need to be enabled for modelling html5 video tracking data.") }}
+    {% elif var("snowplow__enable_youtube") %}
+      {% if var("snowplow__enable_whatwg_media") %}
+        coalesce(y.player_id, me.html_id) as media_id,
+        case when y.player_id is not null then 'com.youtube-youtube' when me.html_id is not null then 'org.whatwg-media_element' else 'unknown' end as media_player_type,
+        coalesce(y.url, me.current_src) as source_url,
+        case when me.media_type = 'audio' then 'audio' else 'video' end as media_type,
+        {% if var("snowplow__enable_whatwg_video") %}
+          coalesce(y.playback_quality, ve.video_width||'x'||ve.video_height) as playback_quality
+        {% else %}
+          y.playback_quality
+        {% endif %}
+      {% else %}
+        y.player_id as media_id,
+        'com.youtube-youtube' as media_player_type,
+        y.url as source_url,
+        'video' as media_type,
+        y.playback_quality
+      {% endif %}
+    {% elif var("snowplow__enable_whatwg_media") %}
+      me.html_id as media_id,
+     'org.whatwg-media_element' as media_player_type,
+      me.current_src as source_url,
+      case when me.media_type = 'audio' then 'audio' else 'video' end as media_type,
+      {% if var("snowplow__enable_whatwg_video") %}
+        ve.video_width||'x'||ve.video_height as playback_quality
+      {% else %}
+        'N/A' as playback_quality
+      {% endif %}
+    {% else %}
+      {{ exceptions.raise_compiler_error("No media context enabled. Please enable as many of the following variables as required: snowplow__enable_youtube, snowplow__enable_whatwg_media, snowplow__enable_whatwg_video") }}
+    {% endif %}
 
     from {{ ref("snowplow_web_base_events_this_run") }} as e
 
