@@ -4,7 +4,13 @@
     unique_key = 'media_id',
     sort = 'last_play',
     dist = 'media_id',
-    tags=["derived"]
+    tags=["derived"],
+    partition_by = snowplow_utils.get_partition_by(bigquery_partition_by={
+      "field": "first_play",
+      "data_type": "timestamp"
+    }),
+    cluster_by=snowplow_utils.get_cluster_by(bigquery_cols=["media_id"]),
+    sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt'))
   )
 }}
 
@@ -33,7 +39,7 @@ with new_data as (
 from {{ ref("snowplow_media_player_base") }} p
 
 where -- enough time has passed since the page_view's start_tstamp to be able to process it as a whole (please bear in mind the late arriving data)
-p.start_tstamp < {{ dbt_utils.dateadd('hour', var("snowplow__max_media_pv_window", 10), dbt_utils.current_timestamp_in_utc() ) }}
+p.start_tstamp < cast({{ dbt_utils.dateadd('hour', var("snowplow__max_media_pv_window", 10), dbt_utils.current_timestamp_in_utc() ) }} as {{ dbt_utils.type_timestamp() }})
 -- and it has not been processed yet
 and p.start_tstamp > ( select max(last_base_tstamp) from {{ this }} )
 
@@ -81,17 +87,19 @@ group by 1,2,4,5
       {%- elif target.type == 'postgres' %}
       string_to_array(p.percent_progress_reached, ',') as percent_progress_reached
 
+      {%- elif target.type in ['snowflake', 'bigquery'] %}
+      split(p.percent_progress_reached, ',') as percent_progress_reached
+
       {%- else -%}
-      {{ exceptions.raise_compiler_error("Currently Redshift and Postgres targets are supported by the model. Got: " ~ target.type) }}
+      {{ exceptions.raise_compiler_error("Target is not supported. Got: " ~ target.type) }}
 
       {%- endif %}
-
 
     from {{ ref("snowplow_media_player_base") }} p
 
     where -- enough time has passed since the page_view`s start_tstamp to be able to process it a a whole (please bear in mind the late arriving data)
 
-    p.start_tstamp < {{ dbt_utils.dateadd('hour', var("snowplow__max_media_pv_window", 10), dbt_utils.current_timestamp_in_utc() ) }}
+    p.start_tstamp < cast({{ dbt_utils.dateadd('hour', var("snowplow__max_media_pv_window", 10), dbt_utils.current_timestamp_in_utc() ) }} as {{ dbt_utils.type_timestamp() }})
 
     -- and it has not been processed yet
     and p.start_tstamp > ( select max(last_base_tstamp) from {{ this }} )
@@ -99,7 +107,6 @@ group by 1,2,4,5
 )
 
 {%- if target.type == 'redshift' %}
-
 , unnesting as (
 
 select media_id, value_reached
@@ -109,7 +116,6 @@ from percent_progress_reached p, p.percent_progress_reached as value_reached
 )
 
 {%- elif target.type == 'postgres' %}
-
 , unnesting as (
 
 select media_id, cast(trim(unnest(percent_progress_reached)) as {{ dbt_utils.type_int() }}) as value_reached
@@ -118,8 +124,26 @@ from percent_progress_reached
 
 )
 
+{%- elif target.type == 'snowflake' %}
+, unnesting as (
+
+select t.media_id, r.value as value_reached
+
+from percent_progress_reached t, table(flatten(t.percent_progress_reached)) r
+
+)
+
+{%- elif target.type == 'bigquery' %}
+, unnesting as (
+
+select media_id, r as value_reached
+
+from percent_progress_reached t, unnest(t.percent_progress_reached) r
+
+)
+
 {%- else -%}
-{{ exceptions.raise_compiler_error("Currently Redshift and Postgres targets are supported by the model. Got: " ~ target.type) }}
+{{ exceptions.raise_compiler_error("Target is not supported. Got: " ~ target.type) }}
 
 {% endif %}
 
@@ -215,9 +239,14 @@ group by 1,2,4,5
       {%- elif target.type == 'postgres' %}
       string_to_array(p.percent_progress_reached, ',') as percent_progress_reached
 
-      {%- else -%}
-      {{ exceptions.raise_compiler_error("Currently Redshift and Postgres targets are supported by the model. Got: " ~ target.type) }}
+      {%- elif target.type == 'snowflake' %}
+      split(p.percent_progress_reached, ',') as percent_progress_reached
 
+      {%- elif target.type == 'bigquery' %}
+      split(p.percent_progress_reached, ',') as percent_progress_reached
+
+      {%- else -%}
+      {{ exceptions.raise_compiler_error("Target is not supported. Got: " ~ target.type) }}
       {%- endif %}
 
 
@@ -245,8 +274,26 @@ from percent_progress_reached
 
 )
 
+{%- elif target.type == 'snowflake' %}
+, unnesting as (
+
+select t.media_id, r.value as value_reached
+
+from percent_progress_reached t, table(flatten(t.percent_progress_reached)) r
+
+)
+
+{%- elif target.type == 'bigquery' %}
+, unnesting as (
+
+select media_id, r as value_reached
+
+from percent_progress_reached t, unnest(t.percent_progress_reached) r
+
+)
+
 {%- else -%}
-{{ exceptions.raise_compiler_error("Currently Redshift and Postgres targets are supported by the model. Got: " ~ target.type) }}
+{{ exceptions.raise_compiler_error("Target is not supported. Got: " ~ target.type) }}
 
 {% endif %}
 

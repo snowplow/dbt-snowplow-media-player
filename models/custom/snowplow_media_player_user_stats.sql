@@ -2,7 +2,13 @@
   config(
     materialized = 'table',
     sort = 'first_play',
-    dist = 'domain_userid'
+    dist = 'domain_userid',
+    partition_by = snowplow_utils.get_partition_by(bigquery_partition_by={
+      "field": "first_play",
+      "data_type": "timestamp"
+    }),
+    cluster_by=snowplow_utils.get_cluster_by(bigquery_cols=["domain_userid"]),
+    sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt'))
   )
 }}
 
