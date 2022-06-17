@@ -14,15 +14,10 @@ with prep as (
     e.page_view_id,
     e.domain_sessionid,
     e.domain_userid,
-    coalesce(y.player_id, me.html_id) as media_id,
-    mpe.label as media_label,
-    {{ dbt_utils.surrogate_key(['e.page_view_id', 'coalesce(y.player_id, me.html_id)' ]) }} play_id,
-    round(mp.duration) as duration,
-    case when me.media_type = 'audio' then 'audio' else 'video' end as media_type,
-    coalesce(y.schema_vendor||'-'||y.schema_name, me.schema_vendor||'-'||me.schema_name)  as media_player_type,
     e.page_referrer,
     e.page_url,
-    coalesce(y.url, me.current_src) as source_url,
+    mpe.label as media_label,
+    round(mp.duration) as duration,
     e.geo_region_name,
     e.br_name,
     e.dvce_type,
@@ -32,14 +27,13 @@ with prep as (
     e.derived_tstamp as start_tstamp,
     mp.current_time as player_current_time,
     coalesce(mp.playback_rate, 1) as playback_rate,
-    coalesce(y.playback_quality, ve.video_height||'x'||ve.video_width) as playback_quality,
     case when mpe.type = 'ended' then 100 else mp.percent_progress end percent_progress,
     mp.muted as is_muted,
     mp.is_live,
     mp.loop,
     mp.volume,
     {% if var("snowplow__enable_whatwg_media") is false and var("snowplow__enable_whatwg_video") %}
-       {{ exceptions.raise_compiler_error("variable: snowplow__enable_whatwg_video is enabled but variable: snowplow__enable_whatwg_media is not, both need to be enabled for modelling html5 video tracking data.") }}
+       {{ exceptions.raise_compiler_error("variable: snowplow__enable_whatwg_video is enabled but variable: snowplow__enable_whatwg_media is not, both needs to be enabled for modelling html5 video tracking data.") }}
     {% elif var("snowplow__enable_youtube") %}
       {% if var("snowplow__enable_whatwg_media") %}
         coalesce(y.player_id, me.html_id) as media_id,
@@ -77,21 +71,28 @@ with prep as (
     inner join {{ source('atomic', 'com_snowplowanalytics_snowplow_media_player_event_1') }} as mpe
     on mpe.root_id = e.event_id and mpe.root_tstamp = e.collector_tstamp
 
-    left join {{ source('atomic', 'com_snowplowanalytics_snowplow_media_player_1') }} as mp
+    inner join {{ source('atomic', 'com_snowplowanalytics_snowplow_media_player_1') }} as mp
     on mp.root_id = e.event_id and mp.root_tstamp = e.collector_tstamp
 
+  {% if var("snowplow__enable_youtube") %}
     left join {{ source('atomic', 'com_youtube_youtube_1') }} as y
-    on  y.root_id = e.event_id and y.root_tstamp = e.collector_tstamp
+    on y.root_id = e.event_id and y.root_tstamp = e.collector_tstamp
+  {% endif %}
 
+  {% if var("snowplow__enable_whatwg_media") %}
     left join {{ source('atomic', 'org_whatwg_media_element_1') }} as me
     on me.root_id = e.event_id and me.root_tstamp = e.collector_tstamp
+  {% endif %}
 
+  {% if var("snowplow__enable_whatwg_video") %}
     left join {{ source('atomic', 'org_whatwg_video_element_1') }} as ve
     on ve.root_id = e.event_id and ve.root_tstamp = e.collector_tstamp
+  {% endif %}
 
 )
 
  select
+ {{ dbt_utils.surrogate_key(['p.page_view_id', 'p.media_id' ]) }} play_id,
   p.*,
   coalesce(cast(piv.weight_rate * p.duration / 100 as {{ dbt_utils.type_int() }}), 0) as play_time_sec,
   coalesce(cast(case when p.is_muted then piv.weight_rate * p.duration / 100 end as {{ dbt_utils.type_int() }}), 0) as play_time_sec_muted
