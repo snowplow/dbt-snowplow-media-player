@@ -10,7 +10,7 @@ Please refer to the [doc site][snowplow-media-player-docs] for a full breakdown 
 
 ### Adapter Support
 
-The snowplow-media-player v0.1.0 package currently supports the following adapters:
+The snowplow-media-player v0.2.0 package currently supports the following adapters:
 
 |                    Warehouse                 |     dbt versions    | snowplow-web version | snowplow-media-player version |
 |:--------------------------------------------:|:-------------------:|:--------------------:|:-----------------------------:|
