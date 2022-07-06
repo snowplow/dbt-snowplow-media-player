@@ -38,7 +38,7 @@ with prep as (
         coalesce(e.contexts_com_youtube_youtube_1[0]:playerId::varchar, e.contexts_org_whatwg_media_element_1[0]:htmlId::varchar) as media_id,
         case when e.contexts_com_youtube_youtube_1[0]:playerId is not null then 'com.youtube-youtube'
         when e.contexts_org_whatwg_media_element_1[0]:htmlId::varchar is not null then 'org.whatwg-media_element' else 'unknown' end as media_player_type,
-        coalesce(e.contexts_com_youtube_youtube_1[0]:url::varchar, e.contexts_org_whatwg_media_element_1[0]:currentSource::varchar) as source_url,
+        coalesce(e.contexts_com_youtube_youtube_1[0]:url::varchar, e.contexts_org_whatwg_media_element_1[0]:currentSrc::varchar) as source_url,
         case when e.contexts_org_whatwg_media_element_1[0]:mediaType::varchar = 'audio' then 'audio' else 'video' end as media_type,
         {% if var("snowplow__enable_whatwg_video") %}
           coalesce(e.contexts_com_youtube_youtube_1[0]:playbackQuality::varchar, e.contexts_org_whatwg_video_element_1[0]:videoWidth::varchar||'x'||e.contexts_org_whatwg_video_element_1[0]:videoHeight::varchar) as playback_quality
