@@ -5,7 +5,7 @@
     partition_by = snowplow_utils.get_partition_by(bigquery_partition_by={
       "field": "start_tstamp",
       "data_type": "timestamp"
-    }),
+    }, databricks_partition_by='start_tstamp_date'),
     cluster_by=snowplow_utils.get_cluster_by(bigquery_cols=["media_id"]),
     sort = 'start_tstamp',
     dist = 'play_id',
@@ -49,6 +49,9 @@ with prep as (
 
     {%- elif target.type == 'bigquery' %}
     string_agg(cast(i.percent_progress as string), ',' order by i.percent_progress) as percent_progress_reached,
+
+    {%- elif target.type == 'databricks' %}
+    array_join(array_sort(collect_set(cast(i.percent_progress as string))),",") as percent_progress_reached,
 
     {%- else -%}
     {{ exceptions.raise_compiler_error("Target is not supported. Got: " ~ target.type) }}
@@ -136,6 +139,10 @@ select
           end, 0) as retention_rate, -- to correct incorrect result due to duplicate session_id (one removed)
   d.seeks,
   d.percent_progress_reached
+
+  {% if target.type in ['databricks', 'spark'] -%}
+  , date(start_tstamp) as start_tstamp_date
+  {%- endif %}
 
 from dedupe d
 
