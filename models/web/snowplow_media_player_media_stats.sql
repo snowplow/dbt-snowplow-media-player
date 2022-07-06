@@ -8,7 +8,7 @@
     partition_by = snowplow_utils.get_partition_by(bigquery_partition_by={
       "field": "first_play",
       "data_type": "timestamp"
-    }),
+    }, databricks_partition_by='first_play_date'),
     cluster_by=snowplow_utils.get_cluster_by(bigquery_cols=["media_id"]),
     sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt'))
   )
@@ -87,7 +87,7 @@ group by 1,2,4,5
       {%- elif target.type == 'postgres' %}
       string_to_array(p.percent_progress_reached, ',') as percent_progress_reached
 
-      {%- elif target.type in ['snowflake', 'bigquery'] %}
+      {%- elif target.type in ['snowflake', 'bigquery', 'databricks'] %}
       split(p.percent_progress_reached, ',') as percent_progress_reached
 
       {%- else -%}
@@ -283,12 +283,12 @@ from percent_progress_reached t, table(flatten(t.percent_progress_reached)) r
 
 )
 
-{%- elif target.type == 'bigquery' %}
+{%- elif target.type == 'databricks' %}
 , unnesting as (
 
-select media_id, r as value_reached
+select media_id, LATERAL VIEW explode(percent_progress_reached) as value_reached
 
-from percent_progress_reached t, unnest(t.percent_progress_reached) r
+from percent_progress_reached
 
 )
 
@@ -320,6 +320,10 @@ select
   p.avg_percent_played,
   p.avg_retention_rate,
   l.last_base_tstamp,
+
+{% if target.type in ['databricks', 'spark'] -%}
+  date(first_play) as first_play_date,
+{%- endif %}
 
 {% if is_incremental() %}
 

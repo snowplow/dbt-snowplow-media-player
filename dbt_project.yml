@@ -30,6 +30,11 @@ vars:
   snowplow__enable_whatwg_media: false
   # set to true if the HTML5 video element context schema is enabled
   snowplow__enable_whatwg_video: false
+  snowplow__media_player_event_context: "{{ source('atomic', 'com_snowplowanalytics_snowplow_media_player_event_1') }}"
+  snowplow__media_player_context: "{{ source('atomic', 'com_snowplowanalytics_snowplow_media_player_1') }}"
+  snowplow__youtube_context: "{{ source('atomic', 'com_youtube_youtube_1') }}"
+  snowplow__html5_media_element_context: "{{ source('atomic', 'org_whatwg_media_element_1') }}"
+  snowplow__html5_video_element_context: "{{ source('atomic', 'org_whatwg_video_element_1') }}"
 
 models:
   snowplow_media_player:
@@ -45,6 +50,8 @@ models:
         interactions_this_run:
           bigquery:
             enabled: "{{ target.type == 'bigquery' | as_bool() }}"
+          databricks:
+            enabled: "{{ target.type in ['databricks', 'spark'] | as_bool() }}"
           redshift_postgres:
             enabled: "{{ target.type in ['redshift', 'postgres'] | as_bool() }}"
           snowflake:
