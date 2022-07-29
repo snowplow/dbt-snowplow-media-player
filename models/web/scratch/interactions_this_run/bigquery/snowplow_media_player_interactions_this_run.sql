@@ -21,13 +21,13 @@ with prep as (
                 relation=ref('snowplow_web_base_events_this_run'),
                 relation_alias='e',
                 include_field_alias=false)}} as media_label,
-    round({{ get_optional_bigquery_fields(
+    round(cast({{ get_optional_bigquery_fields(
                  enabled= true,
                  fields=[{'field': 'duration', 'dtype': 'int'}],
                  col_prefix='contexts_com_snowplowanalytics_snowplow_media_player_1',
                  relation=ref('snowplow_web_base_events_this_run'),
                  relation_alias='e',
-                 include_field_alias=false)}}) as duration,
+                 include_field_alias=false)}} as float64)) as duration,
     e.geo_region_name,
     e.br_name,
     e.dvce_type,
@@ -48,13 +48,13 @@ with prep as (
                 relation=ref('snowplow_web_base_events_this_run'),
                 relation_alias='e',
                 include_field_alias=false)}} as player_current_time,
-    coalesce({{ get_optional_bigquery_fields(
+    coalesce(cast({{ get_optional_bigquery_fields(
                         enabled= true,
                         fields=[{'field': 'playback_rate', 'dtype': 'string'}],
                         col_prefix='contexts_com_snowplowanalytics_snowplow_media_player_1',
                         relation=ref('snowplow_web_base_events_this_run'),
                         relation_alias='e',
-                        include_field_alias=false)}}, 1) as playback_rate,
+                        include_field_alias=false)}} as float64), 1) as playback_rate,
     case when {{ get_optional_bigquery_fields(
                         enabled= true,
                         fields=[{'field': 'type', 'dtype': 'string'}],
@@ -63,20 +63,20 @@ with prep as (
                         relation_alias='e',
                         include_field_alias=false)}} = 'ended'
         then 100
-        else {{ get_optional_bigquery_fields(
+        else safe_cast({{ get_optional_bigquery_fields(
                         enabled= true,
                         fields=[{'field': 'percent_progress', 'dtype': 'int'}],
                         col_prefix='contexts_com_snowplowanalytics_snowplow_media_player_1',
                         relation=ref('snowplow_web_base_events_this_run'),
                         relation_alias='e',
-                        include_field_alias=false)}} end as percent_progress,
-    {{ get_optional_bigquery_fields(
+                        include_field_alias=false)}} as int64) end as percent_progress,
+    cast({{ get_optional_bigquery_fields(
                 enabled= true,
                 fields=[{'field': 'muted', 'dtype': 'string'}],
                 col_prefix='contexts_com_snowplowanalytics_snowplow_media_player_1',
                 relation=ref('snowplow_web_base_events_this_run'),
                 relation_alias='e',
-                include_field_alias=false)}} as is_muted,
+                include_field_alias=false)}} as boolean) as is_muted,
     {{ get_optional_bigquery_fields(
                 enabled= true,
                 fields=[{'field': 'is_live', 'dtype': 'string'}],

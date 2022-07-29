@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: snowplow_media_player_base_actual
+    tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('snowplow_media_player_base_expected_stg')
+      - dbt_utils.equality:
+          compare_model: ref('snowplow_media_player_base_expected_stg')
+          compare_columns:
+            - play_id
+            - page_view_id
+            - media_id
+            - media_label
+            - domain_sessionid
+            - domain_userid
+            - duration
+            - media_type
+            - media_player_type
+            - page_referrer
+            - page_url
+            - source_url
+            - geo_region_name
+            - br_name
+            - dvce_type
+            - os_name
+            - os_timezone
+            - start_tstamp
+            - end_tstamp
+            - play_time_sec
+            - play_time_sec_muted
+            - is_played
+            - is_valid_play
+            - is_complete_play
+            - avg_playback_rate
+            - retention_rate
+            - seeks
+            - percent_progress_reached
+  - name: snowplow_media_player_media_stats_actual
+    tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('snowplow_media_player_media_stats_expected_stg')
+      - dbt_utils.equality:
+          compare_model: ref('snowplow_media_player_media_stats_expected_stg')
+          compare_columns:
+            - media_id
+            - media_label
+            - duration
+            - media_type
+            - media_player_type
+            - first_play
+            - last_play
+            - plays
+            - valid_plays
+            - complete_plays
+            - impressions
+            - completion_rate_by_plays
+            - _10_percent_reached
+            - _25_percent_reached
+            - _50_percent_reached
+            - _75_percent_reached
+            - _100_percent_reached

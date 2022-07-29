@@ -56,8 +56,8 @@ group by 1,2,4,5
     n.media_type,
     n.media_player_type,
     n.last_base_tstamp,
-    least(n.first_play, coalesce(t.first_play, '2999-01-01 00:00:00')) as first_play,
-    greatest(n.last_play, coalesce(t.last_play, '2000-01-01 00:00:00')) as last_play,
+    least(n.first_play, coalesce(t.first_play, cast('2999-01-01 00:00:00' as {{ dbt_utils.type_timestamp() }}))) as first_play,
+    greatest(n.last_play, coalesce(t.last_play, cast('2000-01-01 00:00:00' as {{ dbt_utils.type_timestamp() }}))) as last_play,
     n.play_time_sec / cast(60 as {{ dbt_utils.type_float() }}) + coalesce(t.play_time_min, 0) as play_time_min,
     (n.play_time_sec / cast(60 as {{ dbt_utils.type_float() }}) + coalesce(t.play_time_min, 0))  / (n.plays + coalesce(t.plays, 0)) as avg_play_time_min,
     n.plays + coalesce(t.plays, 0) as plays,
@@ -80,20 +80,7 @@ group by 1,2,4,5
 
     select
       media_id,
-
-      {%- if target.type == 'redshift' %}
-      split_to_array(p.percent_progress_reached) as percent_progress_reached
-
-      {%- elif target.type == 'postgres' %}
-      string_to_array(p.percent_progress_reached, ',') as percent_progress_reached
-
-      {%- elif target.type in ['snowflake', 'bigquery', 'databricks'] %}
-      split(p.percent_progress_reached, ',') as percent_progress_reached
-
-      {%- else -%}
-      {{ exceptions.raise_compiler_error("Target is not supported. Got: " ~ target.type) }}
-
-      {%- endif %}
+      {{ get_split_to_array('percent_progress_reached', 'p') }} as percent_progress_reached
 
     from {{ ref("snowplow_media_player_base") }} p
 
@@ -106,46 +93,11 @@ group by 1,2,4,5
 
 )
 
-{%- if target.type == 'redshift' %}
 , unnesting as (
 
-select media_id, value_reached
-
-from percent_progress_reached p, p.percent_progress_reached as value_reached
+  {{ unnest('media_id', 'percent_progress_reached', 'value_reached', 'percent_progress_reached') }}
 
 )
-
-{%- elif target.type == 'postgres' %}
-, unnesting as (
-
-select media_id, cast(trim(unnest(percent_progress_reached)) as {{ dbt_utils.type_int() }}) as value_reached
-
-from percent_progress_reached
-
-)
-
-{%- elif target.type == 'snowflake' %}
-, unnesting as (
-
-select t.media_id, r.value as value_reached
-
-from percent_progress_reached t, table(flatten(t.percent_progress_reached)) r
-
-)
-
-{%- elif target.type == 'bigquery' %}
-, unnesting as (
-
-select media_id, r as value_reached
-
-from percent_progress_reached t, unnest(t.percent_progress_reached) r
-
-)
-
-{%- else -%}
-{{ exceptions.raise_compiler_error("Target is not supported. Got: " ~ target.type) }}
-
-{% endif %}
 
 , pivoting as (
 
@@ -232,70 +184,17 @@ group by 1,2,4,5
 
     select
       media_id,
-
-      {%- if target.type == 'redshift' %}
-      split_to_array(p.percent_progress_reached) as percent_progress_reached
-
-      {%- elif target.type == 'postgres' %}
-      string_to_array(p.percent_progress_reached, ',') as percent_progress_reached
-
-      {%- elif target.type == 'snowflake' %}
-      split(p.percent_progress_reached, ',') as percent_progress_reached
-
-      {%- elif target.type == 'bigquery' %}
-      split(p.percent_progress_reached, ',') as percent_progress_reached
-
-      {%- else -%}
-      {{ exceptions.raise_compiler_error("Target is not supported. Got: " ~ target.type) }}
-      {%- endif %}
-
+      {{ get_split_to_array('percent_progress_reached', 'p') }} as percent_progress_reached
 
     from {{ ref("snowplow_media_player_base") }} p
 
 )
 
-{%- if target.type == 'redshift' %}
-
 , unnesting as (
 
-select media_id, value_reached
-
-from percent_progress_reached p, p.percent_progress_reached as value_reached
+  {{ unnest('media_id', 'percent_progress_reached', 'value_reached', 'percent_progress_reached') }}
 
 )
-
-{%- elif target.type == 'postgres' %}
-
-, unnesting as (
-
-select media_id, cast(trim(unnest(percent_progress_reached)) as {{ dbt_utils.type_int() }}) as value_reached
-
-from percent_progress_reached
-
-)
-
-{%- elif target.type == 'snowflake' %}
-, unnesting as (
-
-select t.media_id, r.value as value_reached
-
-from percent_progress_reached t, table(flatten(t.percent_progress_reached)) r
-
-)
-
-{%- elif target.type == 'databricks' %}
-, unnesting as (
-
-select media_id, LATERAL VIEW explode(percent_progress_reached) as value_reached
-
-from percent_progress_reached
-
-)
-
-{%- else -%}
-{{ exceptions.raise_compiler_error("Target is not supported. Got: " ~ target.type) }}
-
-{% endif %}
 
 {% endif %}
 
