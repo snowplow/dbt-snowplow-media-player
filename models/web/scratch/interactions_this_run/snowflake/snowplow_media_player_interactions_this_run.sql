@@ -26,8 +26,10 @@ with prep as (
     e.derived_tstamp as start_tstamp,
     contexts_com_snowplowanalytics_snowplow_media_player_1[0]:currentTime::float as player_current_time,
     coalesce(contexts_com_snowplowanalytics_snowplow_media_player_1[0]:playbackRate::varchar, 1) as playback_rate,
-    case when e.unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1:type::varchar = 'ended' then 100 else contexts_com_snowplowanalytics_snowplow_media_player_1[0]:percentProgress::int end percent_progress,
-    contexts_com_snowplowanalytics_snowplow_media_player_1[0]:muted::varchar as is_muted,
+    cast(case when e.unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1:type::varchar = 'ended' then '100'
+        when contexts_com_snowplowanalytics_snowplow_media_player_1[0]:percentProgress::varchar = '' THEN NULL
+        else contexts_com_snowplowanalytics_snowplow_media_player_1[0]:percentProgress::varchar END AS int) percent_progress,
+    contexts_com_snowplowanalytics_snowplow_media_player_1[0]:muted::boolean as is_muted,
     contexts_com_snowplowanalytics_snowplow_media_player_1[0]:isLive::varchar as is_live,
     contexts_com_snowplowanalytics_snowplow_media_player_1[0]:loop::varchar as loop,
     contexts_com_snowplowanalytics_snowplow_media_player_1[0]:volume::varchar as volume,
@@ -55,7 +57,7 @@ with prep as (
     {% elif var("snowplow__enable_whatwg_media") %}
       e.contexts_org_whatwg_media_element_1[0]:htmlId::varchar as media_id,
       'org.whatwg-media_element' as media_player_type,
-      e.contexts_org_whatwg_media_element_1[0]:currentSource::varchar as source_url,
+      e.contexts_org_whatwg_media_element_1[0]:currentSrc::varchar as source_url,
       case when e.contexts_org_whatwg_media_element_1[0]:mediaType::varchar = 'audio' then 'audio' else 'video' end as media_type,
       {% if var("snowplow__enable_whatwg_video") %}
         e.contexts_org_whatwg_video_element_1[0]:videoWidth::varchar||'x'||e.contexts_org_whatwg_video_element_1[0]:videoHeight::varchar as playback_quality
