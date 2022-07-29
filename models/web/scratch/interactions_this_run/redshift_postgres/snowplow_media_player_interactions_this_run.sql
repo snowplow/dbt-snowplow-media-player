@@ -9,7 +9,7 @@
 
 with prep as (
 
- select
+  select
     e.event_id,
     e.page_view_id,
     e.domain_sessionid,
@@ -68,24 +68,24 @@ with prep as (
 
     from {{ ref("snowplow_web_base_events_this_run") }} as e
 
-    inner join {{ source('atomic', 'com_snowplowanalytics_snowplow_media_player_event_1') }} as mpe
+    inner join {{ var('snowplow__media_player_event_context') }} as mpe
     on mpe.root_id = e.event_id and mpe.root_tstamp = e.collector_tstamp
 
-    inner join {{ source('atomic', 'com_snowplowanalytics_snowplow_media_player_1') }} as mp
+    inner join {{ var('snowplow__media_player_context') }} as mp
     on mp.root_id = e.event_id and mp.root_tstamp = e.collector_tstamp
 
   {% if var("snowplow__enable_youtube") %}
-    left join {{ source('atomic', 'com_youtube_youtube_1') }} as y
+    left join {{ var('snowplow__youtube_context') }} as y
     on y.root_id = e.event_id and y.root_tstamp = e.collector_tstamp
   {% endif %}
 
   {% if var("snowplow__enable_whatwg_media") %}
-    left join {{ source('atomic', 'org_whatwg_media_element_1') }} as me
+    left join {{ var('snowplow__html5_media_element_context') }} as me
     on me.root_id = e.event_id and me.root_tstamp = e.collector_tstamp
   {% endif %}
 
   {% if var("snowplow__enable_whatwg_video") %}
-    left join {{ source('atomic', 'org_whatwg_video_element_1') }} as ve
+    left join {{ var('snowplow__html5_video_element_context') }} as ve
     on ve.root_id = e.event_id and ve.root_tstamp = e.collector_tstamp
   {% endif %}
 
@@ -94,8 +94,8 @@ with prep as (
  select
  {{ dbt_utils.surrogate_key(['p.page_view_id', 'p.media_id' ]) }} play_id,
   p.*,
-  coalesce(cast(piv.weight_rate * p.duration / 100 as {{ dbt_utils.type_int() }}), 0) as play_time_sec,
-  coalesce(cast(case when p.is_muted then piv.weight_rate * p.duration / 100 end as {{ dbt_utils.type_int() }}), 0) as play_time_sec_muted
+  coalesce(cast(round(piv.weight_rate * p.duration / 100) as {{ dbt_utils.type_int() }}), 0) as play_time_sec,
+  coalesce(cast(case when p.is_muted then round(piv.weight_rate * p.duration / 100) end as {{ dbt_utils.type_int() }}), 0) as play_time_sec_muted
 
   from prep p
 

@@ -40,24 +40,7 @@ with prep as (
     sum(i.play_time_sec) as play_time_sec,
     sum(i.play_time_sec_muted) as play_time_sec_muted,
     coalesce(sum(i.playback_rate * i.play_time_sec) / nullif(sum(i.play_time_sec), 0), max(i.playback_rate)) as avg_playback_rate,
-
-    {%- if target.type in ('redshift', 'snowflake') -%}
-    listagg(i.percent_progress, ',') within group (order by i.percent_progress) as percent_progress_reached,
-
-    {%- elif target.type == 'postgres' -%}
-    string_agg(i.percent_progress::varchar(10), ',' order by i.percent_progress) as percent_progress_reached,
-
-    {%- elif target.type == 'bigquery' %}
-    string_agg(cast(i.percent_progress as string), ',' order by i.percent_progress) as percent_progress_reached,
-
-    {%- elif target.type == 'databricks' %}
-    array_join(array_sort(collect_set(cast(i.percent_progress as string))),",") as percent_progress_reached,
-
-    {%- else -%}
-    {{ exceptions.raise_compiler_error("Target is not supported. Got: " ~ target.type) }}
-
-    {%- endif -%}
-
+    {{ get_string_agg('percent_progress', 'i') }} as percent_progress_reached,
     min(case when i.event_type in ('seek', 'seeked') then start_tstamp end) as first_seek_time,
     max(i.percent_progress) as max_percent_progress
 
@@ -132,13 +115,13 @@ select
   d.plays > 0 as is_played,
   case when d.play_time_sec > {{ var("snowplow__valid_play_sec") }} then true else false end is_valid_play,
   case when play_time_sec / f.duration >= {{ var("snowplow__complete_play_rate") }} then true else false end as is_complete_play,
-  d.avg_playback_rate,
-  coalesce(case when r.retention_rate > d.max_percent_progress
+  cast(d.avg_playback_rate as {{ dbt_utils.type_float() }}) as avg_playback_rate,
+  cast(coalesce(case when r.retention_rate > d.max_percent_progress
           then d.max_percent_progress / cast(100 as {{ dbt_utils.type_float() }})
           else r.retention_rate / cast(100 as {{ dbt_utils.type_float() }})
-          end, 0) as retention_rate, -- to correct incorrect result due to duplicate session_id (one removed)
+          end, 0) as {{ dbt_utils.type_float() }}) as retention_rate, -- to correct incorrect result due to duplicate session_id (one removed)
   d.seeks,
-  d.percent_progress_reached
+  case when d.percent_progress_reached = '' then null else d.percent_progress_reached end as percent_progress_reached
 
   {% if target.type in ['databricks', 'spark'] -%}
   , date(start_tstamp) as start_tstamp_date
