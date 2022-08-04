@@ -1,8 +1,8 @@
 version: 2
 
 models:
-  - name: snowplow_media_player_plays_by_session
-    description: '{{ doc("table_plays_by_session") }}'
+  - name: snowplow_media_player_session_stats
+    description: '{{ doc("table_session_stats") }}'
     columns:
       - name: domain_sessionid
         description: '{{ doc("col_domain_sessionid") }}'
