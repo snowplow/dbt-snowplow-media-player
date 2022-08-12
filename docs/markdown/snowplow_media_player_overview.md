@@ -34,7 +34,7 @@ The additional `_pivot_base` table is there to calculate the percent_progress bo
 
 ## Adapter Support
 
-The Snowplow Media Player v0.2.0 package currently supports BigQuery, Databricks, Postgres, Redshift and Snowflake.
+The Snowplow Media Player v0.3.0 package currently supports BigQuery, Databricks, Postgres, Redshift and Snowflake.
 
 ## Requirements
 
