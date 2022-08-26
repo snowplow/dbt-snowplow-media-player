@@ -120,6 +120,22 @@ The selectors include:
 
 These are defined in the `selectors.yml` file ([source](https://github.com/snowplow/dbt-snowplow-media-player/blob/main/selectors.yml)) within the package, however in order to use these selections you will need to copy this file into your own dbt project directory. This is a top-level file and therefore should sit alongside your `dbt_project.yml` file.
 
+### 4 - Databricks only - setting the databricks_catalog
+
+Add the following variable to your dbt project's `dbt_project.yml` file
+
+```yml
+# dbt_project.yml
+...
+vars:
+  snowplow_web:
+    snowplow__databricks_catalog: 'hive_metastore'
+```
+Depending on the use case it should either be the catalog (for Unity Catalog users from databricks connector 1.1.1 onwards, defaulted to 'hive_metastore') or the same value as your `snowplow__atomic_schema` (unless changed it should be 'atomic'). This is needed to handle the database property within models/base/src_base.yml.
+
+**A more detailed explanation for how to set up your Databricks configuration properly can be found in [Unity Catalog support](#Unity-Catalog-support).**
+
+
 ## Operation
 
 Due to its unique relationship with the web package, in order to operate the media player package together with the web model there are several considerations to keep in mind. Depending on the use case one of the following scenarios may happen:
@@ -272,6 +288,22 @@ from interaction_ends
 
 where event_type = 'play'
 ```
+
+## Databricks Specific Information
+
+You can connect to Databricks using either the `dbt-spark` or the `dbt-databricks` connectors. The `dbt-spark` adapter does not allow dbt to take advantage of certain features that are unique to Databricks, which you can take advantage of when using the `dbt-databricks` adapter. Where possible, we would recommend using the `dbt-databricks` adapter.
+
+### Unity Catalog support
+
+With the rollout of Unity Catalog (UC), the `dbt-databricks` adapter has added support in dbt for the three-level-namespace as of `dbt-databricks>=1.1.1`. As a result of this, we have introduced the `snowplow__databricks_catalog` variable which should be used **if** your Databricks environment has UC enabled, and you are using a version of the `dbt-databricks` adapter that supports UC. The default value for this variable is `hive_metastore` which is also the default name of your UC, but this can be changed with the `snowplow__databricks_catalog` variable.
+
+Since there are many different situations, we've created the following table to help guide your setup process (this should help resolve the `Cannot set database in Databricks!` error):
+
+|                                             | Adapter supports UC and UC Enabled                                                                     | Adapter supports UC and UC not enabled         | Adapter does not support UC                                                                           |
+|---------------------------------------------|--------------------------------------------------------------------------------------------------------|------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| Events land in default `atomic` schema      | `snowplow__databricks_catalog` = '{name_of_catalog}'                                                   | Nothing needed                                 | `snowplow__atomic_schema` = 'atomic'                                                                                        |
+| Events land in custom schema (not `atomic`) | `snowplow__atomic_schema` = '{name_of_schema}'<br>`snowplow__databricks_catalog` = '{name_of_catalog}' | `snowplow__atomic_schema` = '{name_of_schema}' | `snowplow__atomic_schema` = '{name_of_schema}'<br>`snowplow__databricks_catalog` = '{name_of_schema}' |
+
 # Join the Snowplow community
 
 We welcome all ideas, questions and contributions!
