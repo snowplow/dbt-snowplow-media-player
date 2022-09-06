@@ -1,3 +1,8 @@
+snowplow-media-player 0.3.1 (2022-09-06)
+---------------------------------------
+Optimize performance in Databricks for incremental models (Close #14)
+Improve the GitHub workflow (Close #15)
+
 snowplow-media-player 0.3.0 (2022-08-12)
 ---------------------------------------
 Add support for Databricks (Close #9)
