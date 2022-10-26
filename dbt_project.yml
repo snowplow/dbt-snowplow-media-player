@@ -1,7 +1,8 @@
 name: 'snowplow_media_player'
 version: '0.3.3'
 config-version: 2
-require-dbt-version: ">=1.0.0"
+
+require-dbt-version: [">=1.3.0", "<2.0.0"]
 
 profile: 'default'
 
@@ -19,6 +20,8 @@ clean-targets:
   - "dbt_packages"
 
 vars:
+  surrogate_key_treat_nulls_as_empty_strings: true # turn on legacy behavior
+
   snowplow__percent_progress_boundaries: [10, 25, 50, 75]
   snowplow__valid_play_sec: 30
   snowplow__complete_play_rate: 0.99

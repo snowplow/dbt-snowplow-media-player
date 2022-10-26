@@ -27,9 +27,9 @@ with prep as (
     min(start_tstamp) start_tstamp,
     max(end_tstamp) as end_tstamp,
     sum(seeks) as seeks,
-    sum(play_time_sec / cast(60 as {{ dbt_utils.type_float() }})) as play_time_min,
-    sum(play_time_sec_muted / cast(60 as {{ dbt_utils.type_float() }})) as play_time_min_muted,
-    coalesce(avg(case when is_played then play_time_sec / cast(60 as {{ dbt_utils.type_float() }}) end), 0) as avg_play_time_min,
+    sum(play_time_sec / cast(60 as {{ type_float() }})) as play_time_min,
+    sum(play_time_sec_muted / cast(60 as {{ type_float() }})) as play_time_min_muted,
+    coalesce(avg(case when is_played then play_time_sec / cast(60 as {{ type_float() }}) end), 0) as avg_play_time_min,
     coalesce(avg(case when is_played then coalesce(play_time_sec / nullif(duration, 0), 0) end),0) as avg_percent_played,
     sum(case when is_complete_play then 1 else 0 end) as complete_plays
 
