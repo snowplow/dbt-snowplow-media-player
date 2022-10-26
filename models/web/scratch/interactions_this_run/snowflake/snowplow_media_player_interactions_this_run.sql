@@ -74,10 +74,10 @@ with prep as (
 )
 
  select
-  {{ dbt_utils.surrogate_key(['p.page_view_id', 'p.media_id' ]) }} play_id,
+  {{ dbt_utils.generate_surrogate_key(['p.page_view_id', 'p.media_id' ]) }} play_id,
   p.*,
-  coalesce(cast(piv.weight_rate * p.duration / 100 as {{ dbt_utils.type_int() }}), 0) as play_time_sec,
-  coalesce(cast(case when p.is_muted = true then piv.weight_rate * p.duration / 100 else 0 end as {{ dbt_utils.type_int() }}), 0) as play_time_sec_muted
+  coalesce(cast(piv.weight_rate * p.duration / 100 as {{ type_int() }}), 0) as play_time_sec,
+  coalesce(cast(case when p.is_muted = true then piv.weight_rate * p.duration / 100 else 0 end as {{ type_int() }}), 0) as play_time_sec_muted
 
   from prep p
 
