@@ -1,3 +1,7 @@
+snowplow-media-player 0.3.2 (2022-10-26)
+---------------------------------------
+ Migrate core docs to https://docs.snowplow.io/docs (Close #21)
+
 snowplow-media-player 0.3.1 (2022-09-06)
 ---------------------------------------
 Optimize performance in Databricks for incremental models (Close #14)
