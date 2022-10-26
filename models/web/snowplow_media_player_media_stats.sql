@@ -43,8 +43,7 @@ with new_data as (
 from {{ ref("snowplow_media_player_base") }} p
 
 where -- enough time has passed since the page_view's start_tstamp to be able to process it as a whole (please bear in mind the late arriving data)
-cast({{ dbt_utils.dateadd('hour', var("snowplow__max_media_pv_window", 10), 'p.end_tstamp ') }} as {{ dbt_utils.type_timestamp() }}) < {{ dbt_utils.current_timestamp_in_utc() }}
-
+cast({{ dateadd('hour', var("snowplow__max_media_pv_window", 10), 'p.end_tstamp ') }} as {{ type_timestamp() }}) < {{ snowplow_utils.current_timestamp_in_utc() }}
 -- and it has not been processed yet
 and p.start_tstamp > ( select max(last_base_tstamp) from {{ this }} )
 
@@ -61,10 +60,10 @@ group by 1,2,4,5
     n.media_type,
     n.media_player_type,
     n.last_base_tstamp,
-    least(n.first_play, coalesce(t.first_play, cast('2999-01-01 00:00:00' as {{ dbt_utils.type_timestamp() }}))) as first_play,
-    greatest(n.last_play, coalesce(t.last_play, cast('2000-01-01 00:00:00' as {{ dbt_utils.type_timestamp() }}))) as last_play,
-    n.play_time_sec / cast(60 as {{ dbt_utils.type_float() }}) + coalesce(t.play_time_min, 0) as play_time_min,
-    (n.play_time_sec / cast(60 as {{ dbt_utils.type_float() }}) + coalesce(t.play_time_min, 0))  / (n.plays + coalesce(t.plays, 0)) as avg_play_time_min,
+    least(n.first_play, coalesce(t.first_play, cast('2999-01-01 00:00:00' as {{ type_timestamp() }}))) as first_play,
+    greatest(n.last_play, coalesce(t.last_play, cast('2000-01-01 00:00:00' as {{ type_timestamp() }}))) as last_play,
+    n.play_time_sec / cast(60 as {{ type_float() }}) + coalesce(t.play_time_min, 0) as play_time_min,
+    (n.play_time_sec / cast(60 as {{ type_float() }}) + coalesce(t.play_time_min, 0))  / (n.plays + coalesce(t.plays, 0)) as avg_play_time_min,
     n.plays + coalesce(t.plays, 0) as plays,
     n.valid_plays + coalesce(t.valid_plays, 0) as valid_plays,
     n.complete_plays + coalesce(t.complete_plays, 0) as complete_plays,
@@ -91,7 +90,7 @@ group by 1,2,4,5
 
     where -- enough time has passed since the page_view`s start_tstamp to be able to process it a a whole (please bear in mind the late arriving data)
 
-    cast({{ dbt_utils.dateadd('hour', var("snowplow__max_media_pv_window", 10), 'p.end_tstamp ') }} as {{ dbt_utils.type_timestamp() }}) < {{ dbt_utils.current_timestamp_in_utc() }}
+    cast({{ dateadd('hour', var("snowplow__max_media_pv_window", 10), 'p.end_tstamp ') }} as {{ type_timestamp() }}) < {{ snowplow_utils.current_timestamp_in_utc() }}
 
     -- and it has not been processed yet
     and p.start_tstamp > ( select max(last_base_tstamp) from {{ this }} )
@@ -168,8 +167,8 @@ with prep as (
     max(start_tstamp) as last_base_tstamp,
     min(case when is_played then p.start_tstamp end) as first_play,
     max(case when is_played then p.start_tstamp end) as last_play,
-    sum(p.play_time_sec) / cast(60 as {{ dbt_utils.type_float() }}) as play_time_min,
-    avg(case when is_played then p.play_time_sec / cast(60 as {{ dbt_utils.type_float() }}) end) as avg_play_time_min,
+    sum(p.play_time_sec) / cast(60 as {{ type_float() }}) as play_time_min,
+    avg(case when is_played then p.play_time_sec / cast(60 as {{ type_float() }}) end) as avg_play_time_min,
     sum(case when is_played then 1 else 0 end) as plays,
     sum(case when is_valid_play then 1 else 0 end) as valid_plays,
     sum(case when p.is_complete_play then 1 else 0 end) as complete_plays,
@@ -219,8 +218,8 @@ select
   p.complete_plays,
   p.impressions,
   p.avg_playback_rate,
-  p.plays / cast(p.impressions as {{ dbt_utils.type_float() }}) as play_rate,
-  p.complete_plays / cast(nullif(p.plays, 0) as {{ dbt_utils.type_float() }}) as completion_rate_by_plays,
+  p.plays / cast(p.impressions as {{ type_float() }}) as play_rate,
+  p.complete_plays / cast(nullif(p.plays, 0) as {{ type_float() }}) as completion_rate_by_plays,
   p.avg_percent_played,
   p.avg_retention_rate,
   l.last_base_tstamp,
@@ -232,7 +231,7 @@ select
 {% if is_incremental() %}
 
   {% for element in get_percentage_boundaries(var("snowplow__percent_progress_boundaries")) %}
-     coalesce(cast(a._{{ element }}_percent_reached as {{ dbt_utils.type_int() }}), 0) as _{{ element }}_percent_reached
+     coalesce(cast(a._{{ element }}_percent_reached as {{ type_int() }}), 0) as _{{ element }}_percent_reached
      {% if not loop.last %}
        ,
      {% endif %}

@@ -115,11 +115,11 @@ select
   d.plays > 0 as is_played,
   case when d.play_time_sec > {{ var("snowplow__valid_play_sec") }} then true else false end is_valid_play,
   case when play_time_sec / nullif(f.duration, 0) >= {{ var("snowplow__complete_play_rate") }} then true else false end as is_complete_play,
-  cast(d.avg_playback_rate as {{ dbt_utils.type_float() }}) as avg_playback_rate,
+  cast(d.avg_playback_rate as {{ type_float() }}) as avg_playback_rate,
   cast(coalesce(case when r.retention_rate > d.max_percent_progress
-          then d.max_percent_progress / cast(100 as {{ dbt_utils.type_float() }})
-          else r.retention_rate / cast(100 as {{ dbt_utils.type_float() }})
-          end, 0) as {{ dbt_utils.type_float() }}) as retention_rate, -- to correct incorrect result due to duplicate session_id (one removed)
+          then d.max_percent_progress / cast(100 as {{ type_float() }})
+          else r.retention_rate / cast(100 as {{ type_float() }})
+          end, 0) as {{ type_float() }}) as retention_rate, -- to correct incorrect result due to duplicate session_id (one removed)
   d.seeks,
   case when d.percent_progress_reached = '' then null else d.percent_progress_reached end as percent_progress_reached
 
