@@ -40,7 +40,7 @@ with prep as (
     sum(i.play_time_sec) as play_time_sec,
     sum(i.play_time_sec_muted) as play_time_sec_muted,
     coalesce(sum(i.playback_rate * i.play_time_sec) / nullif(sum(i.play_time_sec), 0), max(i.playback_rate)) as avg_playback_rate,
-    {{ snowplow_utils.get_string_agg('percent_progress', 'i') }} as percent_progress_reached,
+    {{ snowplow_utils.get_string_agg('percent_progress', 'i', sort_numeric=true) }} as percent_progress_reached,
     min(case when i.event_type in ('seek', 'seeked') then start_tstamp end) as first_seek_time,
     max(i.percent_progress) as max_percent_progress
 
