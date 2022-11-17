@@ -43,7 +43,8 @@ with new_data as (
 from {{ ref("snowplow_media_player_base") }} p
 
 where -- enough time has passed since the page_view's start_tstamp to be able to process it as a whole (please bear in mind the late arriving data)
-p.start_tstamp < cast({{ dbt_utils.dateadd('hour', var("snowplow__max_media_pv_window", 10), dbt_utils.current_timestamp_in_utc() ) }} as {{ dbt_utils.type_timestamp() }})
+cast({{ dbt_utils.dateadd('hour', var("snowplow__max_media_pv_window", 10), 'p.end_tstamp ') }} as {{ dbt_utils.type_timestamp() }}) < {{ dbt_utils.current_timestamp_in_utc() }}
+
 -- and it has not been processed yet
 and p.start_tstamp > ( select max(last_base_tstamp) from {{ this }} )
 
@@ -90,7 +91,7 @@ group by 1,2,4,5
 
     where -- enough time has passed since the page_view`s start_tstamp to be able to process it a a whole (please bear in mind the late arriving data)
 
-    p.start_tstamp < cast({{ dbt_utils.dateadd('hour', var("snowplow__max_media_pv_window", 10), dbt_utils.current_timestamp_in_utc() ) }} as {{ dbt_utils.type_timestamp() }})
+    cast({{ dbt_utils.dateadd('hour', var("snowplow__max_media_pv_window", 10), 'p.end_tstamp ') }} as {{ dbt_utils.type_timestamp() }}) < {{ dbt_utils.current_timestamp_in_utc() }}
 
     -- and it has not been processed yet
     and p.start_tstamp > ( select max(last_base_tstamp) from {{ this }} )
