@@ -84,7 +84,7 @@ group by 1,2,4,5
 
     select
       media_id,
-      {{ get_split_to_array('percent_progress_reached', 'p') }} as percent_progress_reached
+      {{ snowplow_utils.get_split_to_array('percent_progress_reached', 'p') }} as percent_progress_reached
 
     from {{ ref("snowplow_media_player_base") }} p
 
@@ -99,7 +99,7 @@ group by 1,2,4,5
 
 , unnesting as (
 
-  {{ unnest('media_id', 'percent_progress_reached', 'value_reached', 'percent_progress_reached') }}
+  {{ snowplow_utils.unnest('media_id', 'percent_progress_reached', 'value_reached', 'percent_progress_reached') }}
 
 )
 
@@ -188,7 +188,7 @@ group by 1,2,4,5
 
     select
       media_id,
-      {{ get_split_to_array('percent_progress_reached', 'p') }} as percent_progress_reached
+      {{ snowplow_utils.get_split_to_array('percent_progress_reached', 'p') }} as percent_progress_reached
 
     from {{ ref("snowplow_media_player_base") }} p
 
@@ -196,7 +196,7 @@ group by 1,2,4,5
 
 , unnesting as (
 
-  {{ unnest('media_id', 'percent_progress_reached', 'value_reached', 'percent_progress_reached') }}
+  {{ snowplow_utils.unnest('media_id', 'percent_progress_reached', 'value_reached', 'percent_progress_reached') }}
 
 )
 
