@@ -114,7 +114,7 @@ select
   d.play_time_sec_muted,
   d.plays > 0 as is_played,
   case when d.play_time_sec > {{ var("snowplow__valid_play_sec") }} then true else false end is_valid_play,
-  case when play_time_sec / f.duration >= {{ var("snowplow__complete_play_rate") }} then true else false end as is_complete_play,
+  case when play_time_sec / nullif(f.duration, 0) >= {{ var("snowplow__complete_play_rate") }} then true else false end as is_complete_play,
   cast(d.avg_playback_rate as {{ dbt_utils.type_float() }}) as avg_playback_rate,
   cast(coalesce(case when r.retention_rate > d.max_percent_progress
           then d.max_percent_progress / cast(100 as {{ dbt_utils.type_float() }})

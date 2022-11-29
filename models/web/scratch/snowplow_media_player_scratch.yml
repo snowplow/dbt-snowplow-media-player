@@ -25,6 +25,9 @@ models:
         description: '{{ doc("col_play_id") }}'
       - name: duration
         description: '{{ doc("col_duration") }}'
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
       - name: media_type
         description: '{{ doc("col_media_type") }}'
       - name: media_player_type
