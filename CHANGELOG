@@ -1,4 +1,11 @@
-snowplow-media-player 0.3.2 (2022-10-26)
+snowplow-media-player 0.3.3 (2022-11-30)
+---------------------------------------
+Remove deduplication for Databricks for get_string_agg macro (Close #23)
+Move macros to snowplow_utils (Close #24)
+Change incremental logic for media_stats (Close #26)
+Handle exception when duration equals zero (Close #27)
+
+ snowplow-media-player 0.3.2 (2022-10-26)
 ---------------------------------------
  Migrate core docs to https://docs.snowplow.io/docs (Close #21)
 
