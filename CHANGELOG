@@ -1,3 +1,7 @@
+snowplow-media-player 0.3.4 (2022-12-08)
+---------------------------------------
+Support dbt-snowplow-web v0.12.0 to take advantage of Databricks performance improvements (Close #30)
+
 snowplow-media-player 0.3.3 (2022-11-30)
 ---------------------------------------
 Remove deduplication for Databricks for get_string_agg macro (Close #23)
