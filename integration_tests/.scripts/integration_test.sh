@@ -29,7 +29,7 @@ for db in ${DATABASES[@]}; do
 
   echo "Snowplow media player integration tests: Execute models - run 1/3"
 
-  eval "dbt run --target $db --full-refresh" || exit 1;
+  eval "dbt run --target $db --full-refresh --vars '{snowplow__allow_refresh: true}'" || exit 1;
 
   for i in {2..3}
   do
