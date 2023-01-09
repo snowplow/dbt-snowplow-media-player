@@ -127,6 +127,7 @@ seeds:
           refr_dvce_tstamp: timestamp
           derived_tstamp: timestamp
           true_tstamp: timestamp
+          load_tstamp: timestamp
       snowplow_media_player_context:
         +quote_columns: true
         +column_types:
