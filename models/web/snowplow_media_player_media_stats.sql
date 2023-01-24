@@ -63,15 +63,15 @@ group by 1,2,4,5
     least(n.first_play, coalesce(t.first_play, cast('2999-01-01 00:00:00' as {{ type_timestamp() }}))) as first_play,
     greatest(n.last_play, coalesce(t.last_play, cast('2000-01-01 00:00:00' as {{ type_timestamp() }}))) as last_play,
     n.play_time_sec / cast(60 as {{ type_float() }}) + coalesce(t.play_time_min, 0) as play_time_min,
-    (n.play_time_sec / cast(60 as {{ type_float() }}) + coalesce(t.play_time_min, 0))  / (n.plays + coalesce(t.plays, 0)) as avg_play_time_min,
+    (n.play_time_sec / cast(60 as {{ type_float() }}) + coalesce(t.play_time_min, 0))  / nullif((n.plays + coalesce(t.plays, 0)), 0) as avg_play_time_min,
     n.plays + coalesce(t.plays, 0) as plays,
     n.valid_plays + coalesce(t.valid_plays, 0) as valid_plays,
     n.complete_plays + coalesce(t.complete_plays, 0) as complete_plays,
     n.impressions + coalesce(t.impressions, 0)  as impressions,
     -- weighted average calculations
-    (n.avg_percent_played * n.plays / (n.plays + coalesce(t.plays, 0))) + (coalesce(t.avg_percent_played, 0) * coalesce(t.plays, 0) / (n.plays + coalesce(t.plays, 0))) as avg_percent_played,
-    (n.avg_retention_rate * n.plays / (n.plays + coalesce(t.plays, 0))) + (coalesce(t.avg_retention_rate, 0) * coalesce(t.plays, 0) / (n.plays + coalesce(t.plays, 0))) as avg_retention_rate,
-    (n.avg_playback_rate * n.plays / (n.plays + coalesce(t.plays, 0))) + (coalesce(t.avg_playback_rate, 0) * coalesce(t.plays, 0) / (n.plays + coalesce(t.plays, 0))) as avg_playback_rate
+    (n.avg_percent_played * n.plays / nullif((n.plays + coalesce(t.plays, 0)),0)) + (coalesce(t.avg_percent_played, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_percent_played,
+    (n.avg_retention_rate * n.plays / nullif((n.plays + coalesce(t.plays, 0)), 0)) + (coalesce(t.avg_retention_rate, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_retention_rate,
+    (n.avg_playback_rate * n.plays / nullif((n.plays + coalesce(t.plays, 0)), 0)) + (coalesce(t.avg_playback_rate, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_playback_rate
 
   from new_data n
 
@@ -218,7 +218,7 @@ select
   p.complete_plays,
   p.impressions,
   p.avg_playback_rate,
-  p.plays / cast(p.impressions as {{ type_float() }}) as play_rate,
+  p.plays / cast(nullif(p.impressions, 0) as {{ type_float() }}) as play_rate,
   p.complete_plays / cast(nullif(p.plays, 0) as {{ type_float() }}) as completion_rate_by_plays,
   p.avg_percent_played,
   p.avg_retention_rate,
