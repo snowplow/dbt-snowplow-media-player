@@ -1,3 +1,15 @@
+snowplow-media-player 0.4.1 (2023-01-26)
+---------------------------------------
+## Summary
+This release fixes a bug that causes data models to fail when a media object is never played. We also add an automatic action to generate our docsite with every new release.
+
+## Features
+Add action for generating docs for pages
+Fix bug which causes data model to fail when a media object is never played
+
+## Upgrading
+To upgrade simply bump the snowplow-web version in your `packages.yml` file.
+
 snowplow-media-player 0.4.0 (2022-12-08)
 ---------------------------------------
 ## Summary
