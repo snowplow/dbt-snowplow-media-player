@@ -7,7 +7,96 @@
   )
 }}
 
-with prep as (
+{%- set lower_limit, upper_limit = snowplow_utils.return_limits_from_model(ref('snowplow_web_base_sessions_this_run'),
+                                                                          'start_tstamp',
+                                                                          'end_tstamp') %}
+
+with mpe_context as (
+
+  select
+    root_id,
+    root_tstamp,
+    label,
+    type,
+    row_number() over (partition by root_id order by root_tstamp) dedupe_index
+
+  from {{ var('snowplow__media_player_event_context') }}
+
+)
+
+, mp_context as (
+
+  select
+    root_id,
+    root_tstamp,
+    duration,
+    playback_rate,
+    current_time,
+    percent_progress,
+    muted,
+    is_live,
+    loop,
+    volume,
+    row_number() over (partition by root_id order by root_tstamp) dedupe_index
+
+  from {{ var('snowplow__media_player_context') }}
+
+)
+
+{% if var("snowplow__enable_youtube") %}
+
+, yt_context as (
+
+  select
+    root_id,
+    root_tstamp,
+    player_id,
+    url,
+    playback_quality,
+    row_number() over (partition by root_id order by root_tstamp) dedupe_index
+
+  from {{ var('snowplow__youtube_context') }}
+
+)
+
+{% endif %}
+
+{% if var("snowplow__enable_whatwg_media") %}
+
+, me_context as (
+
+select
+    root_id,
+    root_tstamp,
+    media_type,
+    current_src,
+    html_id,
+    row_number() over (partition by root_id order by root_tstamp) dedupe_index
+
+from {{ var('snowplow__html5_media_element_context') }}
+
+)
+
+{% endif %}
+
+{% if var("snowplow__enable_whatwg_video") %}
+
+, ve_context as (
+
+select
+    root_id,
+    root_tstamp,
+    video_width,
+    video_height,
+    row_number() over (partition by root_id order by root_tstamp) dedupe_index
+
+from {{ var('snowplow__html5_video_element_context') }}
+
+)
+
+{% endif %}
+
+, prep as (
 
   select
     e.event_id,
@@ -68,25 +157,30 @@ with prep as (
 
     from {{ ref("snowplow_web_base_events_this_run") }} as e
 
-    inner join {{ var('snowplow__media_player_event_context') }} as mpe
+    inner join mpe_context as mpe
     on mpe.root_id = e.event_id and mpe.root_tstamp = e.collector_tstamp
+    and mpe.dedupe_index = 1
 
-    inner join {{ var('snowplow__media_player_context') }} as mp
+    inner join mp_context as mp
     on mp.root_id = e.event_id and mp.root_tstamp = e.collector_tstamp
+    and mp.dedupe_index = 1
 
   {% if var("snowplow__enable_youtube") %}
-    left join {{ var('snowplow__youtube_context') }} as y
+    left join yt_context as y
     on y.root_id = e.event_id and y.root_tstamp = e.collector_tstamp
+    and y.dedupe_index = 1
   {% endif %}
 
   {% if var("snowplow__enable_whatwg_media") %}
-    left join {{ var('snowplow__html5_media_element_context') }} as me
+    left join me_context as me
     on me.root_id = e.event_id and me.root_tstamp = e.collector_tstamp
+    and me.dedupe_index = 1
   {% endif %}
 
   {% if var("snowplow__enable_whatwg_video") %}
-    left join {{ var('snowplow__html5_video_element_context') }} as ve
+    left join ve_context as ve
     on ve.root_id = e.event_id and ve.root_tstamp = e.collector_tstamp
+    and ve.dedupe_index = 1
   {% endif %}
 
 )
