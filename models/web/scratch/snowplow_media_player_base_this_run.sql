@@ -2,11 +2,11 @@
   config(
     materialized='table',
     tags=["this_run"],
-    partition_by = snowplow_utils.get_partition_by(bigquery_partition_by={
+    partition_by = snowplow_utils.get_value_by_target_type(bigquery_val={
       "field": "start_tstamp",
       "data_type": "timestamp"
-    }, databricks_partition_by='start_tstamp_date'),
-    cluster_by=snowplow_utils.get_cluster_by(bigquery_cols=["media_id"]),
+    }, databricks_val='start_tstamp_date'),
+    cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["media_id"]),
     sort = 'start_tstamp',
     dist = 'play_id',
     sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt'))

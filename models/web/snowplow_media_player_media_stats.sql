@@ -5,11 +5,11 @@
     sort = 'last_play',
     dist = 'media_id',
     tags=["derived"],
-    partition_by = snowplow_utils.get_partition_by(bigquery_partition_by={
+    partition_by = snowplow_utils.get_value_by_target_type(bigquery_val={
       "field": "first_play",
       "data_type": "timestamp"
-    }, databricks_partition_by='first_play_date'),
-    cluster_by=snowplow_utils.get_cluster_by(bigquery_cols=["media_id"]),
+    }, databricks_val='first_play_date'),
+    cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["media_id"]),
     sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt')),
     tblproperties={
       'delta.autoOptimize.optimizeWrite' : 'true',
