@@ -10,11 +10,11 @@ Please refer to the [doc site][snowplow-media-player-docs] for a full breakdown 
 
 ### Adapter Support
 
-The snowplow-media-player v0.4.1 package currently supports the following adapters:
+The snowplow-media-player v0.4.2 package currently supports the following adapters:
 
 |                       Warehouse                      |     dbt versions    | snowplow-web version | snowplow-media-player version |
 |:----------------------------------------------------:|:-------------------:|:--------------------:|:-----------------------------:|
-| BigQuery, Databricks, Postgres, Redshift & Snowflake |  >=1.3.0 to <2.0.0  |  >=0.12.0 to <0.13.0 |              0.4.1            |
+| BigQuery, Databricks, Postgres, Redshift & Snowflake |  >=1.3.0 to <2.0.0  |  >=0.13.0 to <0.14.0 |              0.4.2            |
 | BigQuery, Databricks, Postgres, Redshift & Snowflake |  >=1.0.0 to <1.3.0  |  >=0.10.0 to <0.12.0 |              0.3.4            |
 |                   Redshift & Postgres                | >=0.20.0 to <1.1.0  |  >=0.6.0 to <0.7.0   |              0.1.0            |
 
