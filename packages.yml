@@ -1,3 +1,5 @@
 packages:
-  - package: snowplow/snowplow_web
-    version: [">=0.13.0", "<0.14.0"]
+  # - package: snowplow/snowplow_web
+  #   version: [">=0.13.0", "<0.14.0"]
+  - git: https://github.com/snowplow/dbt-snowplow-web.git
+    revision: release/snowplow-web/0.14.0
