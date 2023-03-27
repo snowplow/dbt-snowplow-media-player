@@ -15,14 +15,7 @@ The easiest way to get started is to follow our [QuickStart guide](https://docs.
 
 ### Adapter Support
 
-The snowplow-media-player v0.4.2 package currently supports the following adapters:
-
-|                       Warehouse                      |     dbt versions    | snowplow-web version | snowplow-media-player version |
-|:----------------------------------------------------:|:-------------------:|:--------------------:|:-----------------------------:|
-| BigQuery, Databricks, Postgres, Redshift & Snowflake |  >=1.3.0 to <2.0.0  |  >=0.13.0 to <0.14.0 |              0.4.2            |
-| BigQuery, Databricks, Postgres, Redshift & Snowflake |  >=1.0.0 to <1.3.0  |  >=0.10.0 to <0.12.0 |              0.3.4            |
-|                   Redshift & Postgres                | >=0.20.0 to <1.1.0  |  >=0.6.0 to <0.7.0   |              0.1.0            |
-
+The latest version of the snowplow-media-player package supports BigQuery, Databricks, Redshift, Snowflake & Postgres. For previous versions see our [package docs](https://docs.snowplow.io/docs/modeling-your-data/modeling-your-data-with-dbt/).
 
 ### Requirements
 
@@ -49,8 +42,8 @@ The package contains multiple staging models however the mart models are as foll
 
 | Model                                    | Description                                                                                |
 |------------------------------------------|--------------------------------------------------------------------------------------------|
-| snowplow_media_player_base               | A table summarising media player events by media and pageview including impressions.       |
-| snowplow_media_player_plays_by_pageview  | A view summarising media plays by media on a pageview level.                               |
+| snowplow_media_player_base               | A table summarizing media player events by media and pageview including impressions.       |
+| snowplow_media_player_plays_by_pageview  | A view summarizing media plays by media on a pageview level.                               |
 | snowplow_media_player_media_stats        | An aggregated table of media metrics on a media_id level.                                  |
 
 Please refer to the [dbt doc site][snowplow-media-player-docs-dbt] for details on the model output tables.
