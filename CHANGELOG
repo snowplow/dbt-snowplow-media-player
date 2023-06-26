@@ -1,4 +1,4 @@
-snowplow-media-player 0.4.2 (2023-06-27)
+snowplow-media-player 0.5.1 (2023-06-27)
 ---------------------------------------
 ## Summary
 A release to support [dbt-snowplow-web v0.15.0](https://github.com/snowplow/dbt-snowplow-web/releases/tag/0.15.0).
