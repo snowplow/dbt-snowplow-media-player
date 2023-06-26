@@ -1,3 +1,14 @@
+snowplow-media-player 0.4.2 (2023-06-27)
+---------------------------------------
+## Summary
+A release to support [dbt-snowplow-web v0.15.0](https://github.com/snowplow/dbt-snowplow-web/releases/tag/0.15.0).
+
+## Features
+Bump package versions
+
+## Upgrading
+To upgrade simply bump the snowplow-web and snowplow-media-player version in your `packages.yml` file.
+
 snowplow-media-player 0.5.0 (2023-03-29)
 ---------------------------------------
 ## Summary
