@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: snowplow_media_player_media_stats
+    description: '{{ doc("table_media_stats") }}'
+    columns:
+      - name: media_id
+        description: The primary key of this table
+        tags:
+          - primary-key
+        tests:
+          - unique
+          - not_null
+      - name: media_label
+        description: '{{ doc("col_media_label") }}'
+      - name: duration
+        description: '{{ doc("col_duration") }}'
+      - name: media_type
+        description: '{{ doc("col_media_type") }}'
+      - name: media_player_type
+        description: '{{ doc("col_media_player_type") }}'
+      - name: play_time_min
+        description: '{{ doc("col_play_time_min") }}'
+      - name: avg_play_time_min
+        description: '{{ doc("col_avg_play_time_min") }}'
+      - name: first_play
+        description: '{{ doc("col_first_play") }}'
+      - name: last_play
+        description: '{{ doc("col_last_play") }}'
+      - name: plays
+        description: '{{ doc("col_plays") }}'
+      - name: valid_plays
+        description: '{{ doc("col_valid_plays") }}'
+      - name: complete_plays
+        description: '{{ doc("col_complete_plays") }}'
+      - name: impressions
+        description: '{{ doc("col_impressions") }}'
+      - name: avg_playback_rate
+        description: '{{ doc("col_avg_playback_rate") }}'
+      - name: play_rate
+        description: '{{ doc("col_play_rate") }}'
+      - name: completion_rate_by_plays
+        description: '{{ doc("col_completion_rate_by_plays") }}'
+      - name: avg_percent_played
+        description: '{{ doc("col_avg_percent_played") }}'
+      - name: avg_retention_rate
+        description: '{{ doc("col_retention_rate") }}'
+      - name: last_base_tstamp
+        description: '{{ doc("col_last_base_tstamp") }}'

@@ -1,87 +1,44 @@
 selectors:
-  - name: snowplow_web_lean_and_media_player_tests
-    # Description field added dbt v0.19. Commenting out for compatibility.
-    # description: >
-    #   Suggested testing implementation for the Snowplow Media Player and Web package. Lean approach, essential tests rather than full suite to save cost.
-    #   Tests:
-    #     - All tests on Snowplow Web this_run and manifest tables.
-    #     - Primary key and data tests on the Snowplow Web derived tables (page_views, sessions and users)
-    #     - All tests on any custom models in your dbt project, tagged with `snowplow_web_incremental`.
-    #     - All tests within the Snowplow Media Player package.
-    #     - All tests on any custom models in your dbt project, tagged with `snowplow_media_player`.
+  - name: snowplow_media_player
+    description: >
+      Suggested node selection when running the Snowplow Media Player package.
+      Runs:
+        - All Snowplow Media Player models.
+        - All custom models in your dbt project, tagged with `snowplow_media_player_incremental`.
+    definition:
+      union:
+        - method: package
+          value: snowplow_media_player
+        - method: tag
+          value: snowplow_media_player_incremental
+  - name: snowplow_media_player_lean_tests
+    description: >
+      Suggested testing implementation for the Snowplow Media Player package. Lean approach, essential tests rather than full suite to save cost.
+      Tests:
+        - All tests on Snowplow Media Player this_run and manifest tables.
+        - Primary key and data tests on the Snowplow Media Player derived tables.
+        - All tests on any custom models in your dbt project, tagged with `snowplow_media_player_incremental`.
     definition:
       union:
         - intersection:
           - method: package
-            value: snowplow_web
+            value: snowplow_media_player
           - method: tag
             value: this_run
         - intersection:
           - method: package
-            value: snowplow_web
+            value: snowplow_media_player
           - method: tag
             value: manifest
         - intersection:
           - method: package
-            value: snowplow_web
+            value: snowplow_media_player
           - method: tag
             value: derived
           - method: tag
             value: primary-key
         - intersection:
-          - method: package
-            value: snowplow_web
-          - method: tag
-            value: derived
-          - method: test_type
-            value: data
-        - intersection:
           - method: path
             value: models
           - method: tag
-            value: snowplow_web_incremental
-        - method: package
-          value: snowplow_media_player
-        - method: tag
-          value: snowplow_media_player
-  - name: snowplow_media_player_tests
-  # Tests:
-  #   - All tests within the Snowplow Media Player package.
-  #   - All tests on any custom models in your dbt project, tagged with `snowplow_media_player`.
-    definition:
-      union:
-        - method: package
-          value: snowplow_media_player
-        - intersection:
-          - method: path
-            value: models
-          - method: tag
-            value: snowplow_media_player
-  - name: snowplow_web_and_media_player_tests
-    # description: >
-    #   Runs:
-    #     - All Snowplow Web and Media Player models.
-    #     - All custom models in your dbt project, tagged with `snowplow_web_incremental` or `snowplow_media_player`  .
-    definition:
-      union:
-        - method: package
-          value: snowplow_web
-        - method: tag
-          value: snowplow_web_incremental
-        - method: package
-          value: snowplow_media_player
-        - method: tag
-          value: snowplow_media_player
-  - name: snowplow_web
-    # description: >
-    #   Suggested node selection when running the Snowplow Web package together with the Media Player package.
-    #   Runs:
-    #     - All Snowplow Web and Media Player models.
-    #     - All custom models in your dbt project, tagged with `snowplow_web_incremental`.
-    definition:
-      union:
-        - method: package
-          value: snowplow_web
-        - method: tag
-          value: snowplow_web_incremental
-
+            value: snowplow_media_player_incremental
