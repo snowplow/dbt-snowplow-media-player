@@ -2,6 +2,7 @@ version: 2
 
 models:
   - name: snowplow_media_player_session_stats
+    +tags: "snowplow_media_player_incremental"
     description: '{{ doc("table_session_stats") }}'
     columns:
       - name: domain_sessionid
@@ -44,6 +45,7 @@ models:
       - name: complete_plays
         description: '{{ doc("col_complete_plays") }}'
   - name: snowplow_media_player_user_stats
+    +tags: "snowplow_media_player_incremental"
     description: '{{ doc("table_user_stats") }}'
     columns:
       - name: domain_userid
