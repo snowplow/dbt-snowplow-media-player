@@ -1,0 +1,53 @@
+version: 2
+
+macros:
+
+  - name: media_id_col
+    description: '{{ doc("macro_media_id_col") }}'
+    arguments:
+      - name: youtube_player_id
+        type: string
+        description: The name of the player_id column in the YouTube context
+      - name: media_player_id
+        type: string
+        description: The name of the player_id column in the HTML5 media element context
+
+  - name: media_player_type_col
+    description: '{{ doc("macro_media_player_type_col") }}'
+    arguments:
+      - name: youtube_player_id
+        type: string
+        description: The name of the player_id column in the YouTube context
+      - name: media_player_id
+        type: string
+        description: The name of the player_id column in the HTML5 media element context
+
+  - name: media_type_col
+    description: '{{ doc("macro_media_type_col") }}'
+    arguments:
+      - name: media_media_type
+        type: string
+        description: The media_type value in the HTML5 media element context
+
+  - name: playback_quality_col
+    description: '{{ doc("macro_playback_quality_col") }}'
+    arguments:
+      - name: youtube_quality
+        type: string
+        description: The quality value in the YouTube context
+      - name: video_width
+        type: string
+        description: The video width value in the HTML5 video element context
+      - name: video_height
+        type: string
+        description: The video height value in the HTML5 video element context
+
+  - name: source_url_col
+    description: '{{ doc("macro_source_url_col") }}'
+    arguments:
+      - name: youtube_url
+        type: string
+        description: The url value in the YouTube context
+      - name: media_current_src
+        type: string
+        description: The current_src value in the HTML5 media element context
