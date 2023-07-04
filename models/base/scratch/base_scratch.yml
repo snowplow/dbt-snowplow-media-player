@@ -1,0 +1,116 @@
+version: 2
+
+models:
+  - name: snowplow_media_player_base_new_event_limits
+    description: '{{ doc("table_base_new_event_limits") }}'
+    columns:
+      - name: lower_limit
+        description: The lower `collector_tstamp` limit for the run
+      - name: upper_limit
+        description: The upper `collector_tstamp` limit for the run
+
+  - name: snowplow_media_player_base_sessions_this_run
+    description: '{{ doc("table_base_sessions_this_run") }}'
+    columns:
+      - name: session_id
+        description: '{{ doc("col_domain_sessionid") }}'
+        tags:
+          - primary-key
+        tests:
+          - unique
+          - not_null
+      - name: domain_userid
+        description: '{{ doc("col_domain_userid") }}'
+      - name: start_tstamp
+        description: The `collector_tstamp` when the session began
+      - name: end_tstamp
+        description: The `collector_tstamp` when the session ended
+
+  - name: snowplow_media_player_base_events_this_run
+    description: '{{ doc("table_base_events_this_run") }}'
+    columns:
+      - name: event_id
+        description: '{{ doc("col_event_id") }}'
+        tags:
+          - primary-key
+        tests:
+          - unique
+          - not_null
+      - name: page_view_id
+        description: '{{ doc("col_page_view_id") }}'
+      - name: domain_sessionid
+        description: '{{ doc("col_domain_sessionid") }}'
+      - name: domain_userid
+        description: '{{ doc("col_domain_userid") }}'
+      - name: media_id
+        description: '{{ doc("col_media_id") }}'
+      - name: media_label
+        description: '{{ doc("col_media_label") }}'
+      - name: play_id
+        description: '{{ doc("col_play_id") }}'
+      - name: duration
+        description: '{{ doc("col_duration") }}'
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+      - name: media_type
+        description: '{{ doc("col_media_type") }}'
+      - name: media_player_type
+        description: '{{ doc("col_media_player_type") }}'
+      - name: page_referrer
+        description: '{{ doc("col_page_referrer") }}'
+      - name: page_url
+        description: '{{ doc("col_page_url") }}'
+      - name: source_url
+        description: '{{ doc("col_source_url") }}'
+      - name: geo_region_name
+        description: '{{ doc("col_geo_region_name") }}'
+      - name: br_name
+        description: '{{ doc("col_br_name") }}'
+      - name: dvce_type
+        description: '{{ doc("col_dvce_type") }}'
+      - name: os_name
+        description: '{{ doc("col_os_name") }}'
+      - name: os_timezone
+        description: '{{ doc("col_os_timezone") }}'
+      - name: event_type
+        description: '{{ doc("col_event_type") }}'
+      - name: start_tstamp
+        description: '{{ doc("col_start_tstamp") }}'
+      - name: player_current_time
+        description: '{{ doc("col_player_current_time") }}'
+      - name: playback_rate
+        description: '{{ doc("col_playback_rate") }}'
+      - name: playback_quality
+        description: '{{ doc("col_playback_quality") }}'
+      - name: percent_progress
+        description: '{{ doc("col_percent_progress") }}'
+      - name: is_muted
+        description: '{{ doc("col_is_muted") }}'
+      - name: play_time_sec
+        description: '{{ doc("col_play_time_sec") }}'
+      - name: play_time_sec_muted
+        description: '{{ doc("col_play_time_sec_muted") }}'
+      - name: is_live
+        description: '{{ doc("col_is_live") }}'
+      - name: loop
+        description: '{{ doc("col_loop") }}'
+      - name: volume
+        description: '{{ doc("col_volume") }}'
+      - name: collector_tstamp
+        description: '{{ doc("col_collector_tstamp") }}'
+      - name: event_in_session_index
+        description: '{{ doc("col_event_in_session_index") }}'
+
+  - name: snowplow_media_player_pivot_base
+    description: '{{ doc("table_pivot_base") }}'
+    columns:
+      - name: percent_progress
+        description: '{{ doc("col_percent_progress") }}'
+        tags:
+          - primary-key
+        tests:
+          - unique
+          - not_null
+      - name: weight_rate
+        description: '{{ doc("col_weight_rate") }}'
