@@ -11,7 +11,7 @@ This derived table aggregates media player interactions to a pageview level incr
 {% enddocs %}
 
 {% docs table_plays_by_pageview %}
-This view removes impressions from the derived snowplow_media_base table for showing pageview level media play events.
+This view removes impressions from the derived snowplow_media_player_base table for showing pageview level media play events. This means that only media player instances where a play event was tracked are kept (where `is_played` is true).
 {% enddocs %}
 
 {% docs table_session_stats %}
