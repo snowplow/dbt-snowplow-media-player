@@ -29,19 +29,19 @@ with mpe_context as (
 , mp_context as (
 
   select
-    root_id,
-    root_tstamp,
-    duration,
-    playback_rate,
-    current_time,
-    percent_progress,
-    muted,
-    is_live,
-    loop,
-    volume,
+    a.root_id,
+    a.root_tstamp,
+    a.duration,
+    a.playback_rate,
+    a.current_time,
+    a.percent_progress,
+    a.muted,
+    a.is_live,
+    a.loop,
+    a.volume,
     row_number() over (partition by root_id order by root_tstamp) dedupe_index
 
-  from {{ var('snowplow__media_player_context') }}
+  from {{ var('snowplow__media_player_context') }} a
 
   where root_tstamp between {{ lower_limit }} and {{ upper_limit }}
 
