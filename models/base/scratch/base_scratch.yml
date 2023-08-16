@@ -87,9 +87,9 @@ models:
         description: '{{ doc("col_percent_progress") }}'
       - name: is_muted
         description: '{{ doc("col_is_muted") }}'
-      - name: play_time_sec
+      - name: play_time_secs
         description: '{{ doc("col_play_time_sec") }}'
-      - name: play_time_sec_muted
+      - name: play_time_muted_secs
         description: '{{ doc("col_play_time_sec_muted") }}'
       - name: is_live
         description: '{{ doc("col_is_live") }}'

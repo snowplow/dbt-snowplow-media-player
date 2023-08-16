@@ -138,15 +138,15 @@ TODO
 TODO
 {% enddocs %}
 
-{% docs col_avg_play_time_min %}
+{% docs col_avg_play_time_mins %}
 Estimated average duration of plays in minutes.
 {% enddocs %}
 
-{% docs col_avg_content_watched_min %}
+{% docs col_avg_content_watched_mins %}
 TODO
 {% enddocs %}
 
-{% docs col_content_watched_min %}
+{% docs col_content_watched_mins %}
 TODO
 {% enddocs %}
 
@@ -219,7 +219,7 @@ Pageviews with at least one play event.
 {% enddocs %}
 
 {% docs col_is_valid_play %}
-A boolean value to show whether the duration of the play (`play_time_sec`) is bigger than or equal to the variable given in `snowplow__valid_play_sec` (defaulted to 30).
+A boolean value to show whether the duration of the play (`play_time_secs`) is bigger than or equal to the variable given in `snowplow__valid_play_sec` (defaulted to 30).
 {% enddocs %}
 
 {% docs col_is_complete_play %}
@@ -246,11 +246,11 @@ The sum of all video plays that exceed the limit set within the variable `snowpl
 The sum of all audio plays that exceeded the limit set within the variable `snowplow__valid_play_sec`, it is defaulted to 30 seconds.
 {% enddocs %}
 
-{% docs col_play_time_min %}
+{% docs col_play_time_mins %}
 Calculated duration of play in minutes.
 {% enddocs %}
 
-{% docs col_play_time_min_muted %}
+{% docs col_play_time_mins_muted %}
 Calculated duration of muted play in minutes. It is based on the percent_progress event and whether the user played it on mute during this event or not.
 {% enddocs %}
 
@@ -282,7 +282,7 @@ The playback position of a specific media in seconds whenever a media player eve
 The optional, human readable name given to tracked media content.
 {% enddocs %}
 
-{% docs col_avg_session_play_time_min %}
+{% docs col_avg_session_play_time_mins %}
 Estimated average duration of plays in seconds within a session.
 {% enddocs %}
 

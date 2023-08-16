@@ -49,10 +49,10 @@ events_this_run as (
     max(start_tstamp) as end_tstamp,
     sum(case when i.event_type = 'play' then 1 else 0 end) as plays,
     sum(case when i.event_type in ('seek', 'seeked', 'seekend') then 1 else 0 end) as seeks,
-    sum(i.play_time_sec) as play_time_sec,
-    sum(i.play_time_sec_muted) as play_time_sec_muted,
+    sum(i.play_time_secs) as play_time_secs,
+    sum(i.play_time_muted_secs) as play_time_muted_secs,
     coalesce(
-      sum(i.playback_rate * i.play_time_sec) / nullif(sum(i.play_time_sec), 0),
+      sum(i.playback_rate * i.play_time_secs) / nullif(sum(i.play_time_secs), 0),
       max(i.playback_rate)
     ) as avg_playback_rate,
     min(case when i.event_type in ('seek', 'seeked', 'seekstart', 'seekend') then start_tstamp end) as first_seek_time,
@@ -175,11 +175,11 @@ select
   ) as avg_playback_rate,
 
   -- time spent
-  coalesce(s.media_session_time_played, d.play_time_sec) as play_time_sec,
-  coalesce(s.media_session_time_played_muted, d.play_time_sec_muted) as play_time_sec_muted,
-  s.media_session_time_paused as paused_time_sec,
-  s.media_session_time_buffering as buffering_time_sec,
-  s.media_session_time_spent_ads as ads_time_sec,
+  coalesce(s.media_session_time_played, d.play_time_secs) as play_time_secs,
+  coalesce(s.media_session_time_played_muted, d.play_time_muted_secs) as play_time_muted_secs,
+  s.media_session_time_paused as paused_time_secs,
+  s.media_session_time_buffering as buffering_time_secs,
+  s.media_session_time_spent_ads as ads_time_secs,
 
   -- event counts
   d.seeks,
@@ -191,12 +191,12 @@ select
   -- playback progress
   d.plays > 0 as is_played,
   case
-    when coalesce(s.media_session_time_played, d.play_time_sec) > {{ var("snowplow__valid_play_sec") }} then true else
+    when coalesce(s.media_session_time_played, d.play_time_secs) > {{ var("snowplow__valid_play_sec") }} then true else
       false
   end as is_valid_play,
   case
     when
-      coalesce(s.media_session_time_played, d.play_time_sec) / nullif(f.duration_secs, 0)
+      coalesce(s.media_session_time_played, d.play_time_secs) / nullif(f.duration_secs, 0)
       >= {{ var("snowplow__complete_play_rate") }}
       then true else
       false

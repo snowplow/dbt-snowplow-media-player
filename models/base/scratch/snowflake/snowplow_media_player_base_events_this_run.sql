@@ -96,7 +96,7 @@ select
   coalesce(
     cast(piv.weight_rate * p.duration_secs / 100 as {{ type_int() }}),
     0
-  ) as play_time_sec,
+  ) as play_time_secs,
   coalesce(
     cast(
       case
@@ -105,7 +105,7 @@ select
       end as {{ type_int() }}
     ),
     0
-  ) as play_time_sec_muted,
+  ) as play_time_muted_secs,
 
   dense_rank() over (partition by session_id order by start_tstamp) AS event_in_session_index
 

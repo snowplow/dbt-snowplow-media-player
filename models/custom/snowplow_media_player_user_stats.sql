@@ -24,9 +24,9 @@ with prep as (
     sum(valid_audio_plays) as valid_audio_plays,
     sum(complete_plays) as complete_plays,
     sum(seeks) as seeks,
-    cast(sum(play_time_min) as {{ type_int() }}) as play_time_min,
+    cast(sum(play_time_mins) as {{ type_int() }}) as play_time_mins,
     -- using session and not page_view as the base for average to save cost by not joining on snowplow_media_player_base for calculating on individual page_view level average
-    coalesce(cast(avg(case when (video_plays + audio_plays) > 0 then avg_play_time_min end) as {{ type_int() }}), 0) as avg_session_play_time_min,
+    coalesce(cast(avg(case when (video_plays + audio_plays) > 0 then avg_play_time_mins end) as {{ type_int() }}), 0) as avg_session_play_time_mins,
     coalesce(avg(avg_percent_played),0) as avg_percent_played
 
   from {{ ref("snowplow_media_player_session_stats") }}

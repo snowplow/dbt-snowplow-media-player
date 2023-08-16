@@ -229,8 +229,8 @@ seeds:
           os_timezone: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           start_tstamp: timestamp
           end_tstamp: timestamp
-          play_time_sec: integer
-          play_time_sec_muted: integer
+          play_time_secs: integer
+          play_time_muted_secs: integer
           is_played: boolean
           is_valid_play: boolean
           is_complete_play: boolean
@@ -245,8 +245,8 @@ seeds:
           duration_secs: float
           media_type: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           media_player_type: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
-          play_time_min: float
-          avg_play_time_min: float
+          play_time_mins: float
+          avg_play_time_mins: float
           first_play: timestamp
           last_play: timestamp
           plays: integer

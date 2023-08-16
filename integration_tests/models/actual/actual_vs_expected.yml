@@ -27,8 +27,8 @@ models:
             - os_timezone
             - start_tstamp
             - end_tstamp
-            - play_time_sec
-            - play_time_sec_muted
+            - play_time_secs
+            - play_time_muted_secs
             - is_played
             - is_valid_play
             - is_complete_play

@@ -30,12 +30,12 @@ with new_data as (
     p.media_player_type,
     min(case when is_played then p.start_tstamp end) as first_play,
     max(case when is_played then p.start_tstamp end) as last_play,
-    sum(p.play_time_sec) as play_time_sec,
+    sum(p.play_time_secs) as play_time_secs,
     sum(case when is_played then 1 else 0 end) as plays,
     sum(case when is_valid_play then 1 else 0 end) as valid_plays,
     sum(case when p.is_complete_play then 1 else 0 end) as complete_plays,
     count(distinct p.page_view_id) as impressions,
-    avg(case when is_played then coalesce(p.content_watched_sec, p.play_time_sec, 0) / nullif(p.duration_secs, 0) end) as avg_percent_played,
+    avg(case when is_played then coalesce(p.content_watched_sec, p.play_time_secs, 0) / nullif(p.duration_secs, 0) end) as avg_percent_played,
     avg(case when is_played then p.retention_rate end) as avg_retention_rate,
     avg(case when is_played then p.avg_playback_rate end) as avg_playback_rate,
     avg(case when is_played then p.content_watched_sec end) as avg_content_watched_sec,
@@ -69,8 +69,8 @@ group by 1,2,4,5
       greatest(n.last_play, coalesce(t.last_play, cast('2000-01-01 00:00:00' as {{ type_timestamp() }}))),
       cast('2000-01-01 00:00:00' as {{ type_timestamp() }})
     ) as last_play,
-    n.play_time_sec / cast(60 as {{ type_float() }}) + coalesce(t.play_time_min, 0) as play_time_min,
-    (n.play_time_sec / cast(60 as {{ type_float() }}) + coalesce(t.play_time_min, 0))  / nullif((n.plays + coalesce(t.plays, 0)), 0) as avg_play_time_min,
+    n.play_time_secs / cast(60 as {{ type_float() }}) + coalesce(t.play_time_mins, 0) as play_time_mins,
+    (n.play_time_secs / cast(60 as {{ type_float() }}) + coalesce(t.play_time_mins, 0))  / nullif((n.plays + coalesce(t.plays, 0)), 0) as avg_play_time_mins,
     n.plays + coalesce(t.plays, 0) as plays,
     n.valid_plays + coalesce(t.valid_plays, 0) as valid_plays,
     n.complete_plays + coalesce(t.complete_plays, 0) as complete_plays,
@@ -79,7 +79,7 @@ group by 1,2,4,5
     (n.avg_percent_played * n.plays / nullif((n.plays + coalesce(t.plays, 0)),0)) + (coalesce(t.avg_percent_played, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_percent_played,
     (n.avg_retention_rate * n.plays / nullif((n.plays + coalesce(t.plays, 0)), 0)) + (coalesce(t.avg_retention_rate, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_retention_rate,
     (n.avg_playback_rate * n.plays / nullif((n.plays + coalesce(t.plays, 0)), 0)) + (coalesce(t.avg_playback_rate, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_playback_rate,
-    (coalesce(n.avg_content_watched_sec, 0) / cast(60 as {{ type_float() }}) * n.plays + coalesce(t.avg_content_watched_min, 0) * coalesce(t.plays, 0)) / nullif((n.plays + coalesce(t.plays, 0)), 0) as avg_content_watched_min
+    (coalesce(n.avg_content_watched_sec, 0) / cast(60 as {{ type_float() }}) * n.plays + coalesce(t.avg_content_watched_mins, 0) * coalesce(t.plays, 0)) / nullif((n.plays + coalesce(t.plays, 0)), 0) as avg_content_watched_mins
 
   from new_data n
 
@@ -175,20 +175,20 @@ with prep as (
     max(start_tstamp) as last_base_tstamp,
     min(case when is_played then p.start_tstamp end) as first_play,
     max(case when is_played then p.start_tstamp end) as last_play,
-    sum(p.play_time_sec) / cast(60 as {{ type_float() }}) as play_time_min,
-    avg(case when is_played then p.play_time_sec / cast(60 as {{ type_float() }}) end) as avg_play_time_min,
+    sum(p.play_time_secs) / cast(60 as {{ type_float() }}) as play_time_mins,
+    avg(case when is_played then p.play_time_secs / cast(60 as {{ type_float() }}) end) as avg_play_time_mins,
     sum(case when is_played then 1 else 0 end) as plays,
     sum(case when is_valid_play then 1 else 0 end) as valid_plays,
     sum(case when p.is_complete_play then 1 else 0 end) as complete_plays,
     count(distinct p.page_view_id) as impressions,
-    avg(case when is_played then coalesce(p.content_watched_sec, p.play_time_sec, 0) / nullif(p.duration_secs, 0) end) as avg_percent_played,
+    avg(case when is_played then coalesce(p.content_watched_sec, p.play_time_secs, 0) / nullif(p.duration_secs, 0) end) as avg_percent_played,
     avg(case when is_played then p.retention_rate end) as avg_retention_rate,
     avg(case when is_played then p.avg_playback_rate end) as avg_playback_rate,
     avg(
       case
         when is_played and p.content_watched_sec is not null
         then p.content_watched_sec / cast(60 as {{ type_float() }}) end
-    ) as avg_content_watched_min
+    ) as avg_content_watched_mins
 
 
 from {{ ref("snowplow_media_player_base") }} p
@@ -222,9 +222,9 @@ select
   p.duration_secs,
   p.media_type,
   p.media_player_type,
-  p.play_time_min,
-  p.avg_play_time_min,
-  p.avg_content_watched_min,
+  p.play_time_mins,
+  p.avg_play_time_mins,
+  p.avg_content_watched_mins,
   p.first_play,
   p.last_play,
   p.plays,

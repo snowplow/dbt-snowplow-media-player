@@ -52,15 +52,15 @@ models:
       - name: end_tstamp
         description: '{{ doc("col_end_tstamp") }}'
 
-      - name: play_time_sec
+      - name: play_time_secs
         description: '{{ doc("col_play_time_sec") }}'
-      - name: play_time_sec_muted
+      - name: play_time_muted_secs
         description: '{{ doc("col_play_time_sec_muted") }}'
-      - name: paused_time_sec
+      - name: paused_time_secs
         description: '{{ doc("col_paused_time_sec") }}'
-      - name: buffering_time_sec
+      - name: buffering_time_secs
         description: '{{ doc("col_buffering_time_sec") }}'
-      - name: ads_time_sec
+      - name: ads_time_secs
         description: '{{ doc("col_ads_time_sec") }}'
 
       - name: seeks
