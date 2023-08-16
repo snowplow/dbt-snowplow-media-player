@@ -13,16 +13,18 @@ models:
           - not_null
       - name: media_label
         description: '{{ doc("col_media_label") }}'
-      - name: duration
-        description: '{{ doc("col_duration") }}'
+      - name: duration_secs
+        description: '{{ doc("col_duration_secs") }}'
       - name: media_type
         description: '{{ doc("col_media_type") }}'
       - name: media_player_type
         description: '{{ doc("col_media_player_type") }}'
-      - name: play_time_min
-        description: '{{ doc("col_play_time_min") }}'
-      - name: avg_play_time_min
-        description: '{{ doc("col_avg_play_time_min") }}'
+      - name: play_time_mins
+        description: '{{ doc("col_play_time_mins") }}'
+      - name: avg_play_time_mins
+        description: '{{ doc("col_avg_play_time_mins") }}'
+      - name: avg_content_watched_mins
+        description: '{{ doc("col_avg_content_watched_mins") }}'
       - name: first_play
         description: '{{ doc("col_first_play") }}'
       - name: last_play

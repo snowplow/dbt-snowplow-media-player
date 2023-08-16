@@ -1,0 +1,53 @@
+{% macro percent_progress_field(v1_percent_progress, v1_event_type, event_name, v2_current_time, v2_duration) %}
+    {%- set v2_percent_progres -%}
+      round({{ field(
+        v2_current_time,
+        col_prefix='contexts_com_snowplowanalytics_snowplow_media_player_2'
+      ) }} / {{ field(
+        v2_duration,
+        col_prefix='contexts_com_snowplowanalytics_snowplow_media_player_2'
+      ) }} * 100)
+    {%- endset -%}
+    coalesce(
+      {% if var("snowplow__enable_media_player_v1") -%}
+        case
+          when {{ field(
+            v1_event_type,
+            col_prefix="unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1",
+            field='type'
+          ) }} = 'ended'
+          then 100
+          else {{ field(
+            v1_percent_progress,
+            col_prefix='contexts_com_snowplowanalytics_snowplow_media_player_1'
+          ) }}
+        end
+      {%- else -%}
+        null
+      {%- endif %},
+      {% if var("snowplow__enable_media_player_v2") -%}
+        case
+            when {{ event_name }} = 'end_event'
+            then 100
+            when {{ event_name }} = 'percent_progress_event'
+            and coalesce({{ field(
+              v2_duration,
+              col_prefix='contexts_com_snowplowanalytics_snowplow_media_player_2'
+            ) }}, 0) > 0
+            then (
+              case
+                {% for element in get_percentage_boundaries(var("snowplow__percent_progress_boundaries"))|sort|reverse %}
+                when {{ v2_percent_progres }} >= {{ element }}
+                then {{ element }}
+                {% endfor %}
+                else null
+              end
+            )
+
+            else null
+        end
+      {%- else -%}
+        null
+      {%- endif %}
+    )
+{% endmacro %}

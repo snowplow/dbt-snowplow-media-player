@@ -14,7 +14,7 @@ The surrogate key generated from `page_view_id` and `media_id `to create a uniqu
 A UUID for each page view e.g. `c6ef3124-b53a-4b13-a233-0088f79dcbcb`.
 {% enddocs %}
 
-{% docs col_domain_sessionid %}
+{% docs col_session_identifier %}
 A visit / session UUID e.g. `c6ef3124-b53a-4b13-a233-0088f79dcbcb`.
 {% enddocs %}
 
@@ -66,7 +66,7 @@ Name of operating system e.g. `Android`.
 Client operating system timezone e.g. `Europe/London`.
 {% enddocs %}
 
-{% docs col_duration %}
+{% docs col_duration_secs %}
 Total length of media in seconds e.g. it's a 5:32 youtube video so the duration is 332 seconds.
 {% enddocs %}
 
@@ -98,16 +98,84 @@ The `derived_tstamp` denoting the time when the event started.
 The `derived_tstamp` denoting the time when the last media player event belonging to the specific level of aggregation (e.g.: page_view by media) started.
 {% enddocs %}
 
-{% docs col_play_time_sec %}
-Estimated duration of play in seconds. It is calculated using the percent_progress events that are fired during play. In case such an event is fired, it is assumed that the total section of the media in between the previous and current percent_progress is played through, even if the user seeks to another point in time within the audio / video. The more often these events are tracked (e.g. every 5% of the media's length) the more accurate the calculation becomes.
+{% docs col_play_time_secs %}
+Total seconds user spent playing content (excluding linear ads). If the media session entity is tracked with media events, the information is read from there. This is an accurate measurement provided by the tracker.
+
+ This also counts playback of rewatched content (see `content_watched_secs` for a measurement without considering rewatched content).
+
+If the media session entity is not tracked, the value is estimated. It is calculated using the percent_progress events that are fired during play. In case such an event is fired, it is assumed that the total section of the media in between the previous and current percent_progress is played through, even if the user seeks to another point in time within the audio / video. The more often these events are tracked (e.g. every 5% of the media's length) the more accurate the calculation becomes.
 {% enddocs %}
 
-{% docs col_avg_play_time_min %}
-Estimated average duration of plays in minutes.
+{% docs col_paused_time_secs %}
+Total seconds user spent with paused content (excluding linear ads).
+
+This information is provided by the tracker in the media session context entity. If the media session entity is not tracked (when using our older tracking plugins or when it is disabled on the tracker), this property will be null.
+{% enddocs %}
+
+{% docs col_buffering_time_secs %}
+Total seconds that playback was buffering.
+
+Calculated on the tracker and provided through the media session context entity. If the media session entity is not tracked (when using our older tracking plugins or when it is disabled on the tracker), this property will be null.
+{% enddocs %}
+
+{% docs col_ads_time_secs %}
+Total seconds that ads played.
+
+Calculated on the tracker and provided through the media session context entity. If the media session entity is not tracked (when using our older tracking plugins or when it is disabled on the tracker), this property will be null.
+{% enddocs %}
+
+{% docs col_ads %}
+Number of ads played.
+
+Calculated on the tracker and provided through the media session context entity. If the media session entity is not tracked (when using our older tracking plugins or when it is disabled on the tracker), this property will be null.
+{% enddocs %}
+
+{% docs col_ads_clicked %}
+Number of ads that the user clicked on.
+
+Calculated on the tracker and provided through the media session context entity. If the media session entity is not tracked (when using our older tracking plugins or when it is disabled on the tracker), this property will be null.
+{% enddocs %}
+
+{% docs col_ads_skipped %}
+Number of ads that the user skipped.
+
+Calculated on the tracker and provided through the media session context entity. If the media session entity is not tracked (when using our older tracking plugins or when it is disabled on the tracker), this property will be null.
+{% enddocs %}
+
+{% docs col_ad_breaks %}
+Number of ad breaks played.
+
+Calculated on the tracker and provided through the media session context entity. If the media session entity is not tracked (when using our older tracking plugins or when it is disabled on the tracker), this property will be null.
+{% enddocs %}
+
+{% docs col_content_watched_secs %}
+Total seconds of the content played. Each part of the content played is counted once (i.e., counts rewinding or rewatching the same content only once).
+
+Calculated on the tracker and provided through the media session context entity. If the media session entity is not tracked (when using our older tracking plugins or when it is disabled on the tracker), this property will be null.
+{% enddocs %}
+
+{% docs col_content_watched_percent %}
+Percentage of the content played.
+
+Calculated on the tracker and provided through the media session context entity. If the media session entity is not tracked (when using our older tracking plugins or when it is disabled on the tracker), this property will be null.
+{% enddocs %}
+
+{% docs col_avg_play_time_mins %}
+Estimated average duration of plays in minutes. This also counts rewatched content (see `avg_content_watched_mins` for a measurement without considering rewatched content).
+
+If the media session context entity is tracked with events, the information is taken from there which makes it more accurate since it is calculated on the tracker. If the media session entity is not tracked (when using our older tracking plugins or when it is disabled on the tracker), this property will be null.
+{% enddocs %}
+
+{% docs col_avg_content_watched_mins %}
+Average duration of the content played in minutes. Each part of the content played is counted once (i.e., counts rewinding or rewatching the same content only once).
+
+Calculated on the tracker and provided through the media session context entity. If the media session entity is not tracked (when using our older tracking plugins or when it is disabled on the tracker), this property will be null.
 {% enddocs %}
 
 {% docs col_avg_play_time_sec %}
-Estimated average duration of plays in seconds.
+Estimated average duration of plays in seconds. This also counts rewatched content (see `content_watched_secs` for a measurement without considering rewatched content).
+
+If the media session context entity is tracked with events, the information is taken from there which makes it more accurate since it is calculated on the tracker.
 {% enddocs %}
 
 {% docs col_first_play %}
@@ -150,7 +218,7 @@ The maximum percent progress reached before any seek event.
 Average of total play_time divided by the media duration.
 {% enddocs %}
 
-{% docs col__percent_reached %}
+{% docs col_percent_reached_x %}
 Field(s) calculated based on the `snowplow_mp_percent_progress` list, which shows how many times a certain percent progress has been reached. Please note that `100_percent_reached` = 1 does not necessarily mean that one user has played the media fully, but that there was either an 'ended' event or a 'percentprogress' event with a value of 100 and the user could still have seeked just before the end. If the same user replays part of the media during the same page_view, it will be counted in the total number.
 {% enddocs %}
 
@@ -166,8 +234,10 @@ Time stamp for the event recorded by the collector e.g. `2013-11-26 00:02:05`.
 The weight given for each percent progress reached used for the calculation of the play_time_sec_estimated field. It is based on the difference of the current and preciding percent_progress rate.
 {% enddocs %}
 
-{% docs col_play_time_sec_muted %}
-Calculated duration of muted play in seconds. It is based on the percent_progress event and whether the user played it on mute during this event or not.
+{% docs col_play_time_muted_secs %}
+Total seconds user spent playing content on mute (excluding linear ads). If the media session entity is tracked with media events, the information is read from there. This is an accurate measurement provided by the tracker.
+
+If the media session entity is not tracked, the value is estimated. It is based on the percent_progress event and whether the user played it on mute during this event or not.
 {% enddocs %}
 
 {% docs col_is_played %}
@@ -175,7 +245,7 @@ Pageviews with at least one play event.
 {% enddocs %}
 
 {% docs col_is_valid_play %}
-A boolean value to show whether the duration of the play (`play_time_sec`) is bigger than or equal to the variable given in `snowplow__valid_play_sec` (defaulted to 30).
+A boolean value to show whether the duration of the play (`play_time_secs`) is bigger than or equal to the variable given in `snowplow__valid_play_sec` (defaulted to 30).
 {% enddocs %}
 
 {% docs col_is_complete_play %}
@@ -202,11 +272,11 @@ The sum of all video plays that exceed the limit set within the variable `snowpl
 The sum of all audio plays that exceeded the limit set within the variable `snowplow__valid_play_sec`, it is defaulted to 30 seconds.
 {% enddocs %}
 
-{% docs col_play_time_min %}
-Calculated duration of play in minutes.
+{% docs col_play_time_mins %}
+Calculated duration of play in minutes.  This also counts rewatched content (see `avg_content_watched_mins` for a measurement without considering rewatched content).
 {% enddocs %}
 
-{% docs col_play_time_min_muted %}
+{% docs col_play_time_muted_mins %}
 Calculated duration of muted play in minutes. It is based on the percent_progress event and whether the user played it on mute during this event or not.
 {% enddocs %}
 
@@ -238,7 +308,7 @@ The playback position of a specific media in seconds whenever a media player eve
 The optional, human readable name given to tracked media content.
 {% enddocs %}
 
-{% docs col_avg_session_play_time_min %}
+{% docs col_avg_session_play_time_mins %}
 Estimated average duration of plays in seconds within a session.
 {% enddocs %}
 
@@ -832,4 +902,196 @@ User-set “true timestamp” for the event e.g. ‘2013-11-26 00:02:04’
 
 {% docs col_event_in_session_index %}
 The index of the event in the corresponding session.
+{% enddocs %}
+
+{% docs col_media_ad_id %}
+Generated identifier that identifies an ad (identified using the ad_id) played with a specific media (identified using the media_id) and on a specific platform (based on the platform property).
+{% enddocs %}
+
+{% docs col_ad_id %}
+Unique identifier for the ad taken from the ad context entity.
+{% enddocs %}
+
+{% docs col_name %}
+Friendly name of the ad taken from the ad context entity.
+{% enddocs %}
+
+{% docs col_creative_id %}
+The ID of the ad creative taken from the ad context entity.
+{% enddocs %}
+
+{% docs col_ad_duration_secs %}
+Length of the video ad in seconds as reported in the ad context entity.
+{% enddocs %}
+
+{% docs col_skippable %}
+Indicating whether skip controls are made available to the end user (reported in the ad context entity).
+{% enddocs %}
+
+{% docs col_avg_pod_position %}
+The average position of the ad within the ad break, starting with 1 (reported in the ad context entity).
+{% enddocs %}
+
+{% docs col_views %}
+Number of total views on the ad (repeated views are counted as well).
+{% enddocs %}
+
+{% docs col_clicks %}
+Number of total clicks on the ad (repeated clicks are counted as well).
+{% enddocs %}
+
+{% docs col_skips %}
+Number of total times users skipped the ad (repeated skips are counted as well).
+{% enddocs %}
+
+{% docs col_percent_reached_25 %}
+Number of times users reached 25% of the ad playback (repeated views are counted as well).
+{% enddocs %}
+
+{% docs col_percent_reached_50 %}
+Number of times users reached 50% of the ad playback (repeated views are counted as well).
+{% enddocs %}
+
+{% docs col_percent_reached_75 %}
+Number of times users reached 75% of the ad playback (repeated views are counted as well).
+{% enddocs %}
+
+{% docs col_percent_reached_100 %}
+Number of times users watched the whole ad (repeated views are counted as well).
+{% enddocs %}
+
+{% docs col_first_view %}
+Datetime of the first ad view.
+{% enddocs %}
+
+{% docs col_last_view %}
+Datetime of the last ad view.
+{% enddocs %}
+
+{% docs col_ad_break_id %}
+An identifier for the ad break (reported in the ad_break context entity).
+{% enddocs %}
+
+{% docs col_ad_break_name %}
+Ad break name (e.g., pre-roll, mid-roll, and post-roll), reported in the ad_break context entity.
+{% enddocs %}
+
+{% docs col_ad_break_type %}
+Type of ads within the break: linear (take full control of the video for a period of time), nonlinear (run concurrently to the video), companion (accompany the video but placed outside the player). Reported in the ad_break context entity.
+{% enddocs %}
+
+{% docs col_pod_position %}
+The position of the ad within the ad break, starting with 1 (reported in the ad context entity).
+{% enddocs %}
+
+{% docs col_clicked %}
+Whether the ad was clicked during this ad view.
+{% enddocs %}
+
+{% docs col_skipped %}
+Whether the ad was skipped during this ad view.
+{% enddocs %}
+
+{% docs col_viewed_at %}
+Datetime when the ad was viewed.
+{% enddocs %}
+
+{% docs col_last_event %}
+Datetime of the last event.
+{% enddocs %}
+
+{% docs col_views_unique %}
+Number of users that viewed the ad (identified by their domain_userid).
+{% enddocs %}
+
+{% docs col_clicked_unique %}
+Number of users that clicked on the ad (identified by their domain_userid).
+{% enddocs %}
+
+{% docs col_skipped_unique %}
+Number of users that skipped the ad (identified by their domain_userid).
+{% enddocs %}
+
+{% docs col_percent_reached_25_unique %}
+Number of users that watched 25% of the ad (identified by their domain_userid).
+{% enddocs %}
+
+{% docs col_percent_reached_50_unique %}
+Number of users that watched 50% of the ad (identified by their domain_userid).
+{% enddocs %}
+
+{% docs col_percent_reached_75_unique %}
+Number of users that watched 75% of the ad (identified by their domain_userid).
+{% enddocs %}
+
+{% docs col_percent_reached_100_unique %}
+Number of users that watched 100% of the ad (identified by their domain_userid).
+{% enddocs %}
+
+{% docs col_media_session_id %}
+An identifier for the media session that is kept while the media content is played in the media player.
+{% enddocs %}
+
+{% docs col_media_session_time_played %}
+Total seconds user spent playing content (excluding linear ads).
+{% enddocs %}
+
+{% docs col_media_session_time_played_muted %}
+Total seconds user spent playing content on mute (excluding linear ads).
+{% enddocs %}
+
+{% docs col_media_session_time_paused %}
+Total seconds user spent with paused content (excluding linear ads).
+{% enddocs %}
+
+{% docs col_media_session_content_watched %}
+Total seconds of the content played. Each part of the content played is counted once (i.e., counts rewinding or rewatching the same content only once). Playback rate does not affect this value.
+{% enddocs %}
+
+{% docs col_media_session_time_buffering %}
+Total seconds that playback was buffering during the session.
+{% enddocs %}
+
+{% docs col_media_session_time_spent_ads %}
+Total seconds that ads played during the session.
+{% enddocs %}
+
+{% docs col_media_session_ads %}
+Number of ads played.
+{% enddocs %}
+
+{% docs col_media_session_ads_clicked %}
+Number of ads that the user clicked on.
+{% enddocs %}
+
+{% docs col_media_session_ads_skipped %}
+Number of ads that the user skipped.
+{% enddocs %}
+
+{% docs col_media_session_ad_breaks %}
+Number of ad breaks played.
+{% enddocs %}
+
+{% docs col_media_session_avg_playback_rate %}
+Average playback rate (1 is normal speed).
+{% enddocs %}
+
+{% docs col_ad_name %}
+Friendly name of the ad.
+{% enddocs %}
+
+{% docs col_ad_creative_id %}
+The ID of the ad creative.
+{% enddocs %}
+
+{% docs col_ad_pod_position %}
+The position of the ad within the ad break, starting with 1.
+{% enddocs %}
+
+{% docs col_ad_skippable %}
+Indicating whether skip controls are made available to the end user.
+{% enddocs %}
+
+{% docs col_ad_percent_progress %}
+The percent of the way through the ad.
 {% enddocs %}
