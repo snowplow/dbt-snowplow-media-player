@@ -1,0 +1,63 @@
+version: 2
+
+models:
+  - name: snowplow_media_player_media_ads
+    description: '{{ doc("table_media_ads") }}'
+    columns:
+      - name: media_ad_id
+        description: The primary key of this table
+        tags:
+          - primary-key
+        tests:
+          - unique
+          - not_null
+      - name: platform
+        description: '{{ doc("col_platform")}}'
+      - name: media_id
+        description: '{{ doc("col_media_id")}}'
+      - name: media_label
+        description: '{{ doc("col_media_label")}}'
+      - name: ad_id
+        description: '{{ doc("col_ad_id")}}'
+      - name: name
+        description: '{{ doc("col_name")}}'
+      - name: creative_id
+        description: '{{ doc("col_creative_id")}}'
+      - name: duration_secs
+        description: '{{ doc("col_duration_secs")}}'
+      - name: skippable
+        description: '{{ doc("col_skippable")}}'
+      - name: pod_position
+        description: '{{ doc("col_pod_position")}}'
+      - name: views
+        description: '{{ doc("col_views")}}'
+      - name: clicked
+        description: '{{ doc("col_clicked")}}'
+      - name: skipped
+        description: '{{ doc("col_skipped")}}'
+      - name: percent_reached_25
+        description: '{{ doc("col_percent_reached_25")}}'
+      - name: percent_reached_50
+        description: '{{ doc("col_percent_reached_50")}}'
+      - name: percent_reached_75
+        description: '{{ doc("col_percent_reached_75")}}'
+      - name: percent_reached_100
+        description: '{{ doc("col_percent_reached_100")}}'
+      - name: views_unique
+        description: '{{ doc("col_views_unique")}}'
+      - name: clicked_unique
+        description: '{{ doc("col_clicked_unique")}}'
+      - name: skipped_unique
+        description: '{{ doc("col_skipped_unique")}}'
+      - name: percent_reached_25_unique
+        description: '{{ doc("col_percent_reached_25_unique")}}'
+      - name: percent_reached_50_unique
+        description: '{{ doc("col_percent_reached_50_unique")}}'
+      - name: percent_reached_75_unique
+        description: '{{ doc("col_percent_reached_75_unique")}}'
+      - name: percent_reached_100_unique
+        description: '{{ doc("col_percent_reached_100_unique")}}'
+      - name: first_view
+        description: '{{ doc("col_first_view")}}'
+      - name: last_view
+        description: '{{ doc("col_last_view")}}'

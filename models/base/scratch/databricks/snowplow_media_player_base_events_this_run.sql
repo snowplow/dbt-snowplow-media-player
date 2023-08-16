@@ -11,67 +11,130 @@
 -- check for exceptions
 {% if var("snowplow__enable_whatwg_media") is false and var("snowplow__enable_whatwg_video") %}
   {{ exceptions.raise_compiler_error("variable: snowplow__enable_whatwg_video is enabled but variable: snowplow__enable_whatwg_media is not, both need to be enabled for modelling html5 video tracking data.") }}
-{% elif not var("snowplow__enable_youtube") and not var("snowplow__enable_whatwg_media") %}
-  {{ exceptions.raise_compiler_error("No media context enabled. Please enable as many of the following variables as required: snowplow__enable_youtube, snowplow__enable_whatwg_media, snowplow__enable_whatwg_video") }}
+{% elif not var("snowplow__enable_media_player_v1") and not var("snowplow__enable_media_player_v2") %}
+  {{ exceptions.raise_compiler_error("No media player context enabled. Please enable at least one media player context: snowplow__enable_media_player_v1 or snowplow__enable_media_player_v2") }}
+{% elif not var("snowplow__enable_youtube") and not var("snowplow__enable_whatwg_media") and not var("snowplow__enable_media_player_v2") %}
+  {{ exceptions.raise_compiler_error("No media context enabled. Please enable as many of the following variables as required: snowplow__enable_media_player_v2, snowplow__enable_youtube, snowplow__enable_whatwg_media, snowplow__enable_whatwg_video") }}
 {% endif %}
 
 with prep AS (
 
   select
 
-    a.event_id,
-    a.contexts_com_snowplowanalytics_snowplow_web_page_1[0].id::string as page_view_id,
-    a.domain_sessionid,
-    b.domain_userid,
-    a.page_referrer,
-    a.page_url,
-    a.geo_region_name,
-    a.br_name,
-    a.dvce_type,
-    a.os_name,
-    a.os_timezone,
+    a.* except (
+      domain_userid,
+      domain_sessionid,
+      derived_tstamp
+
+      {% if var('snowplow__enable_load_tstamp', true) %}
+      , load_tstamp
+      {% endif %}
+    ),
+
     a.derived_tstamp as start_tstamp,
-    a.collector_tstamp,
+    b.domain_userid, -- take domain_userid from manifest. This ensures only 1 domain_userid per session.
+    b.session_id as session_identifier,
+
+    {{ web_or_mobile_field(
+      web={ 'field': 'id', 'col_prefix': 'contexts_com_snowplowanalytics_snowplow_web_page_1', 'dtype': 'string' },
+      mobile={ 'field': 'id', 'col_prefix': 'contexts_com_snowplowanalytics_mobile_screen_1', 'dtype': 'string' }
+    ) }} as page_view_id,
 
     -- unpacking the media player event
-    a.unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1.label::STRING as media_label,
-    a.unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1.type::STRING as event_type,
+    {{ media_player_field(
+      v1={ 'field': 'label', 'col_prefix': 'unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1', 'dtype': 'string' },
+      v2={ 'field': 'label', 'dtype': 'string' }
+    ) }} as media_label,
+    {{ media_event_type_field(media_player_event_type={ 'dtype': 'string' }, event_name='a.event_name') }} as event_type,
 
     -- unpacking the media player object
-    round(contexts_com_snowplowanalytics_snowplow_media_player_1[0].duration::float) as duration,
-    contexts_com_snowplowanalytics_snowplow_media_player_1[0].current_time::float as player_current_time,
-    coalesce(contexts_com_snowplowanalytics_snowplow_media_player_1[0].playback_rate::STRING, 1) as playback_rate,
-    case when a.unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1.type::STRING = 'ended' then 100 else contexts_com_snowplowanalytics_snowplow_media_player_1[0].percent_progress::int end percent_progress,
-    contexts_com_snowplowanalytics_snowplow_media_player_1[0].muted::STRING as is_muted,
-    contexts_com_snowplowanalytics_snowplow_media_player_1[0].is_live::STRING as is_live,
-    contexts_com_snowplowanalytics_snowplow_media_player_1[0].loop::STRING as loop,
-    contexts_com_snowplowanalytics_snowplow_media_player_1[0].volume::STRING as volume,
+    round({{ media_player_field(
+      v1={ 'field': 'duration', 'dtype': 'double' },
+      v2={ 'field': 'duration', 'dtype': 'double' }
+    ) }}) as duration_secs,
+    {{ media_player_field(
+      v1={ 'field': 'current_time', 'dtype': 'double' },
+      v2={ 'field': 'current_time', 'dtype': 'double' }
+    ) }} as current_time,
+    {{ media_player_field(
+      v1={ 'field': 'playback_rate', 'dtype': 'double' },
+      v2={ 'field': 'playback_rate', 'dtype': 'double' },
+      default='1.0'
+    ) }} as playback_rate,
+    {{ percent_progress_field(
+        v1_percent_progress={ 'field': 'percent_progress', 'dtype': 'string' },
+        v1_event_type={ 'field': 'type', 'dtype': 'string' },
+        event_name='a.event_name',
+        v2_current_time={ 'field': 'current_time', 'dtype': 'double' },
+        v2_duration={ 'field': 'duration', 'dtype': 'double' }
+    ) }} as percent_progress,
+    {{ media_player_field(
+      v1={ 'field': 'muted', 'dtype': 'boolean' },
+      v2={ 'field': 'muted', 'dtype': 'boolean' }
+    ) }} as is_muted,
+
+    -- media session properties
+    {{ media_session_field({ 'field': 'media_session_id', 'dtype': 'string' }) }} as media_session_id,
+    {{ media_session_field({ 'field': 'time_played', 'dtype': 'double' }) }} as media_session_time_played,
+    {{ media_session_field({ 'field': 'time_played_muted', 'dtype': 'double' }) }} as media_session_time_played_muted,
+    {{ media_session_field({ 'field': 'time_paused', 'dtype': 'double' }) }} as media_session_time_paused,
+    {{ media_session_field({ 'field': 'content_watched', 'dtype': 'double' }) }} as media_session_content_watched,
+    {{ media_session_field({ 'field': 'time_buffering', 'dtype': 'double' }) }} as media_session_time_buffering,
+    {{ media_session_field({ 'field': 'time_spent_ads', 'dtype': 'double' }) }} as media_session_time_spent_ads,
+    {{ media_session_field({ 'field': 'ads', 'dtype': 'integer' }) }} as media_session_ads,
+    {{ media_session_field({ 'field': 'ads_clicked', 'dtype': 'integer' }) }} as media_session_ads_clicked,
+    {{ media_session_field({ 'field': 'ads_skipped', 'dtype': 'integer' }) }} as media_session_ads_skipped,
+    {{ media_session_field({ 'field': 'ad_breaks', 'dtype': 'integer' }) }} as media_session_ad_breaks,
+    {{ media_session_field({ 'field': 'avg_playback_rate', 'dtype': 'double' }) }} as media_session_avg_playback_rate,
+
+    -- ad properties
+    {{ media_ad_field({ 'field': 'name', 'dtype': 'string' }) }} as ad_name,
+    {{ media_ad_field({ 'field': 'ad_id', 'dtype': 'string' }) }} as ad_id,
+    {{ media_ad_field({ 'field': 'creative_id', 'dtype': 'string' }) }} as ad_creative_id,
+    {{ media_ad_field({ 'field': 'pod_position', 'dtype': 'integer' }) }} as ad_pod_position,
+    {{ media_ad_field({ 'field': 'duration', 'dtype': 'double' }) }} as ad_duration_secs,
+    {{ media_ad_field({ 'field': 'skippable', 'dtype': 'boolean' }) }} as ad_skippable,
+
+    -- ad break properties
+    {{ media_ad_break_field({ 'field': 'name', 'dtype': 'string' }) }} as ad_break_name,
+    {{ media_ad_break_field({ 'field': 'break_id', 'dtype': 'string' }) }} as ad_break_id,
+    {{ media_ad_break_field({ 'field': 'break_type', 'dtype': 'string' }) }} as ad_break_type,
+
+    -- ad quartile event
+    {{ media_ad_quartile_event_field({ 'field': 'percent_progress', 'dtype': 'integer' }) }} as ad_percent_progress,
 
     -- combined media properties
-    {{ media_id_col(
-      youtube_player_id='a.contexts_com_youtube_youtube_1[0].player_id::STRING',
-      media_player_id='a.contexts_org_whatwg_media_element_1[0].html_id::STRING'
-    ) }},
-    {{ media_player_type_col(
-      youtube_player_id='a.contexts_com_youtube_youtube_1[0].player_id::STRING',
-      media_player_id='a.contexts_org_whatwg_media_element_1[0].html_id::STRING'
-    ) }},
-    {{ source_url_col(
-      youtube_url='a.contexts_com_youtube_youtube_1[0].url::STRING',
-      media_current_src='a.contexts_org_whatwg_media_element_1[0].current_src::STRING'
-    ) }},
-    {{ media_type_col(
-      media_media_type='a.contexts_org_whatwg_media_element_1[0].media_type::STRING'
-    ) }},
-    {{ playback_quality_col(
-      youtube_quality='a.contexts_com_youtube_youtube_1[0].playback_quality::STRING',
-      video_width='a.contexts_org_whatwg_video_element_1[0].video_width::STRING',
-      video_height='a.contexts_org_whatwg_video_element_1[0].video_height::STRING'
-    ) }}
+    {{ media_id_field(
+      v2_player_label={ 'field': 'label', 'dtype': 'string' },
+      youtube_player_id={ 'field': 'player_id', 'dtype': 'string' },
+      media_player_id={ 'field': 'html_id', 'dtype': 'string' }
+    ) }} as media_id,
+    {{ media_player_type_field(
+      v2_player_type={ 'field': 'player_type', 'dtype': 'string' },
+      youtube_player_id={ 'field': 'player_id', 'dtype': 'string' },
+      media_player_id={ 'field': 'html_id', 'dtype': 'string' }
+    ) }} as media_player_type,
+    {{ source_url_field(
+      youtube_url={ 'field': 'url', 'dtype': 'string' },
+      media_current_src={ 'field': 'current_src', 'dtype': 'string' }
+    ) }} as source_url,
+    {{ media_type_field(
+      v2_media_type={ 'field': 'media_type', 'dtype': 'string' },
+      media_media_type={ 'field': 'media_type', 'dtype': 'string' }
+    ) }} as media_type,
+    {{ playback_quality_field(
+        v2_quality={ 'field': 'quality', 'dtype': 'string' },
+        youtube_quality={ 'field': 'playback_quality', 'dtype': 'string' },
+        video_width={ 'field': 'video_width', 'dtype': 'integer' },
+        video_height={ 'field': 'video_height', 'dtype': 'integer' }
+    )}} as playback_quality
 
   from {{ var('snowplow__events') }} as a
   inner join {{ ref('snowplow_media_player_base_sessions_this_run') }} as b
-  on a.domain_sessionid = b.session_id
+  on {{ web_or_mobile_field(
+    web='a.domain_sessionid',
+    mobile={ 'field': 'session_id', 'col_prefix': 'contexts_com_snowplowanalytics_snowplow_client_session_1', 'dtype': 'string' }
+  ) }} = b.session_id
 
   where a.collector_tstamp <= {{ snowplow_utils.timestamp_add('day', var("snowplow__max_session_days", 3), 'b.start_tstamp') }}
   and a.dvce_sent_tstamp <= {{ snowplow_utils.timestamp_add('day', var("snowplow__days_late_allowed", 3), 'a.dvce_created_tstamp') }}
@@ -84,12 +147,18 @@ with prep AS (
 )
 
 select
-  {{ dbt_utils.generate_surrogate_key(['p.page_view_id', 'p.media_id' ]) }} play_id,
-  p.*,
-  coalesce(cast(round(piv.weight_rate * p.duration / 100) as {{ type_int() }}), 0) as play_time_sec,
-  coalesce(cast(case when p.is_muted = true then round(piv.weight_rate * p.duration / 100) else 0 end as {{ type_int() }}), 0) as play_time_sec_muted,
+  coalesce(
+    p.media_session_id,
+    {{ dbt_utils.generate_surrogate_key(['p.page_view_id', 'p.media_id' ]) }}
+  ) as play_id,
+  p.* except (percent_progress),
 
-  dense_rank() over (partition by domain_sessionid order by start_tstamp) AS event_in_session_index
+  cast(p.percent_progress as integer) as percent_progress,
+
+  coalesce(cast(round(piv.weight_rate * p.duration_secs / 100) as {{ type_int() }}), 0) as play_time_secs,
+  coalesce(cast(case when p.is_muted = true then round(piv.weight_rate * p.duration_secs / 100) else 0 end as {{ type_int() }}), 0) as play_time_muted_secs,
+
+  dense_rank() over (partition by session_identifier order by start_tstamp) AS event_in_session_index
 
   from prep p
 

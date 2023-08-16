@@ -27,15 +27,22 @@ for db in ${DATABASES[@]}; do
 
   eval "dbt seed --target $db --full-refresh" || exit 1;
 
-  echo "Snowplow media player integration tests: Execute models - run 1/3"
+  echo "Snowplow media player integration tests: Execute models - run 1/6"
 
   eval "dbt run --target $db --full-refresh --vars '{snowplow__allow_refresh: true}'" || exit 1;
 
   for i in {2..3}
   do
-    echo "Snowplow media player integration tests: Execute models - run $i/3"
+    echo "Snowplow media player integration tests: Execute models - run $i/6"
 
     eval "dbt run --target $db" || exit 1;
+  done
+
+  for i in {4..6}
+  do
+    echo "Snowplow media player integration tests: Execute models - run $i/6"
+
+    eval "dbt run --target $db --vars '{snowplow__backfill_limit_days: 300}'" || exit 1;
   done
 
   echo "Snowplow media player integration tests: Test models"

@@ -1,16 +1,23 @@
 {{
   config(
-    materialized="incremental",
+    materialized='incremental',
     unique_key='session_id',
     upsert_date_key='start_tstamp',
-    sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt')),
+    sort='start_tstamp',
+    dist='session_id',
     partition_by = snowplow_utils.get_value_by_target_type(bigquery_val={
       "field": "start_tstamp",
       "data_type": "timestamp"
     }, databricks_val='start_tstamp_date'),
+    cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["session_id"], snowflake_val=["to_date(start_tstamp)"]),
     full_refresh=snowplow_media_player.allow_refresh(),
     tags=["manifest"],
-    snowplow_optimize=true
+    sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt')),
+    tblproperties={
+      'delta.autoOptimize.optimizeWrite' : 'true',
+      'delta.autoOptimize.autoCompact' : 'true'
+    },
+    snowplow_optimize = true
   )
 }}
 
@@ -23,16 +30,38 @@
 
 with new_events_session_ids as (
   select
-    e.domain_sessionid as session_id,
-    max(e.domain_userid) as domain_userid, -- Edge case 1: Arbitary selection to avoid window function like first_value.
+    {% if var('snowplow__enable_mobile_events', false) %}
+      coalesce(
+        e.contexts_com_snowplowanalytics_snowplow_client_session_1[0].session_id::string,
+        e.domain_sessionid
+      ) as session_id,
+      max(coalesce(
+        e.contexts_com_snowplowanalytics_snowplow_client_session_1[0].user_id::string,
+        e.domain_userid
+      )) as domain_userid,
+    {% else %}
+      e.domain_sessionid as session_id,
+      max(e.domain_userid) as domain_userid, -- Edge case 1: Arbitary selection to avoid window function like first_value.
+    {% endif %}
     min(e.collector_tstamp) as start_tstamp,
     max(e.collector_tstamp) as end_tstamp
 
   from {{ var('snowplow__events') }} e
 
   where
-    e.domain_sessionid is not null
-    and not exists (select 1 from {{ ref('snowplow_media_player_base_quarantined_sessions') }} as a where a.session_id = e.domain_sessionid) -- don't continue processing v.long sessions
+    {% if var('snowplow__enable_mobile_events', false) %}
+      coalesce(
+        e.contexts_com_snowplowanalytics_snowplow_client_session_1[0].session_id::string,
+        e.domain_sessionid
+      ) is not null
+      and not exists (select 1 from {{ ref('snowplow_media_player_base_quarantined_sessions') }} as a where a.session_id = coalesce(
+        e.contexts_com_snowplowanalytics_snowplow_client_session_1[0].session_id::string,
+        e.domain_sessionid
+      )) -- don't continue processing v.long sessions
+    {% else %}
+      e.domain_sessionid is not null
+      and not exists (select 1 from {{ ref('snowplow_media_player_base_quarantined_sessions') }} as a where a.session_id = e.domain_sessionid) -- don't continue processing v.long sessions
+    {% endif %}
     and e.dvce_sent_tstamp <= {{ snowplow_utils.timestamp_add('day', var("snowplow__days_late_allowed", 3), 'dvce_created_tstamp') }} -- don't process data that's too late
     and e.collector_tstamp >= {{ lower_limit }}
     and e.collector_tstamp <= {{ upper_limit }}
