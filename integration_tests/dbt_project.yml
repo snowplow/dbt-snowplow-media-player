@@ -214,9 +214,9 @@ seeds:
           page_view_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           media_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           media_label: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
-          domain_sessionid: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          session_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           domain_userid: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
-          duration: float
+          duration_secs: float
           media_type: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           media_player_type: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           page_referrer: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
@@ -242,7 +242,7 @@ seeds:
         +column_types:
           media_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           media_label: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
-          duration: float
+          duration_secs: float
           media_type: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           media_player_type: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           play_time_min: float

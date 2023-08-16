@@ -150,7 +150,7 @@ events_this_run AS (
         a.dvce_sent_tstamp,
         a.refr_domain_userid,
         a.refr_dvce_tstamp,
-        a.domain_sessionid,
+        b.session_id,
         a.derived_tstamp,
         a.event_vendor,
         a.event_name,
@@ -235,7 +235,7 @@ prep as (
   select
     ev.event_id,
     {{ web_or_mobile_col(web_property='pv.id', mobile_property='sv.id') }} as page_view_id,
-    ev.domain_sessionid, -- this is coalesced web or mobile session id
+    ev.session_id, -- this is coalesced web or mobile session id
     ev.domain_userid, -- this is coalesced web or mobile user id
     ev.user_id,
     ev.platform,
@@ -254,7 +254,7 @@ prep as (
     {{ media_event_type_col(media_player_event_type='mpe.type', event_name='ev.event_name') }},
 
     -- unpacking the media player object
-    round({{ media_player_property_col(v1_property='mp.duration', v2_property='mp2.duration') }}) as duration,
+    round({{ media_player_property_col(v1_property='mp.duration', v2_property='mp2.duration') }}) as duration_secs,
     {{ media_player_property_col(v1_property='mp.current_time', v2_property='mp2.current_time') }} as current_time,
     {{ media_player_property_col(v1_property='mp.playback_rate', v2_property='mp2.playback_rate') }} as playback_rate,
     {{ percent_progress_col(
@@ -316,7 +316,7 @@ prep as (
         video_height='ve.video_height'
     )}},
 
-    dense_rank() over (partition by domain_sessionid order by derived_tstamp) AS event_in_session_index
+    dense_rank() over (partition by session_id order by derived_tstamp) AS event_in_session_index
 
     from events_this_run ev
 
@@ -379,8 +379,8 @@ where
     {{ dbt_utils.generate_surrogate_key(['p.page_view_id', 'p.media_id' ]) }}
   ) play_id,
   p.*,
-  coalesce(cast(round(piv.weight_rate * p.duration / 100) as {{ type_int() }}), 0) as play_time_sec,
-  coalesce(cast(case when p.is_muted then round(piv.weight_rate * p.duration / 100) end as {{ type_int() }}), 0) as play_time_sec_muted
+  coalesce(cast(round(piv.weight_rate * p.duration_secs / 100) as {{ type_int() }}), 0) as play_time_sec,
+  coalesce(cast(case when p.is_muted then round(piv.weight_rate * p.duration_secs / 100) end as {{ type_int() }}), 0) as play_time_sec_muted
 
   from prep p
 

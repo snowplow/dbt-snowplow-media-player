@@ -22,7 +22,7 @@ with prep as (
 
     a.event_id,
     a.contexts_com_snowplowanalytics_snowplow_web_page_1[0]:id::varchar as page_view_id,
-    a.domain_sessionid,
+    b.session_id,
     b.domain_userid,
     a.page_referrer,
     a.page_url,
@@ -39,7 +39,7 @@ with prep as (
     a.unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1:type::varchar as event_type,
 
     -- unpacking the media player object
-    round(a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:duration::float) as duration,
+    round(a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:duration::float) as duration_secs,
     a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:currentTime::float as player_current_time,
     coalesce(a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:playbackRate::varchar, 1) as playback_rate,
     cast(
@@ -94,20 +94,20 @@ select
   {{ dbt_utils.generate_surrogate_key(['p.page_view_id', 'p.media_id' ]) }} as play_id,
   p.*,
   coalesce(
-    cast(piv.weight_rate * p.duration / 100 as {{ type_int() }}),
+    cast(piv.weight_rate * p.duration_secs / 100 as {{ type_int() }}),
     0
   ) as play_time_sec,
   coalesce(
     cast(
       case
-        when p.is_muted = true then piv.weight_rate * p.duration / 100
+        when p.is_muted = true then piv.weight_rate * p.duration_secs / 100
         else 0
       end as {{ type_int() }}
     ),
     0
   ) as play_time_sec_muted,
 
-  dense_rank() over (partition by domain_sessionid order by start_tstamp) AS event_in_session_index
+  dense_rank() over (partition by session_id order by start_tstamp) AS event_in_session_index
 
   from prep as p
 

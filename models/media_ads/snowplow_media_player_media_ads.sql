@@ -50,7 +50,7 @@ new_media_ad_views as (
     a.ad_id,
     max(a.name) as name,
     max(a.creative_id) as creative_id,
-    max(a.duration) as duration,
+    max(a.duration_secs) as duration_secs,
     bool_or(a.skippable) as skippable,
     avg(a.pod_position) as pod_position,
 
@@ -136,7 +136,7 @@ new_media_ad_views as (
     a.ad_id,
     max(a.name) as name,
     max(a.creative_id) as creative_id,
-    max(a.duration) as duration,
+    max(a.duration_secs) as duration_secs,
     bool_or(a.skippable) as skippable,
     sum(a.pod_position * a.views) / sum(a.views) as pod_position,
 
@@ -169,7 +169,7 @@ new_media_ad_views as (
     a.ad_id,
     a.name,
     a.creative_id,
-    a.duration,
+    a.duration_secs,
     a.skippable,
     a.pod_position,
 

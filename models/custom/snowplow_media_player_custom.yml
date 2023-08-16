@@ -5,7 +5,7 @@ models:
     +tags: "snowplow_media_player_incremental"
     description: '{{ doc("table_session_stats") }}'
     columns:
-      - name: domain_sessionid
+      - name: session_id
         description: '{{ doc("col_domain_sessionid") }}'
         tags:
           - primary-key

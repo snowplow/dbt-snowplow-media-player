@@ -30,11 +30,11 @@ events_this_run as (
     i.page_view_id,
     i.media_id,
     i.media_label,
-    i.domain_sessionid,
+    i.session_id,
     i.domain_userid,
     i.user_id,
     i.platform,
-    max(i.duration) as duration,
+    max(i.duration_secs) as duration_secs,
     i.media_type,
     i.media_player_type,
     i.page_referrer,
@@ -130,12 +130,12 @@ events_this_run as (
 
 )
 
--- for correcting NULLs in case of 'ready' events only where the metadata showing the duration is usually missing as the event fires before it has time to load
+-- for correcting NULLs in case of 'ready' events only where the metadata showing the duration_secs is usually missing as the event fires before it has time to load
 , duration_fix as (
 
   select
     f.media_id,
-    max(f.duration) as duration
+    max(f.duration_secs) as duration_secs
 
   from events_this_run as f
 
@@ -148,7 +148,7 @@ select
   d.page_view_id,
   d.media_id,
   d.media_label,
-  d.domain_sessionid,
+  d.session_id,
   d.domain_userid,
   d.user_id,
   d.page_referrer,
@@ -162,7 +162,7 @@ select
   d.platform,
 
   -- media information
-  f.duration,
+  f.duration_secs,
   d.media_type,
   d.media_player_type,
 
@@ -196,7 +196,7 @@ select
   end as is_valid_play,
   case
     when
-      coalesce(s.media_session_time_played, d.play_time_sec) / nullif(f.duration, 0)
+      coalesce(s.media_session_time_played, d.play_time_sec) / nullif(f.duration_secs, 0)
       >= {{ var("snowplow__complete_play_rate") }}
       then true else
       false
@@ -210,9 +210,9 @@ select
   p.percent_progress_reached,
   s.media_session_content_watched as content_watched_sec,
   case
-    when d.duration is not null and s.media_session_content_watched is not null and d.duration > 0
+    when d.duration_secs is not null and s.media_session_content_watched is not null and d.duration_secs > 0
     then least(
-      s.media_session_content_watched / d.duration,
+      s.media_session_content_watched / d.duration_secs,
       1.0
     )
   end as content_watched_percent

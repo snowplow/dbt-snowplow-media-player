@@ -12,9 +12,9 @@ models:
             - page_view_id
             - media_id
             - media_label
-            - domain_sessionid
+            - session_id
             - domain_userid
-            - duration
+            - duration_secs
             - media_type
             - media_player_type
             - page_referrer
@@ -45,7 +45,7 @@ models:
           compare_columns:
             - media_id
             - media_label
-            - duration
+            - duration_secs
             - media_type
             - media_player_type
             - first_play

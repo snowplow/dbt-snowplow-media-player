@@ -18,7 +18,7 @@ models:
         description: '{{ doc("col_media_id") }}'
       - name: media_label
         description: '{{ doc("col_media_label") }}'
-      - name: domain_sessionid
+      - name: session_id
         description: '{{ doc("col_domain_sessionid") }}'
       - name: domain_userid
         description: '{{ doc("col_domain_userid") }}'
@@ -41,7 +41,7 @@ models:
       - name: platform
         description: '{{ doc("col_platform") }}'
 
-      - name: duration
+      - name: duration_secs
         description: '{{ doc("col_duration") }}'
       - name: media_type
         description: '{{ doc("col_media_type") }}'

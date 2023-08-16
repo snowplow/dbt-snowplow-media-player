@@ -19,7 +19,7 @@ with prep as (
 
   select
     *,
-    dense_rank() over (partition by ev.domain_sessionid order by ev.start_tstamp) AS event_in_session_index,
+    dense_rank() over (partition by ev.session_id order by ev.start_tstamp) AS event_in_session_index,
 
   from (
 
@@ -27,7 +27,7 @@ with prep as (
 
       a.event_id,
       a.contexts_com_snowplowanalytics_snowplow_web_page_1_0_0[safe_offset(0)].id as page_view_id,
-      a.domain_sessionid,
+      b.session_id,
       a.domain_userid,
       a.page_referrer,
       a.page_url,
@@ -62,7 +62,7 @@ with prep as (
                       col_prefix='contexts_com_snowplowanalytics_snowplow_media_player_1',
                       relation=source('atomic', 'events'),
                       relation_alias='a',
-                      include_field_alias=false)}} as float64)) as duration,
+                      include_field_alias=false)}} as float64)) as duration_secs,
       {{ snowplow_utils.get_optional_fields(
           enabled= true,
           fields=[{'field': 'current_time', 'dtype': 'string'}],
@@ -225,8 +225,8 @@ with prep as (
 select
   {{ dbt_utils.generate_surrogate_key(['p.page_view_id', 'p.media_id' ]) }} play_id,
   p.*,
-  coalesce(cast(piv.weight_rate * p.duration / 100 as {{ type_int() }}), 0) as play_time_sec,
-  coalesce(cast(case when p.is_muted = true then piv.weight_rate * p.duration / 100 else 0 end as {{ type_int() }}), 0) as play_time_sec_muted
+  coalesce(cast(piv.weight_rate * p.duration_secs / 100 as {{ type_int() }}), 0) as play_time_sec,
+  coalesce(cast(case when p.is_muted = true then piv.weight_rate * p.duration_secs / 100 else 0 end as {{ type_int() }}), 0) as play_time_sec_muted
 
   from prep p
 

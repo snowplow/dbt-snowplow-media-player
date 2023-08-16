@@ -13,7 +13,7 @@ models:
           - not_null
       - name: media_label
         description: '{{ doc("col_media_label") }}'
-      - name: duration
+      - name: duration_secs
         description: '{{ doc("col_duration") }}'
       - name: media_type
         description: '{{ doc("col_media_type") }}'

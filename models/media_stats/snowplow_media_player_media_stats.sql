@@ -25,7 +25,7 @@ with new_data as (
   select
     p.media_id,
     p.media_label,
-    max(p.duration) as duration,
+    max(p.duration_secs) as duration_secs,
     p.media_type,
     p.media_player_type,
     min(case when is_played then p.start_tstamp end) as first_play,
@@ -35,7 +35,7 @@ with new_data as (
     sum(case when is_valid_play then 1 else 0 end) as valid_plays,
     sum(case when p.is_complete_play then 1 else 0 end) as complete_plays,
     count(distinct p.page_view_id) as impressions,
-    avg(case when is_played then coalesce(p.content_watched_sec, p.play_time_sec, 0) / nullif(p.duration, 0) end) as avg_percent_played,
+    avg(case when is_played then coalesce(p.content_watched_sec, p.play_time_sec, 0) / nullif(p.duration_secs, 0) end) as avg_percent_played,
     avg(case when is_played then p.retention_rate end) as avg_retention_rate,
     avg(case when is_played then p.avg_playback_rate end) as avg_playback_rate,
     avg(case when is_played then p.content_watched_sec end) as avg_content_watched_sec,
@@ -57,7 +57,7 @@ group by 1,2,4,5
   select
     n.media_id,
     n.media_label,
-    greatest(n.duration, coalesce(t.duration, 0)) as duration,
+    greatest(n.duration_secs, coalesce(t.duration_secs, 0)) as duration_secs,
     n.media_type,
     n.media_player_type,
     n.last_base_tstamp,
@@ -169,7 +169,7 @@ with prep as (
   select
     p.media_id,
     p.media_label,
-    max(p.duration) as duration,
+    max(p.duration_secs) as duration_secs,
     p.media_type,
     p.media_player_type,
     max(start_tstamp) as last_base_tstamp,
@@ -181,7 +181,7 @@ with prep as (
     sum(case when is_valid_play then 1 else 0 end) as valid_plays,
     sum(case when p.is_complete_play then 1 else 0 end) as complete_plays,
     count(distinct p.page_view_id) as impressions,
-    avg(case when is_played then coalesce(p.content_watched_sec, p.play_time_sec, 0) / nullif(p.duration, 0) end) as avg_percent_played,
+    avg(case when is_played then coalesce(p.content_watched_sec, p.play_time_sec, 0) / nullif(p.duration_secs, 0) end) as avg_percent_played,
     avg(case when is_played then p.retention_rate end) as avg_retention_rate,
     avg(case when is_played then p.avg_playback_rate end) as avg_playback_rate,
     avg(
@@ -219,7 +219,7 @@ group by 1,2,4,5
 select
   p.media_id,
   p.media_label,
-  p.duration,
+  p.duration_secs,
   p.media_type,
   p.media_player_type,
   p.play_time_min,

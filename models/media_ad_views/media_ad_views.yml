@@ -23,7 +23,7 @@ models:
         description: '{{ doc("col_name") }}'
       - name: creative_id
         description: '{{ doc("col_creative_id") }}'
-      - name: duration
+      - name: duration_secs
         description: '{{ doc("col_ad_duration") }}'
       - name: skippable
         description: '{{ doc("col_skippable") }}'

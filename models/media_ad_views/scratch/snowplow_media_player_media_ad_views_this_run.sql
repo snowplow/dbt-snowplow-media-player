@@ -41,7 +41,7 @@ events_this_run as (
     ev.ad_id,
     max(ev.ad_name) as name,
     max(ev.ad_creative_id) as creative_id,
-    max(ev.ad_duration) as duration,
+    max(ev.ad_duration) as duration_secs,
     bool_or(ev.ad_skippable) as skippable,
     avg(ev.ad_pod_position) as pod_position,
 

@@ -38,7 +38,7 @@ models:
           - not_null
       - name: page_view_id
         description: '{{ doc("col_page_view_id") }}'
-      - name: domain_sessionid
+      - name: session_id
         description: '{{ doc("col_domain_sessionid") }}'
       - name: domain_userid
         description: '{{ doc("col_domain_userid") }}'
@@ -48,7 +48,7 @@ models:
         description: '{{ doc("col_media_label") }}'
       - name: play_id
         description: '{{ doc("col_play_id") }}'
-      - name: duration
+      - name: duration_secs
         description: '{{ doc("col_duration") }}'
         tests:
           - dbt_utils.expression_is_true:
