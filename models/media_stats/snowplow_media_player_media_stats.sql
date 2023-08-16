@@ -25,19 +25,20 @@ with new_data as (
   select
     p.media_id,
     p.media_label,
-    max(p.duration) as duration,
+    max(p.duration_secs) as duration_secs,
     p.media_type,
     p.media_player_type,
     min(case when is_played then p.start_tstamp end) as first_play,
     max(case when is_played then p.start_tstamp end) as last_play,
-    sum(p.play_time_sec) as play_time_sec,
+    sum(p.play_time_secs) as play_time_secs,
     sum(case when is_played then 1 else 0 end) as plays,
     sum(case when is_valid_play then 1 else 0 end) as valid_plays,
     sum(case when p.is_complete_play then 1 else 0 end) as complete_plays,
     count(distinct p.page_view_id) as impressions,
-    avg(case when is_played then coalesce(p.play_time_sec, 0) / nullif(p.duration, 0) end) as avg_percent_played,
+    avg(case when is_played then coalesce({{ media_session_field('p.content_watched_secs') }}, p.play_time_secs, 0) / nullif(p.duration_secs, 0) end) as avg_percent_played,
     avg(case when is_played then p.retention_rate end) as avg_retention_rate,
     avg(case when is_played then p.avg_playback_rate end) as avg_playback_rate,
+    {{ media_session_field('avg(case when is_played then p.content_watched_secs end)') }} as avg_content_watched_sec,
     max(start_tstamp) as last_base_tstamp
 
 from {{ ref("snowplow_media_player_base") }} p
@@ -59,7 +60,7 @@ group by 1,2,4,5
   select
     n.media_id,
     n.media_label,
-    greatest(n.duration, coalesce(t.duration, 0)) as duration,
+    greatest(n.duration_secs, coalesce(t.duration_secs, 0)) as duration_secs,
     n.media_type,
     n.media_player_type,
     n.last_base_tstamp,
@@ -71,8 +72,8 @@ group by 1,2,4,5
       greatest(n.last_play, coalesce(t.last_play, cast('2000-01-01 00:00:00' as {{ type_timestamp() }}))),
       cast('2000-01-01 00:00:00' as {{ type_timestamp() }})
     ) as last_play,
-    n.play_time_sec / cast(60 as {{ type_float() }}) + coalesce(t.play_time_min, 0) as play_time_min,
-    (n.play_time_sec / cast(60 as {{ type_float() }}) + coalesce(t.play_time_min, 0))  / nullif((n.plays + coalesce(t.plays, 0)), 0) as avg_play_time_min,
+    n.play_time_secs / cast(60 as {{ type_float() }}) + coalesce(t.play_time_mins, 0) as play_time_mins,
+    (n.play_time_secs / cast(60 as {{ type_float() }}) + coalesce(t.play_time_mins, 0))  / nullif((n.plays + coalesce(t.plays, 0)), 0) as avg_play_time_mins,
     n.plays + coalesce(t.plays, 0) as plays,
     n.valid_plays + coalesce(t.valid_plays, 0) as valid_plays,
     n.complete_plays + coalesce(t.complete_plays, 0) as complete_plays,
@@ -80,7 +81,8 @@ group by 1,2,4,5
     -- weighted average calculations
     (n.avg_percent_played * n.plays / nullif((n.plays + coalesce(t.plays, 0)),0)) + (coalesce(t.avg_percent_played, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_percent_played,
     (n.avg_retention_rate * n.plays / nullif((n.plays + coalesce(t.plays, 0)), 0)) + (coalesce(t.avg_retention_rate, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_retention_rate,
-    (n.avg_playback_rate * n.plays / nullif((n.plays + coalesce(t.plays, 0)), 0)) + (coalesce(t.avg_playback_rate, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_playback_rate
+    (n.avg_playback_rate * n.plays / nullif((n.plays + coalesce(t.plays, 0)), 0)) + (coalesce(t.avg_playback_rate, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_playback_rate,
+    {{ media_session_field('(coalesce(n.avg_content_watched_sec, 0) / cast(60 as ' + type_float() + ') * n.plays + coalesce(t.avg_content_watched_mins, 0) * coalesce(t.plays, 0)) / nullif((n.plays + coalesce(t.plays, 0)), 0)') }} as avg_content_watched_mins
 
   from new_data n
 
@@ -122,8 +124,7 @@ group by 1,2,4,5
     alias=True,
     agg='sum',
     cmp='=',
-    prefix='_',
-    suffix='_percent_reached',
+    prefix='percent_reached_',
     quote_identifiers=FALSE
     ) }}
 
@@ -142,10 +143,10 @@ group by 1,2,4,5
 
     {% set element_string = element | string() %}
 
-    {% set alias  = '_' + element_string + '_percent_reached' %}
+    {% set alias  = 'percent_reached_' + element_string %}
 
-    coalesce(p._{{ element_string }}_percent_reached, 0)
-  + coalesce(t._{{ element_string }}_percent_reached, 0)
+    coalesce(p.percent_reached_{{ element_string }}, 0)
+  + coalesce(t.percent_reached_{{ element_string }}, 0)
     as {{ alias }}
 
     {% if not loop.last %}
@@ -170,21 +171,26 @@ with prep as (
   select
     p.media_id,
     p.media_label,
-    max(p.duration) as duration,
+    max(p.duration_secs) as duration_secs,
     p.media_type,
     p.media_player_type,
     max(start_tstamp) as last_base_tstamp,
     min(case when is_played then p.start_tstamp end) as first_play,
     max(case when is_played then p.start_tstamp end) as last_play,
-    sum(p.play_time_sec) / cast(60 as {{ type_float() }}) as play_time_min,
-    avg(case when is_played then p.play_time_sec / cast(60 as {{ type_float() }}) end) as avg_play_time_min,
+    sum(p.play_time_secs) / cast(60 as {{ type_float() }}) as play_time_mins,
+    avg(case when is_played then p.play_time_secs / cast(60 as {{ type_float() }}) end) as avg_play_time_mins,
     sum(case when is_played then 1 else 0 end) as plays,
     sum(case when is_valid_play then 1 else 0 end) as valid_plays,
     sum(case when p.is_complete_play then 1 else 0 end) as complete_plays,
     count(distinct p.page_view_id) as impressions,
-    avg(case when is_played then coalesce(p.play_time_sec / nullif(p.duration, 0), 0) end) as avg_percent_played,
+    avg(case when is_played then coalesce({{ media_session_field('p.content_watched_secs') }}, p.play_time_secs, 0) / nullif(p.duration_secs, 0) end) as avg_percent_played,
     avg(case when is_played then p.retention_rate end) as avg_retention_rate,
-    avg(case when is_played then p.avg_playback_rate end) as avg_playback_rate
+    avg(case when is_played then p.avg_playback_rate end) as avg_playback_rate,
+    {{ media_session_field('avg(
+      case
+        when is_played and p.content_watched_secs is not null
+        then p.content_watched_secs / cast(60 as ' + type_float() + ') end
+    )') }} as avg_content_watched_mins
 
 
 from {{ ref("snowplow_media_player_base") }} p
@@ -215,11 +221,12 @@ group by 1,2,4,5
 select
   p.media_id,
   p.media_label,
-  p.duration,
+  p.duration_secs,
   p.media_type,
   p.media_player_type,
-  p.play_time_min,
-  p.avg_play_time_min,
+  p.play_time_mins,
+  p.avg_play_time_mins,
+  p.avg_content_watched_mins,
   p.first_play,
   p.last_play,
   p.plays,
@@ -234,13 +241,13 @@ select
   l.last_base_tstamp,
 
   {% if target.type in ['databricks', 'spark'] -%}
-    date(first_play) as first_play_date,
+    date(p.first_play) as first_play_date,
   {%- endif %}
 
   {% if is_incremental() %}
 
     {% for element in get_percentage_boundaries(var("snowplow__percent_progress_boundaries")) %}
-      coalesce(cast(a._{{ element }}_percent_reached as {{ type_int() }}), 0) as _{{ element }}_percent_reached
+      coalesce(cast(a.percent_reached_{{ element }} as {{ type_int() }}), 0) as percent_reached_{{ element }}
       {% if not loop.last %}
         ,
       {% endif %}
@@ -254,8 +261,7 @@ select
     alias=True,
     agg='sum',
     cmp='=',
-    prefix='_',
-    suffix='_percent_reached',
+    prefix='percent_reached_',
     quote_identifiers=FALSE
     ) }}
 
@@ -276,6 +282,6 @@ select
   left join unnesting un
   on un.media_id = p.media_id
 
-  group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
+  {{ dbt_utils.group_by(n=20) }}
 
 {% endif %}

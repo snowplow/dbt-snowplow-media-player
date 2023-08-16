@@ -2,12 +2,36 @@
 This context table contains the `page_view_id` associated with an event.
 {% enddocs %}
 
+{% docs table_screen_context %}
+This context table contains the screen view ID associated with a mobile event.
+{% enddocs %}
+
+{% docs table_client_session_context %}
+This context table contains user and session identifiers associated with mobile events.
+{% enddocs %}
+
 {% docs table_media_player_event %}
 The table specifying the media player event type (e.g. playing, seek) and the label given for the media for user friendly identification.
 {% enddocs %}
 
 {% docs table_media_player_context %}
 This context table contains a set of entities that are common between media events across platforms.
+{% enddocs %}
+
+{% docs table_media_session_context %}
+This context table contains context entities for media player events that track sessions of media player usage (a media session is one video playback).
+{% enddocs %}
+
+{% docs table_media_ad_context %}
+This context table contains context entities with information about the currently played ad.
+{% enddocs %}
+
+{% docs table_media_ad_break_context %}
+This context table contains context entities that are added to all ad events belonging to an ad break.
+{% enddocs %}
+
+{% docs table_media_ad_quartile_event %}
+This table contains self-describing event data fired when a quartile of ad is reached after continuous ad playback at normal speed.
 {% enddocs %}
 
 {% docs table_youtube_context %}

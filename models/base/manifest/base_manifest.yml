@@ -5,7 +5,7 @@ models:
     description: '{{ doc("table_base_sessions_lifecycle_manifest") }}'
     columns:
       - name: session_id
-        description: '{{ doc("col_domain_sessionid") }}'
+        description: '{{ doc("col_session_identifier") }}'
         tags:
           - primary-key
         tests:

@@ -15,7 +15,7 @@
    {% endfor %}
 
    {% if 100 not in var("snowplow__percent_progress_boundaries") %}
-     {% do percentage_boundaries.append('100') %}
+     {% do percentage_boundaries.append(100) %}
    {% endif %}
 
    {{ return(percentage_boundaries) }}
