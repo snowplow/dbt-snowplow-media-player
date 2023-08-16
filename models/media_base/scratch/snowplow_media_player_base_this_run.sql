@@ -79,7 +79,6 @@ events_this_run as (
 
   select
     media_session_id,
-    media_session_started_at,
     media_session_time_played,
     media_session_time_played_muted,
     media_session_time_paused,
