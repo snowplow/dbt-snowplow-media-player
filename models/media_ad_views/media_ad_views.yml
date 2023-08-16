@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: snowplow_media_player_media_ad_views
+    +tags: "snowplow_media_player_incremental"
+    description: '{{ doc("table_base") }}'
+    columns:
+      - name: media_ad_id
+        description: '{{ doc("col_media_ad_id") }}'
+        tests:
+          - not_null
+      - name: media_id
+        description: '{{ doc("col_media_id") }}'
+        tests:
+          - not_null
+      - name: media_label
+        description: '{{ doc("col_media_label") }}'
+      - name: ad_id
+        description: '{{ doc("col_ad_id") }}'
+        tests:
+          - not_null
+      - name: name
+        description: '{{ doc("col_name") }}'
+      - name: creative_id
+        description: '{{ doc("col_creative_id") }}'
+      - name: duration
+        description: '{{ doc("col_ad_duration") }}'
+      - name: skippable
+        description: '{{ doc("col_skippable") }}'
+      - name: avg_pod_position
+        description: '{{ doc("col_avg_pod_position") }}'
+      - name: views
+        description: '{{ doc("col_views") }}'
+      - name: clicks
+        description: '{{ doc("col_clicks") }}'
+      - name: skips
+        description: '{{ doc("col_skips") }}'
+      - name: 25_percent_reached
+        description: '{{ doc("col_25_percent_reached") }}'
+      - name: 50_percent_reached
+        description: '{{ doc("col_50_percent_reached") }}'
+      - name: 75_percent_reached
+        description: '{{ doc("col_75_percent_reached") }}'
+      - name: 100_percent_reached
+        description: '{{ doc("col_100_percent_reached") }}'
+      - name: first_view
+        description: '{{ doc("col_first_view") }}'
+      - name: last_view
+        description: '{{ doc("col_last_view") }}'

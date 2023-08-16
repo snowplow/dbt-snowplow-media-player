@@ -131,11 +131,18 @@ with prep as (
     event_id_dedupe_index,
     row_count,
     parse_json(contexts_com_snowplowanalytics_snowplow_web_page_1_0_0) as contexts_com_snowplowanalytics_snowplow_web_page_1,
+    parse_json(contexts_com_snowplowanalytics_mobile_screen_1_0_0) as contexts_com_snowplowanalytics_mobile_screen_1,
+    parse_json(contexts_com_snowplowanalytics_snowplow_client_session_1_0_2) as contexts_com_snowplowanalytics_snowplow_client_session_1,
     parse_json(contexts_org_whatwg_video_element_1_0_0) as contexts_org_whatwg_video_element_1,
     parse_json(contexts_org_whatwg_media_element_1_0_0) as contexts_org_whatwg_media_element_1,
     parse_json(contexts_com_youtube_youtube_1_0_0) as contexts_com_youtube_youtube_1,
     parse_json(contexts_com_snowplowanalytics_snowplow_media_player_1_0_0) as contexts_com_snowplowanalytics_snowplow_media_player_1,
-    parse_json(unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1_0_0) as unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1
+    parse_json(contexts_com_snowplowanalytics_snowplow_media_player_2_0_0) as contexts_com_snowplowanalytics_snowplow_media_player_2,
+    parse_json(contexts_com_snowplowanalytics_snowplow_media_session_1_0_0) as contexts_com_snowplowanalytics_snowplow_media_session_1,
+    parse_json(contexts_com_snowplowanalytics_snowplow_media_ad_1_0_0) as contexts_com_snowplowanalytics_snowplow_media_ad_1,
+    parse_json(contexts_com_snowplowanalytics_snowplow_media_ad_break_1_0_0) as contexts_com_snowplowanalytics_snowplow_media_ad_break_1,
+    parse_json(unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1_0_0) as unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1,
+    parse_json(unstruct_event_com_snowplowanalytics_snowplow_media_ad_quartile_event_1) as unstruct_event_com_snowplowanalytics_snowplow_media_ad_quartile_event_1
 
 from {{ ref('snowplow_media_player_events') }}
 )
@@ -146,6 +153,12 @@ from {{ ref('snowplow_media_player_events') }}
     *,
     --unstruct_event_com_snowplowanalytics_mobile_screen_view_1[0]:previous_id::varchar AS previousId,
     contexts_com_snowplowanalytics_snowplow_web_page_1[0]:id::varchar as id,
+
+    contexts_com_snowplowanalytics_mobile_screen_1[0]:id::varchar as screenId,
+
+    contexts_com_snowplowanalytics_snowplow_client_session_1[0]:user_id::varchar as clientSessionUserId,
+    contexts_com_snowplowanalytics_snowplow_client_session_1[0]:session_id::varchar as clientSessionSessionId,
+
     contexts_org_whatwg_video_element_1[0]:video_height::varchar as videoHeight,
     contexts_org_whatwg_video_element_1[0]:video_width::varchar as videoWidth,
     contexts_org_whatwg_video_element_1[0]:auto_picture_in_picture::varchar as autoPictureInPicture,
@@ -202,8 +215,54 @@ from {{ ref('snowplow_media_player_events') }}
     contexts_com_snowplowanalytics_snowplow_media_player_1[0]:is_live::varchar as isLive,
     contexts_com_snowplowanalytics_snowplow_media_player_1[0]:percent_progress::varchar as percentProgress,
 
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:current_time::varchar as currentTimeV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:duration::varchar as durationV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:ended::varchar as endedV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:fullscreen::varchar as fullscreenV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:livestream::varchar as livestreamV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:label::varchar as labelV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:loop::varchar as loopV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:media_type::varchar as mediaTypeV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:muted::varchar as mutedV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:paused::varchar as pausedV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:picture_in_picture::varchar as pictureInPictureV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:playback_rate::varchar as playbackRateV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:player_type::varchar as playerTypeV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:quality::varchar as qualityV2,
+    contexts_com_snowplowanalytics_snowplow_media_player_2[0]:volume::varchar as volumeV2,
+
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:media_session_id::varchar as mediaSessionId,
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:started_at::varchar as startedAt,
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:ping_interval::varchar as pingInterval,
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:time_played::varchar as timePlayed,
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:time_played_muted::varchar as timePlayedMuted,
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:time_paused::varchar as timePaused,
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:content_watched::varchar as contentWatched,
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:time_buffering::varchar as timeBuffering,
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:time_spent_ads::varchar as timeSpentAds,
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:ads::varchar as ads,
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:ads_clicked::varchar as adsClicked,
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:ads_skipped::varchar as adsSkipped,
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:ad_breaks::varchar as adBreaks,
+    contexts_com_snowplowanalytics_snowplow_media_session_1[0]:avg_playback_rate::varchar as avgPlaybackRate,
+
+    contexts_com_snowplowanalytics_snowplow_media_ad_1[0]:name::varchar as name,
+    contexts_com_snowplowanalytics_snowplow_media_ad_1[0]:adId::varchar as adId,
+    contexts_com_snowplowanalytics_snowplow_media_ad_1[0]:creativeId::varchar as creativeId,
+    contexts_com_snowplowanalytics_snowplow_media_ad_1[0]:podPosition::varchar as podPosition,
+    contexts_com_snowplowanalytics_snowplow_media_ad_1[0]:duration::varchar as duration,
+    contexts_com_snowplowanalytics_snowplow_media_ad_1[0]:skippable::varchar as skippable,
+
+    contexts_com_snowplowanalytics_snowplow_media_ad_break_1[0]:name::varchar as name,
+    contexts_com_snowplowanalytics_snowplow_media_ad_break_1[0]:breakId::varchar as breakId,
+    contexts_com_snowplowanalytics_snowplow_media_ad_break_1[0]:startTime::varchar as startTime,
+    contexts_com_snowplowanalytics_snowplow_media_ad_break_1[0]:breakType::varchar as breakType,
+    contexts_com_snowplowanalytics_snowplow_media_ad_break_1[0]:podSize::varchar as podSize,
+
     unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1[0]:type as type,
-    unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1[0]:label as label
+    unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1[0]:label as label,
+
+    unstruct_event_com_snowplowanalytics_snowplow_media_ad_quartile_event_1[0]:percent_progress as ad_percent_progress
 
 from prep
 
@@ -341,11 +400,18 @@ select
   event_id_dedupe_index,
   row_count,
   parse_json('[{"id":"'||id||'"}]' ) as contexts_com_snowplowanalytics_snowplow_web_page_1,
+  parse_json('[{"id":"'||screenId||'"}]' ) as contexts_com_snowplowanalytics_mobile_screen_1,
+  parse_json('[{"userId":"'||clientSessionUserId||'", "sessionId":"'||clientSessionSessionId||'"}]' ) as contexts_com_snowplowanalytics_snowplow_client_session_1,
   parse_json('[{"videoHeight":"'||videoHeight||'", "videoWidth":"'||videoWidth||'", "autoPictureInPicture":"'||autoPictureInPicture||'", "disablePictureInPicture":"'||disablePictureInPicture||'", "poster":"'||poster||'"}]' ) as contexts_org_whatwg_video_element_1,
   parse_json('[{"autoPlay":"'||autoPlay||'", "currentSrc":"'||currentSrc||'", "defaultMuted":"'||defaultMuted||'", "defaultPlaybackRate":"'||defaultPlaybackRate||'", "htmlId":"'||htmlId||'", "mediaType":"'||mediaType||'", "networkState":"'||networkState||'", "preload":"'||preload||'", "readyState":"'||readyState||'", "seeking":"'||seeking||'", "crossOrigin":"'||crossOrigin||'", "disableRemotePlayback":"'||disableRemotePlayback||'", "error":"'||error||'", "fileExtension":"'||fileExtension||'", "fullscreen":"'||fullscreen||'", "pictureInPicture":"'||pictureInPicture||'", "played":"'||played||'", "src":"'||src||'", "textTracks":"'||textTracks||'"}]') as contexts_org_whatwg_media_element_1,
   parse_json('[{"autoPlay":"'||YautoPlay||'", "availablePlaybackRates":"'||availablePlaybackRates||'", "buffering":"'||buffering||'", "controls":"'||controls||'", "cued":"'||cued||'", "loaded":"'||loaded||'", "playbackQuality":"'||playbackQuality||'", "playerId":"'||playerId||'", "unstarted":"'||unstarted||'", "url":"'||url||'", "error":"'||Yerror||'", "fov":"'||fov||'", "origin":"'||origin||'", "pitch":"'||pitch||'", "playlist":"'||playlist||'", "playlist_index":"'||playlist_index||'", "roll":"'||roll||'", "yaw":"'||yaw||'"}]') as contexts_com_youtube_youtube_1,
   parse_json('[{"currentTime":"'||currentTime||'", "ended":"'||ended||'", "loop":"'||loop||'", "muted":"'||muted||'", "paused":"'||paused||'", "playbackRate":"'||playbackRate||'", "volume":"'||volume||'", "duration":"'||duration||'", "isLive":"'||isLive||'", "percentProgress":"'||percentProgress||'"}]') as contexts_com_snowplowanalytics_snowplow_media_player_1,
-  object_construct('label',label,'type',type) as unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1
+  parse_json('[{"currentTime":"'||currentTimeV2||'", "duration":"'||durationV2||'", "ended":"'||endedV2||'", "fullscreen":"'||fullscreenV2||'", "livestream":"'||livestreamV2||'", "label":"'||labelV2||'", "loop":"'||loopV2||'", "mediaType":"'||mediaTypeV2||'", "muted":"'||mutedV2||'", "paused":"'||pausedV2||'", "pictureInPicture":"'||pictureInPictureV2||'", "playbackRate":"'||playbackRate||'", "playerType":"'||playerTypeV2||'", "quality": "'||qualityV2||'", "volume":"'||volumeV2||'"}]') as contexts_com_snowplowanalytics_snowplow_media_player_2,
+  parse_json('[{"mediaSessionId": "'||mediaSessionId||'", "startedAt": "'||startedAt||'", "pingInterval": "'||pingInterval||'", "timePlayed": "'||timePlayed||'", "timePlayedMuted": "'||timePlayedMuted||'", "timePaused": "'||timePaused||'", "contentWatched": "'||contentWatched||'", "timeBuffering": "'||timeBuffering||'", "timeSpentAds": "'||timeSpentAds||'", "ads": "'||ads||'", "adsClicked": "'||adsClicked||'", "adsSkipped": "'||adsSkipped||'", "adBreaks": "'||adBreaks||'", "avgPlaybackRate": "'||avgPlaybackRate||'"}]') as contexts_com_snowplowanalytics_snowplow_media_session_1,
+  parse_json('[{"name": "'||name||'", "adId": "'||adId||'", "creativeId": "'||creativeId||'", "podPosition": "'||podPosition||'", "duration": "'||duration||'", "skippable": "'||skippable||'"}]') as contexts_com_snowplowanalytics_snowplow_media_ad_1,
+  parse_json('[{"name": "'||name||'", "breakId": "'||breakId||'", "startTime": "'||startTime||'", "breakType": "'||breakType||'", "podSize": "'||podSize||'"}]') as contexts_com_snowplowanalytics_snowplow_media_ad_break_1,
+  object_construct('label',label,'type',type) as unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1,
+  object_construct('percent_progress',ad_percent_progress) as unstruct_event_com_snowplowanalytics_snowplow_media_ad_quartile_event_1
 
 from flatten
 

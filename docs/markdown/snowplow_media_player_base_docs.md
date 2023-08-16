@@ -41,3 +41,7 @@ Once quarantined, no further events from these sessions will be processed. Event
 The reason for removing long sessions is to reduce table scans on both the events table and all derived tables. This improves performance greatly.
 
 {% enddocs %}
+
+{% docs table_media_ad_views_this_run %}
+TODO
+{% enddocs %}

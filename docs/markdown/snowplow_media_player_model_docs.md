@@ -29,3 +29,7 @@ This derived table aggregates the pageview level interactions to show overall me
 {% docs table_pivot_base %}
 This helper table serves as a base to calculate percent_progress based fields as well as the play_time metrics (by calculating the weight attributed to a percent progress being reached).
 {% enddocs %}
+
+{% docs table_media_ads %}
+TODO
+{% enddocs %}

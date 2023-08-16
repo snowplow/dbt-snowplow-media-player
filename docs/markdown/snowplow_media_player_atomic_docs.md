@@ -2,12 +2,36 @@
 This context table contains the `page_view_id` associated with an event.
 {% enddocs %}
 
+{% docs table_screen_context %}
+TODO
+{% enddocs %}
+
+{% docs table_client_session_context %}
+TODO
+{% enddocs %}
+
 {% docs table_media_player_event %}
 The table specifying the media player event type (e.g. playing, seek) and the label given for the media for user friendly identification.
 {% enddocs %}
 
 {% docs table_media_player_context %}
 This context table contains a set of entities that are common between media events across platforms.
+{% enddocs %}
+
+{% docs table_media_session_context %}
+TODO
+{% enddocs %}
+
+{% docs table_media_ad_context %}
+TODO
+{% enddocs %}
+
+{% docs table_media_ad_break_context %}
+TODO
+{% enddocs %}
+
+{% docs table_media_ad_quartile_event %}
+TODO
 {% enddocs %}
 
 {% docs table_youtube_context %}

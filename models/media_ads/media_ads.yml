@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: snowplow_media_player_media_ads
+    description: '{{ doc("table_media_ads") }}'
+    columns:
+      - name: media_ad_id
+        description: The primary key of this table
+        tags:
+          - primary-key
+        tests:
+          - unique
+          - not_null

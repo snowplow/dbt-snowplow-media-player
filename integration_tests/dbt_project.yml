@@ -53,6 +53,11 @@ vars:
     snowplow__enable_youtube: true
     snowplow__enable_whatwg_media: true
     snowplow__enable_whatwg_video: true
+    snowplow__enable_media_player_v1: true
+    snowplow__enable_media_player_v2: true
+    snowplow__enable_media_session: true
+    snowplow__enable_media_ad: true
+    snowplow__enable_media_ad_break: true
 
     # Variables - Warehouse Specific
     snowplow__page_view_context: 'snowplow_web_page_view_context'
@@ -129,6 +134,36 @@ seeds:
         +column_types:
           root_tstamp: timestamp
 
+      com_snowplowanalytics_snowplow_media_player_2:
+        +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
+        +quote_columns: true
+        +column_types:
+          root_tstamp: timestamp
+
+      com_snowplowanalytics_snowplow_media_session_1:
+        +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
+        +quote_columns: true
+        +column_types:
+          root_tstamp: timestamp
+
+      com_snowplowanalytics_snowplow_media_ad_1:
+        +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
+        +quote_columns: true
+        +column_types:
+          root_tstamp: timestamp
+
+      com_snowplowanalytics_snowplow_media_ad_break_1:
+        +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
+        +quote_columns: true
+        +column_types:
+          root_tstamp: timestamp
+
+      com_snowplowanalytics_snowplow_media_ad_quartile_event_1:
+        +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
+        +quote_columns: true
+        +column_types:
+          root_tstamp: timestamp
+
       org_whatwg_media_element_1:
         +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
         +quote_columns: true
@@ -155,6 +190,18 @@ seeds:
           root_tstamp: timestamp
 
       com_snowplowanalytics_snowplow_web_page_1:
+        +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
+        +quote_columns: true
+        +column_types:
+          root_tstamp: timestamp
+
+      com_snowplowanalytics_mobile_screen_1:
+        +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
+        +quote_columns: true
+        +column_types:
+          root_tstamp: timestamp
+
+      com_snowplowanalytics_snowplow_client_session_1:
         +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
         +quote_columns: true
         +column_types:

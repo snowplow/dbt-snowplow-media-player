@@ -102,8 +102,52 @@ The `derived_tstamp` denoting the time when the last media player event belongin
 Estimated duration of play in seconds. It is calculated using the percent_progress events that are fired during play. In case such an event is fired, it is assumed that the total section of the media in between the previous and current percent_progress is played through, even if the user seeks to another point in time within the audio / video. The more often these events are tracked (e.g. every 5% of the media's length) the more accurate the calculation becomes.
 {% enddocs %}
 
+{% docs col_paused_time_sec %}
+TODO
+{% enddocs %}
+
+{% docs col_buffering_time_sec %}
+TODO
+{% enddocs %}
+
+{% docs col_ads_time_sec %}
+TODO
+{% enddocs %}
+
+{% docs col_ads %}
+TODO
+{% enddocs %}
+
+{% docs col_ads_clicked %}
+TODO
+{% enddocs %}
+
+{% docs col_ads_skipped %}
+TODO
+{% enddocs %}
+
+{% docs col_ad_breaks %}
+TODO
+{% enddocs %}
+
+{% docs col_content_watched_sec %}
+TODO
+{% enddocs %}
+
+{% docs col_content_watched_percent %}
+TODO
+{% enddocs %}
+
 {% docs col_avg_play_time_min %}
 Estimated average duration of plays in minutes.
+{% enddocs %}
+
+{% docs col_avg_content_watched_min %}
+TODO
+{% enddocs %}
+
+{% docs col_content_watched_min %}
+TODO
 {% enddocs %}
 
 {% docs col_avg_play_time_sec %}
@@ -832,4 +876,68 @@ User-set “true timestamp” for the event e.g. ‘2013-11-26 00:02:04’
 
 {% docs col_event_in_session_index %}
 The index of the event in the corresponding session.
+{% enddocs %}
+
+{% docs col_media_ad_id %}
+TODO
+{% enddocs %}
+
+{% docs col_ad_id %}
+TODO
+{% enddocs %}
+
+{% docs col_name %}
+TODO
+{% enddocs %}
+
+{% docs col_creative_id %}
+TODO
+{% enddocs %}
+
+{% docs col_ad_duration %}
+TODO
+{% enddocs %}
+
+{% docs col_skippable %}
+TODO
+{% enddocs %}
+
+{% docs col_avg_pod_position %}
+TODO
+{% enddocs %}
+
+{% docs col_views %}
+TODO
+{% enddocs %}
+
+{% docs col_clicks %}
+TODO
+{% enddocs %}
+
+{% docs col_skips %}
+TODO
+{% enddocs %}
+
+{% docs col_25_percent_reached %}
+TODO
+{% enddocs %}
+
+{% docs col_50_percent_reached %}
+TODO
+{% enddocs %}
+
+{% docs col_75_percent_reached %}
+TODO
+{% enddocs %}
+
+{% docs col_100_percent_reached %}
+TODO
+{% enddocs %}
+
+{% docs col_first_view %}
+TODO
+{% enddocs %}
+
+{% docs col_last_view %}
+TODO
 {% enddocs %}

@@ -56,15 +56,31 @@ vars:
     snowplow__enable_whatwg_media: false
     # set to true if the HTML5 video element context schema is enabled
     snowplow__enable_whatwg_video: false
+    snowplow__enable_media_player_v1: false
+    snowplow__enable_media_player_v2: true
+    snowplow__enable_media_session: true
+    snowplow__enable_media_ad: false
+    snowplow__enable_media_ad_break: false
+    snowplow__enable_media_ad_break: false
+    snowplow__enable_web_events: true
+    snowplow__enable_mobile_events: true
+    snowplow__enable_ad_quartile_event: true
     snowplow__app_id: []
 
     # Variables - Warehouse Specific
     snowplow__media_player_event_context: 'com_snowplowanalytics_snowplow_media_player_event_1'
     snowplow__media_player_context: 'com_snowplowanalytics_snowplow_media_player_1'
+    snowplow__media_player_v2_context: 'com_snowplowanalytics_snowplow_media_player_2'
+    snowplow__media_session_context: 'com_snowplowanalytics_snowplow_media_session_1'
+    snowplow__media_ad_context: 'com_snowplowanalytics_snowplow_media_ad_1'
+    snowplow__media_ad_break_context: 'com_snowplowanalytics_snowplow_media_ad_break_1'
+    snowplow__media_ad_quartile_event: 'com_snowplowanalytics_snowplow_media_ad_quartile_event_1'
     snowplow__youtube_context: 'com_youtube_youtube_1'
     snowplow__html5_media_element_context: 'org_whatwg_media_element_1'
     snowplow__html5_video_element_context: 'org_whatwg_video_element_1'
     snowplow__context_web_page: 'com_snowplowanalytics_snowplow_web_page_1'
+    snowplow__context_screen: 'com_snowplowanalytics_mobile_screen_1'
+    snowplow__context_mobile_session: 'com_snowplowanalytics_snowplow_client_session_1'
     snowplow__derived_tstamp_partitioned: true
     snowplow__query_tag: 'snowplow_dbt'
     snowplow__enable_load_tstamp: true
@@ -86,7 +102,15 @@ models:
     +materialized: view
     base:
       manifest:
-        +schema: 'snowplow_manifest'
+        +schema: "snowplow_manifest"
+        bigquery:
+          +enabled: "{{ target.type == 'bigquery' | as_bool() }}"
+        databricks:
+          +enabled: "{{ target.type in ['databricks', 'spark'] | as_bool() }}"
+        default:
+          +enabled: "{{ target.type in ['redshift', 'postgres'] | as_bool() }}"
+        snowflake:
+          +enabled: "{{ target.type == 'snowflake' | as_bool() }}"
       scratch:
         +schema: 'scratch'
         +tags: 'scratch'
@@ -114,3 +138,12 @@ models:
       +schema: 'scratch'
       +tags: 'snowplow_media_player_incremental'
       +enabled: false
+    media_ad_views:
+      +schema: 'derived'
+      +tags: 'snowplow_media_player_incremental'
+      scratch:
+        +schema: 'scratch'
+        +tags: 'scratch'
+    media_ads:
+      +schema: 'derived'
+      +tags: 'snowplow_media_player_incremental'

@@ -7,10 +7,24 @@ sources:
     tables:
       - name: com_snowplowanalytics_snowplow_web_page_1
         description: '{{ doc("table_page_view_context") }}'
+      - name: com_snowplowanalytics_mobile_screen_1
+        description: '{{ doc("table_screen_context") }}'
+      - name: com_snowplowanalytics_snowplow_client_session_1
+        description: '{{ doc("table_client_session_context") }}'
       - name: com_snowplowanalytics_snowplow_media_player_event_1
         description: '{{ doc("table_media_player_event") }}'
       - name: com_snowplowanalytics_snowplow_media_player_1
         description: '{{ doc("table_media_player_context") }}'
+      - name: com_snowplowanalytics_snowplow_media_player_2
+        description: '{{ doc("table_media_player_context") }}'
+      - name: com_snowplowanalytics_snowplow_media_session_1
+        description: '{{ doc("table_media_session_context") }}'
+      - name: com_snowplowanalytics_snowplow_media_ad_1
+        description: '{{ doc("table_media_ad_context") }}'
+      - name: com_snowplowanalytics_snowplow_media_ad_break_1
+        description: '{{ doc("table_media_ad_break_context") }}'
+      - name: com_snowplowanalytics_snowplow_media_ad_quartile_event_1
+        description: '{{ doc("table_media_ad_quartile_event") }}'
       - name: com_youtube_youtube_1
         description: '{{ doc("table_youtube_context") }}'
       - name: org_whatwg_media_element_1

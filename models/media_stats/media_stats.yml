@@ -23,6 +23,8 @@ models:
         description: '{{ doc("col_play_time_min") }}'
       - name: avg_play_time_min
         description: '{{ doc("col_avg_play_time_min") }}'
+      - name: avg_content_watched_min
+        description: '{{ doc("col_avg_content_watched_min") }}'
       - name: first_play
         description: '{{ doc("col_first_play") }}'
       - name: last_play

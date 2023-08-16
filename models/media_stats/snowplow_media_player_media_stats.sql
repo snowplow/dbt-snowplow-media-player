@@ -35,9 +35,10 @@ with new_data as (
     sum(case when is_valid_play then 1 else 0 end) as valid_plays,
     sum(case when p.is_complete_play then 1 else 0 end) as complete_plays,
     count(distinct p.page_view_id) as impressions,
-    avg(case when is_played then coalesce(p.play_time_sec, 0) / nullif(p.duration, 0) end) as avg_percent_played,
+    avg(case when is_played then coalesce(p.content_watched_sec, p.play_time_sec, 0) / nullif(p.duration, 0) end) as avg_percent_played,
     avg(case when is_played then p.retention_rate end) as avg_retention_rate,
     avg(case when is_played then p.avg_playback_rate end) as avg_playback_rate,
+    avg(case when is_played then p.content_watched_sec end) as avg_content_watched_sec,
     max(start_tstamp) as last_base_tstamp
 
 from {{ ref("snowplow_media_player_base") }} p
@@ -77,7 +78,8 @@ group by 1,2,4,5
     -- weighted average calculations
     (n.avg_percent_played * n.plays / nullif((n.plays + coalesce(t.plays, 0)),0)) + (coalesce(t.avg_percent_played, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_percent_played,
     (n.avg_retention_rate * n.plays / nullif((n.plays + coalesce(t.plays, 0)), 0)) + (coalesce(t.avg_retention_rate, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_retention_rate,
-    (n.avg_playback_rate * n.plays / nullif((n.plays + coalesce(t.plays, 0)), 0)) + (coalesce(t.avg_playback_rate, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_playback_rate
+    (n.avg_playback_rate * n.plays / nullif((n.plays + coalesce(t.plays, 0)), 0)) + (coalesce(t.avg_playback_rate, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_playback_rate,
+    (coalesce(n.avg_content_watched_sec, 0) / cast(60 as {{ type_float() }}) * n.plays + coalesce(t.avg_content_watched_min, 0) * coalesce(t.plays, 0)) / nullif((n.plays + coalesce(t.plays, 0)), 0) as avg_content_watched_min
 
   from new_data n
 
@@ -179,9 +181,14 @@ with prep as (
     sum(case when is_valid_play then 1 else 0 end) as valid_plays,
     sum(case when p.is_complete_play then 1 else 0 end) as complete_plays,
     count(distinct p.page_view_id) as impressions,
-    avg(case when is_played then coalesce(p.play_time_sec / nullif(p.duration, 0), 0) end) as avg_percent_played,
+    avg(case when is_played then coalesce(p.content_watched_sec, p.play_time_sec, 0) / nullif(p.duration, 0) end) as avg_percent_played,
     avg(case when is_played then p.retention_rate end) as avg_retention_rate,
-    avg(case when is_played then p.avg_playback_rate end) as avg_playback_rate
+    avg(case when is_played then p.avg_playback_rate end) as avg_playback_rate,
+    avg(
+      case
+        when is_played and p.content_watched_sec is not null
+        then p.content_watched_sec / cast(60 as {{ type_float() }}) end
+    ) as avg_content_watched_min
 
 
 from {{ ref("snowplow_media_player_base") }} p
@@ -217,6 +224,7 @@ select
   p.media_player_type,
   p.play_time_min,
   p.avg_play_time_min,
+  p.avg_content_watched_min,
   p.first_play,
   p.last_play,
   p.plays,
@@ -273,6 +281,6 @@ select
   left join unnesting un
   on un.media_id = p.media_id
 
-  group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
+  group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
 
 {% endif %}
