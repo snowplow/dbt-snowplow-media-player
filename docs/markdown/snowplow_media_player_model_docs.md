@@ -29,3 +29,13 @@ This derived table aggregates the pageview level interactions to show overall me
 {% docs table_pivot_base %}
 This helper table serves as a base to calculate percent_progress based fields as well as the play_time metrics (by calculating the weight attributed to a percent progress being reached).
 {% enddocs %}
+
+{% docs table_media_ad_views_this_run %}
+
+This derived table aggregates information about ad views. Each ad view (a user viewing a single ad within a media playback) is represented using one row. The ad views aggregate information about the percentage progress of the ad viewed, whether it was skipped, clicked or completed. They also contain meta information about the played ads.
+
+{% enddocs %}
+
+{% docs table_media_ads %}
+This derived table aggregates information about ads. Each row represents one ad played within a certain media on a certain platform. Stats about the number of ad clicks, progress reached and more are calculated as total values but also as counts of unique users (identified using `domain_userid`).
+{% enddocs %}

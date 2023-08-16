@@ -2,7 +2,7 @@
   config(
     materialized = 'table',
     sort = 'start_tstamp',
-    dist = 'domain_sessionid',
+    dist = 'session_identifier',
     partition_by = snowplow_utils.get_value_by_target_type(bigquery_val={
       "field": "start_tstamp",
       "data_type": "timestamp"
@@ -15,7 +15,7 @@
 with prep as (
 
   select
-    domain_sessionid,
+    session_identifier,
     domain_userid,
     count(*) as impressions,
     count(distinct case when media_type = 'video' and is_played then media_id end) as videos_played,
@@ -27,10 +27,10 @@ with prep as (
     min(start_tstamp) start_tstamp,
     max(end_tstamp) as end_tstamp,
     sum(seeks) as seeks,
-    sum(play_time_sec / cast(60 as {{ type_float() }})) as play_time_min,
-    sum(play_time_sec_muted / cast(60 as {{ type_float() }})) as play_time_min_muted,
-    coalesce(avg(case when is_played then play_time_sec / cast(60 as {{ type_float() }}) end), 0) as avg_play_time_min,
-    coalesce(avg(case when is_played then coalesce(play_time_sec / nullif(duration, 0), 0) end),0) as avg_percent_played,
+    sum(play_time_secs / cast(60 as {{ type_float() }})) as play_time_mins,
+    sum(play_time_muted_secs / cast(60 as {{ type_float() }})) as play_time_muted_mins,
+    coalesce(avg(case when is_played then play_time_secs / cast(60 as {{ type_float() }}) end), 0) as avg_play_time_mins,
+    coalesce(avg(case when is_played then coalesce(play_time_secs / nullif(duration_secs, 0), 0) end),0) as avg_percent_played,
     sum(case when is_complete_play then 1 else 0 end) as complete_plays
 
   from {{ ref("snowplow_media_player_base") }}

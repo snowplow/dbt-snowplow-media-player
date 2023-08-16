@@ -19,14 +19,27 @@ The latest version of the snowplow-media-player package supports BigQuery, Datab
 
 ### Requirements
 
-- A dataset of media-player web events from the [Snowplow JavaScript tracker][tracker-docs] must be available in the database. In order for this to happen at least one of the JavaScript based media tracking plugins need to be enabled: [Media Tracking plugin][media-tracking] or [YouTube Tracking plugin][youtube-tracking]
-- Have the [`webPage` context][webpage-context] enabled.
-- Have the [media-player event schema][media-player-event-schema] enabled.
-- Have the [media-player context schema][media-player-context-schema] enabled.
-- Depending on the plugin / intention have all the relevant contexts from below enabled:
-  - in case of embedded YouTube tracking: Have the [YouTube specific context schema][youtube-specific-context-schema] enabled.
-  - in case of HTML5 audio or video tracking: Have the [HTML5 media element context schema][html5-media-element-context-schema] enabled.
-  - in case of HTML5 video tracking: Have the [HTML5 video element context schema][html5-video-element-context-schema] enabled.
+- A dataset of media-player events must be available in the database. You can collect media events using our plugins for the JavaScript tracker or using the iOS and Android trackers: [Media plugin][media-plugin], [HTML5 media player plugin][media-tracking], [YouTube plugin][youtube-tracking], [Vimeo plugin][vimeo-tracking] or the [iOS and Android media APIs][mobile-tracking]
+- Have the [`webPage` context][webpage-context] enabled on Web or the [screen context][screen-context] on mobile (default).
+- Enabled session tracking on the tracker (default).
+
+The model is compatible with all versions of our media tracking APIs. These have evolved over time and may track the media events using two sets of event and contexts schemas:
+
+1. Version 1 media schemas:
+
+   - [media-player event schema][media-player-event-schema] used for all media events.
+   - [media-player context v1 schema][media-player-context-schema].
+   - Depending on the plugin / intention there are player-specific contexts:
+      - in case of embedded YouTube tracking: Have the [YouTube specific context schema][youtube-specific-context-schema] enabled.
+      - in case of HTML5 audio or video tracking: Have the [HTML5 media element context schema][html5-media-element-context-schema] enabled.
+      - in case of HTML5 video tracking: Have the [HTML5 video element context schema][html5-video-element-context-schema] enabled.
+
+2. Version 2 media schemas (preferred):
+
+   - [per-event media event schemas][media-event-schemas].
+   - [media-player context v2 schema][media-player-v2-context-schema].
+   - optional [media-session context schema][media-session-context-schema].
+   - optional [media-ad][media-ad-context-schema] and [ad break][media-ad-break-context-schema] context schema.
 
 ### Installation
 
@@ -40,11 +53,13 @@ Please refer to the [doc site](https://docs.snowplow.io/docs/modeling-your-data/
 
 The package contains multiple staging models however the mart models are as follows:
 
-| Model                                    | Description                                                                                |
-|------------------------------------------|--------------------------------------------------------------------------------------------|
-| snowplow_media_player_base               | A table summarizing media player events by media and pageview including impressions.       |
-| snowplow_media_player_plays_by_pageview  | A view summarizing media plays by media on a pageview level.                               |
-| snowplow_media_player_media_stats        | An aggregated table of media metrics on a media_id level.                                  |
+| Model                                    | Description                                                                                                      |
+|------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| snowplow_media_player_base               | A table summarizing media player events by media and pageview including impressions.                             |
+| snowplow_media_player_plays_by_pageview  | A view summarizing media plays by media on a pageview level.                                                     |
+| snowplow_media_player_media_stats        | An aggregated table of media metrics on a media_id level.                                                        |
+| snowplow_media_player_media_ad_views     | A view summarizing each ad viewed within a media playback (only for v2 schemas, see above).                      |
+| snowplow_media_player_media_ads          | An aggregated table of ad metrics for each ad played within each media content (only for v2 schemas, see above). |
 
 Please refer to the [dbt doc site][snowplow-media-player-docs-dbt] for details on the model output tables.
 
@@ -77,18 +92,28 @@ limitations under the License.
 [tracker-docs]: https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/javascript-trackers/
 
 [webpage-context]: https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/javascript-trackers/javascript-tracker/javascript-tracker-v3/tracker-setup/initialization-options/#Adding_predefined_contexts
+[screen-context]: https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/mobile-trackers/tracking-events/screen-tracking/#screen-view-event-and-screen-context-entity
 
 [media-player-event-schema]: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/media_player_event/jsonschema/1-0-0
 [media-player-context-schema]: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/media_player/jsonschema/1-0-0
 [youtube-specific-context-schema]: https://github.com/snowplow/iglu-central/blob/master/schemas/com.youtube/youtube/jsonschema/1-0-0
 [html5-media-element-context-schema]: https://github.com/snowplow/iglu-central/blob/master/schemas/org.whatwg/media_element/jsonschema/1-0-0
 [html5-video-element-context-schema]: https://github.com/snowplow/iglu-central/blob/master/schemas/org.whatwg/video_element/jsonschema/1-0-0
+[media-event-schemas]: https://github.com/snowplow/iglu-central/tree/master/schemas/com.snowplowanalytics.snowplow.media
+[media-player-v2-context-schema]: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/media_player/jsonschema/2-0-0
+[media-session-context-schema]: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow.media/session/jsonschema/1-0-0
+[media-ad-context-schema]: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow.media/ad/jsonschema/1-0-0
+[media-ad-break-context-schema]: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow.media/ad_break/jsonschema/1-0-0
 
 [media-tracking]: https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/javascript-trackers/javascript-tracker/javascript-tracker-v3/plugins/media-tracking/
 
 [javascript-tracker]: https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/javascript-trackers/javascript-tracker/javascript-tracker-v3
 
 [youtube-tracking]: https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/javascript-trackers/javascript-tracker/javascript-tracker-v3/plugins/youtube-tracking/
+
+[media-plugin]: https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/javascript-trackers/browser-tracker/browser-tracker-v3-reference/plugins/media/
+[vimeo-tracking]: https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/javascript-trackers/browser-tracker/browser-tracker-v3-reference/plugins/vimeo-tracking/
+[mobile-tracking]: https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/mobile-trackers/tracking-events/media-tracking/
 
 [dbt-package-docs]: https://docs.getdbt.com/docs/building-a-dbt-project/package-management
 

@@ -2,9 +2,56 @@ version: 2
 
 macros:
 
-  - name: media_id_col
-    description: '{{ doc("macro_media_id_col") }}'
+  - name: field
+    description: '{{ doc("macro_field") }}'
     arguments:
+      - name: property
+        type: string
+        description: String path to the column or a dictionary describing the field
+      - name: col_prefix
+        type: string
+        description: The prefix to use for the column name
+      - name: field
+        type: string
+        description: The default name of the field to use when a dictionary is passed in for the property argument
+
+  - name: media_ad_break_field
+    description: '{{ doc("macro_media_ad_break_field") }}'
+    arguments:
+      - name: property
+        type: string
+        description: The field definition either as a string path or a dictionary
+
+  - name: media_ad_field
+    description: '{{ doc("macro_media_ad_field") }}'
+    arguments:
+      - name: property
+        type: string
+        description: The field definition either as a string path or a dictionary
+
+  - name: media_ad_quartile_event_field
+    description: '{{ doc("macro_media_ad_quartile_event_field") }}'
+    arguments:
+      - name: property
+        type: string
+        description: The field definition either as a string path or a dictionary
+
+  - name: media_event_type_field
+    description: '{{ doc("macro_media_event_type_field") }}'
+    arguments:
+      - name: media_player_event_type
+        type: string
+        description: The type property in the media player event
+      - name: event_name
+        type: string
+        description: The event name used for v2 media schemas
+
+  - name: media_id_field
+    description: '{{ doc("macro_media_id_field") }}'
+    arguments:
+      - name: v2_player_label
+        type: string
+        description: The label value in the v2 of the player context entity
       - name: youtube_player_id
         type: string
         description: The name of the player_id column in the YouTube context
@@ -12,9 +59,25 @@ macros:
         type: string
         description: The name of the player_id column in the HTML5 media element context
 
-  - name: media_player_type_col
-    description: '{{ doc("macro_media_player_type_col") }}'
+  - name: media_player_field
+    description: '{{ doc("macro_media_player_field") }}'
     arguments:
+      - name: v1
+        type: string
+        description: The field definition in the v1 media player context entity
+      - name: v2
+        type: string
+        description: The field definition in the v2 media player context entity
+      - name: default
+        type: string
+        description: Optional default value
+
+  - name: media_player_type_field
+    description: '{{ doc("macro_media_player_type_field") }}'
+    arguments:
+      - name: v2_player_type
+        type: string
+        description: The player_type value in the v2 of the player context entity
       - name: youtube_player_id
         type: string
         description: The name of the player_id column in the YouTube context
@@ -22,16 +85,45 @@ macros:
         type: string
         description: The name of the player_id column in the HTML5 media element context
 
-  - name: media_type_col
-    description: '{{ doc("macro_media_type_col") }}'
+  - name: media_session_field
+    description: '{{ doc("macro_media_session_field") }}'
+    arguments:
+      - name: property
+        type: string
+        description: The field definition either as a string path or a dictionary
+
+  - name: media_type_field
+    description: '{{ doc("macro_media_type_field") }}'
     arguments:
       - name: media_media_type
         type: string
         description: The media_type value in the HTML5 media element context
 
-  - name: playback_quality_col
-    description: '{{ doc("macro_playback_quality_col") }}'
+  - name: percent_progress_field
+    description: '{{ doc("macro_percent_progress_field") }}'
     arguments:
+      - name: v1_percent_progress
+        type: string
+        description: The percent_progress value in the v1 of the player context entity
+      - name: v1_event_type
+        type: string
+        description: The type property from the v1 media player event
+      - name: event_name
+        type: string
+        description: The event name used for v2 media schemas
+      - name: v2_current_time
+        type: string
+        description: The current_time value in the v2 of the player context entity
+      - name: v2_duration
+        type: string
+        description: The duration value in the v2 of the player context entity
+
+  - name: playback_quality_field
+    description: '{{ doc("macro_playback_quality_field") }}'
+    arguments:
+      - name: v2_quality
+        type: string
+        description: The quality value in the v2 of the player context entity
       - name: youtube_quality
         type: string
         description: The quality value in the YouTube context
@@ -42,8 +134,8 @@ macros:
         type: string
         description: The video height value in the HTML5 video element context
 
-  - name: source_url_col
-    description: '{{ doc("macro_source_url_col") }}'
+  - name: source_url_field
+    description: '{{ doc("macro_source_url_field") }}'
     arguments:
       - name: youtube_url
         type: string
@@ -51,3 +143,13 @@ macros:
       - name: media_current_src
         type: string
         description: The current_src value in the HTML5 media element context
+
+  - name: web_or_mobile_field
+    description: '{{ doc("macro_web_or_mobile_field") }}'
+    arguments:
+      - name: web
+        type: string
+        description: The field definition for web events
+      - name: mobile
+        type: string
+        description: The field definition for mobile events

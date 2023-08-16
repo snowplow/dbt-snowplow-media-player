@@ -12,9 +12,10 @@ models:
             - page_view_id
             - media_id
             - media_label
-            - domain_sessionid
+            - session_identifier
             - domain_userid
-            - duration
+            - user_id
+            - duration_secs
             - media_type
             - media_player_type
             - page_referrer
@@ -27,15 +28,25 @@ models:
             - os_timezone
             - start_tstamp
             - end_tstamp
-            - play_time_sec
-            - play_time_sec_muted
+            - play_time_secs
+            - play_time_muted_secs
+            - paused_time_secs
+            - buffering_time_secs
+            - ads_time_secs
             - is_played
             - is_valid_play
             - is_complete_play
             - avg_playback_rate
             - retention_rate
             - seeks
+            - ads
+            - ads_clicked
+            - ads_skipped
+            - ad_breaks
             - percent_progress_reached
+            - content_watched_secs
+            - content_watched_percent
+
   - name: snowplow_media_player_media_stats_actual
     tests:
       - dbt_utils.equal_rowcount:
@@ -45,9 +56,12 @@ models:
           compare_columns:
             - media_id
             - media_label
-            - duration
+            - duration_secs
             - media_type
             - media_player_type
+            - play_time_mins
+            - avg_play_time_mins
+            - avg_content_watched_mins
             - first_play
             - last_play
             - plays
@@ -55,8 +69,74 @@ models:
             - complete_plays
             - impressions
             - completion_rate_by_plays
-            - _10_percent_reached
-            - _25_percent_reached
-            - _50_percent_reached
-            - _75_percent_reached
-            - _100_percent_reached
+            - percent_reached_10
+            - percent_reached_25
+            - percent_reached_50
+            - percent_reached_75
+            - percent_reached_100
+            - avg_playback_rate
+            - play_rate
+            - avg_percent_played
+            - avg_retention_rate
+
+  - name: snowplow_media_player_media_ad_views_actual
+    tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('snowplow_media_player_media_ad_views_expected_stg')
+      - dbt_utils.equality:
+          compare_model: ref('snowplow_media_player_media_ad_views_expected_stg')
+          compare_columns:
+            - media_ad_id
+            - platform
+            - media_id
+            - media_label
+            - domain_userid
+            - user_id
+            - play_id
+            - ad_break_id
+            - ad_break_name
+            - ad_break_type
+            - ad_id
+            - name
+            - creative_id
+            - duration_secs
+            - pod_position
+            - skippable
+            - clicked
+            - skipped
+            - percent_reached_25
+            - percent_reached_50
+            - percent_reached_75
+            - percent_reached_100
+
+  - name: snowplow_media_player_media_ads_actual
+    tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('snowplow_media_player_media_ads_expected_stg')
+      - dbt_utils.equality:
+          compare_model: ref('snowplow_media_player_media_ads_expected_stg')
+          compare_columns:
+            - media_ad_id
+            - platform
+            - media_id
+            - media_label
+            - ad_id
+            - name
+            - creative_id
+            - duration_secs
+            - skippable
+            - pod_position
+            - views
+            - clicked
+            - skipped
+            - percent_reached_25
+            - percent_reached_50
+            - percent_reached_75
+            - percent_reached_100
+            - views_unique
+            - clicked_unique
+            - skipped_unique
+            - percent_reached_25_unique
+            - percent_reached_50_unique
+            - percent_reached_75_unique
+            - percent_reached_100_unique

@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: snowplow_media_player_media_ad_views
+    +tags: "snowplow_media_player_incremental"
+    description: '{{ doc("table_base") }}'
+    columns:
+      - name: media_ad_id
+        description: '{{ doc("col_media_ad_id") }}'
+        tests:
+          - not_null
+      - name: platform
+        description: '{{ doc("col_platform")}}'
+      - name: media_id
+        description: '{{ doc("col_media_id") }}'
+      - name: media_label
+        description: '{{ doc("col_media_label") }}'
+      - name: domain_userid
+        description: '{{ doc("col_domain_userid")}}'
+      - name: user_id
+        description: '{{ doc("col_user_id")}}'
+      - name: session_identifier
+        description: '{{ doc("col_session_identifier")}}'
+      - name: play_id
+        description: '{{ doc("col_play_id")}}'
+      - name: ad_break_id
+        description: '{{ doc("col_ad_break_id")}}'
+      - name: ad_break_name
+        description: '{{ doc("col_ad_break_name")}}'
+      - name: ad_break_type
+        description: '{{ doc("col_ad_break_type")}}'
+      - name: ad_id
+        description: '{{ doc("col_ad_id") }}'
+      - name: name
+        description: '{{ doc("col_name") }}'
+      - name: creative_id
+        description: '{{ doc("col_creative_id") }}'
+      - name: duration_secs
+        description: '{{ doc("col_ad_duration_secs") }}'
+      - name: pod_position
+        description: '{{ doc("col_pod_position") }}'
+      - name: skippable
+        description: '{{ doc("col_skippable") }}'
+      - name: clicked
+        description: '{{ doc("col_clicked") }}'
+      - name: skipped
+        description: '{{ doc("col_skipped") }}'
+      - name: percent_reached_25
+        description: '{{ doc("col_percent_reached_25") }}'
+      - name: percent_reached_50
+        description: '{{ doc("col_percent_reached_50") }}'
+      - name: percent_reached_75
+        description: '{{ doc("col_percent_reached_75") }}'
+      - name: percent_reached_100
+        description: '{{ doc("col_percent_reached_100") }}'
+      - name: viewed_at
+        description: '{{ doc("col_viewed_at") }}'
+      - name: last_event
+        description: '{{ doc("col_last_event") }}'

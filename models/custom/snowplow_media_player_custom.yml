@@ -5,8 +5,8 @@ models:
     +tags: "snowplow_media_player_incremental"
     description: '{{ doc("table_session_stats") }}'
     columns:
-      - name: domain_sessionid
-        description: '{{ doc("col_domain_sessionid") }}'
+      - name: session_identifier
+        description: '{{ doc("col_session_identifier") }}'
         tags:
           - primary-key
         tests:
@@ -34,10 +34,10 @@ models:
         description: '{{ doc("col_end_tstamp") }}'
       - name: seeks
         description: '{{ doc("col_seeks") }}'
-      - name: play_time_sec
-        description: '{{ doc("col_play_time_sec") }}'
-      - name: play_time_sec_muted
-        description: '{{ doc("col_play_time_sec_muted") }}'
+      - name: play_time_secs
+        description: '{{ doc("col_play_time_secs") }}'
+      - name: play_time_muted_secs
+        description: '{{ doc("col_play_time_muted_secs") }}'
       - name: avg_play_time_sec
         description: '{{ doc("col_avg_play_time_sec") }}'
       - name: avg_percent_played
@@ -71,9 +71,9 @@ models:
         description: '{{ doc("col_complete_plays") }}'
       - name: seeks
         description: '{{ doc("col_seeks") }}'
-      - name: play_time_min
-        description: '{{ doc("col_play_time_min") }}'
-      - name: avg_session_play_time_min
-        description: '{{ doc("col_avg_session_play_time_min") }}'
+      - name: play_time_mins
+        description: '{{ doc("col_play_time_mins") }}'
+      - name: avg_session_play_time_mins
+        description: '{{ doc("col_avg_session_play_time_mins") }}'
       - name: avg_percent_played
         description: '{{ doc("col_avg_percent_played") }}'
