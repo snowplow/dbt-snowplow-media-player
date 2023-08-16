@@ -216,9 +216,7 @@ seeds:
           media_label: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           session_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           domain_userid: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
-          duration_secs: float
-          media_type: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
-          media_player_type: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          user_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           page_referrer: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           page_url: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           source_url: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
@@ -227,17 +225,31 @@ seeds:
           dvce_type: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           os_name: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           os_timezone: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          platform: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          duration_secs: float
+          media_type: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          media_player_type: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           start_tstamp: timestamp
           end_tstamp: timestamp
-          play_time_secs: integer
-          play_time_muted_secs: integer
+          avg_playback_rate: float
+          play_time_secs: float
+          play_time_muted_secs: float
+          paused_time_secs: float
+          buffering_time_secs: float
+          ads_time_secs: float
+          seeks: integer
+          ads: integer
+          ads_clicked: integer
+          ads_skipped: integer
+          ad_breaks: integer
           is_played: boolean
           is_valid_play: boolean
           is_complete_play: boolean
-          avg_playback_rate: float
           retention_rate: float
-          seeks: integer
           percent_progress_reached: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          content_watched_sec: float
+          content_watched_percent: float
+
       snowplow_media_player_media_stats_expected:
         +column_types:
           media_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
@@ -247,6 +259,7 @@ seeds:
           media_player_type: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           play_time_mins: float
           avg_play_time_mins: float
+          avg_content_watched_mins: float
           first_play: timestamp
           last_play: timestamp
           plays: integer
@@ -264,3 +277,58 @@ seeds:
           _50_percent_reached: integer
           _75_percent_reached: integer
           _100_percent_reached: integer
+
+      snowplow_media_player_media_ad_views_expected:
+        +column_types:
+          media_ad_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          platform: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          media_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          media_label: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          domain_userid: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          user_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          play_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          ad_break_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          ad_break_name: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          ad_break_type: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          ad_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          name: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          creative_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          duration_secs: float
+          skippable: boolean
+          pod_position: integer
+          clicked: boolean
+          skipped: boolean
+          _25_percent_reached: boolean
+          _50_percent_reached: boolean
+          _75_percent_reached: boolean
+          _100_percent_reached: boolean
+          viewed_at: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+
+      snowplow_media_player_media_ads_expected:
+        +column_types:
+          media_ad_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          platform: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          media_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          media_label: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          ad_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          name: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          creative_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          duration_secs: float
+          skippable: boolean
+          pod_position: integer
+          views: integer
+          clicked: integer
+          skipped: integer
+          _25_percent_reached: integer
+          _50_percent_reached: integer
+          _75_percent_reached: integer
+          _100_percent_reached: integer
+          views_unique: integer
+          clicked_unique: integer
+          skipped_unique: integer
+          _25_percent_reached_unique: integer
+          _50_percent_reached_unique: integer
+          _75_percent_reached_unique: integer
+          _100_percent_reached_unique: integer
+          first_view: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          last_view: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
