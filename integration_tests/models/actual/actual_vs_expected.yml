@@ -36,6 +36,7 @@ models:
             - retention_rate
             - seeks
             - percent_progress_reached
+
   - name: snowplow_media_player_media_stats_actual
     tests:
       - dbt_utils.equal_rowcount:
@@ -60,3 +61,69 @@ models:
             - _50_percent_reached
             - _75_percent_reached
             - _100_percent_reached
+
+  - name: snowplow_media_player_media_ad_views_actual
+    tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('snowplow_media_player_media_ad_views_expected_stg')
+      - dbt_utils.equality:
+          compare_model: ref('snowplow_media_player_media_ad_views_expected_stg')
+          compare_columns:
+            - media_ad_id
+            - platform
+            - media_id
+            - media_label
+            - domain_userid
+            - user_id
+            - play_id
+            - ad_break_id
+            - ad_break_name
+            - ad_break_type
+            - ad_id
+            - name
+            - creative_id
+            - duration_secs
+            - pod_position
+            - skippable
+            - clicked
+            - skipped
+            - _25_percent_reached
+            - _50_percent_reached
+            - _75_percent_reached
+            - _100_percent_reached
+            - viewed_at
+            - last_event
+
+  - name: snowplow_media_player_media_ads_actual
+    tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('snowplow_media_player_media_ads_expected_stg')
+      - dbt_utils.equality:
+          compare_model: ref('snowplow_media_player_media_ads_expected_stg')
+          compare_columns:
+            - media_ad_id
+            - platform
+            - media_id
+            - media_label
+            - ad_id
+            - name
+            - creative_id
+            - duration_secs
+            - skippable
+            - pod_position
+            - views
+            - clicked
+            - skipped
+            - _25_percent_reached
+            - _50_percent_reached
+            - _75_percent_reached
+            - _100_percent_reached
+            - views_unique
+            - clicked_unique
+            - skipped_unique
+            - _25_percent_reached_unique
+            - _50_percent_reached_unique
+            - _75_percent_reached_unique
+            - _100_percent_reached_unique
+            - first_view
+            - last_view
