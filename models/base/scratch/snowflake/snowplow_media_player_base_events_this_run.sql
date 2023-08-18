@@ -53,7 +53,7 @@ with prep as (
     -- unpacking the media player event
     {{ media_player_property_col(v1_property=media_event_prefix + 'label::varchar', v2_property=player_2_prefix + 'label::varchar') }} as media_label,
     {{ media_event_type_col(
-      media_player_event_type='a.unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1:type::varchar',
+      media_player_event_type=media_event_prefix + 'type::varchar',
       event_name='a.event_name'
     ) }},
 
