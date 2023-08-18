@@ -139,20 +139,24 @@ prep as (
     ev.collector_tstamp,
 
     -- unpacking the media player event
-    {{ media_label_col(v1_event_label='mpe.label', v2_player_label='mp2.label') }},
+    {{ media_player_property_col(v1_property='mpe.label', v2_property='mp2.label') }} as media_label,
     {{ media_event_type_col(media_player_event_type='mpe.type', event_name='ev.event_name') }},
 
     -- unpacking the media player object
     round({{ media_player_property_col(v1_property='mp.duration', v2_property='mp2.duration') }}) as duration_secs,
     {{ media_player_property_col(v1_property='mp.current_time', v2_property='mp2.current_time') }} as current_time,
-    {{ media_player_property_col(v1_property='mp.playback_rate', v2_property='mp2.playback_rate') }} as playback_rate,
+    {{ media_player_property_col(
+        v1_property='mp.playback_rate',
+        v2_property='mp2.playback_rate',
+        default='1'
+    ) }} as playback_rate,
     {{ percent_progress_col(
         v1_percent_progress='mp.percent_progress',
         v1_event_type='mpe.type',
         event_name='ev.event_name',
         v2_current_time='mp2.current_time',
         v2_duration='mp2.duration'
-    ) }} as percent_progress,
+    ) }},
     {{ media_player_property_col(v1_property='mp.muted', v2_property='mp2.muted') }} as is_muted,
 
     -- media session properties

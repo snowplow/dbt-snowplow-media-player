@@ -6,9 +6,9 @@
     dist = 'media_ad_id',
     tags=["derived"],
     partition_by = snowplow_utils.get_value_by_target_type(bigquery_val={
-      "field": "first_view",
+      "field": "viewed_at",
       "data_type": "timestamp"
-    }, databricks_val='first_view_date'),
+    }, databricks_val='viewed_at_date'),
     cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["media_ad_id"]),
     sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt')),
     tblproperties={

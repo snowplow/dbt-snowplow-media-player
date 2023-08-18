@@ -1,6 +1,12 @@
 {% macro media_event_type_col(media_player_event_type, event_name) %}
   coalesce(
-    {% if var("snowplow__enable_media_player_v1") %}{{ media_player_event_type }},{% endif %}
+    {% if var("snowplow__enable_media_player_v1") -%}
+      {{ property_col(
+        media_player_event_type,
+        col_prefix="unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1",
+        field='type'
+      ) }},
+    {% endif %}
     case 
         when right({{ event_name }}, 6) = '_event'
         then replace(

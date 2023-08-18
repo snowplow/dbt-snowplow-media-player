@@ -1,6 +1,9 @@
 {% macro media_ad_quartile_event_property_col(property) %}
     coalesce(
-      {% if var("snowplow__enable_ad_quartile_event") %}{{ property }},{% endif %}
+      {% if var("snowplow__enable_ad_quartile_event") %}{{ property_col(
+        property,
+        col_prefix='unstruct_event_com_snowplowanalytics_snowplow_media_ad_quartile_event_1'
+      ) }},{% endif %}
       null
     )
 {% endmacro %}

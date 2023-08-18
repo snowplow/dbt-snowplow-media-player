@@ -49,10 +49,12 @@ with prep AS (
 
     -- combined media properties
     {{ media_id_col(
+      v2_player_label='a.contexts_com_snowplowanalytics_snowplow_media_player_2[0].label::STRING',
       youtube_player_id='a.contexts_com_youtube_youtube_1[0].player_id::STRING',
       media_player_id='a.contexts_org_whatwg_media_element_1[0].html_id::STRING'
     ) }},
     {{ media_player_type_col(
+      v2_player_type='a.contexts_com_snowplowanalytics_snowplow_media_player_2[0].player_type::STRING',
       youtube_player_id='a.contexts_com_youtube_youtube_1[0].player_id::STRING',
       media_player_id='a.contexts_org_whatwg_media_element_1[0].html_id::STRING'
     ) }},
@@ -61,9 +63,11 @@ with prep AS (
       media_current_src='a.contexts_org_whatwg_media_element_1[0].current_src::STRING'
     ) }},
     {{ media_type_col(
+      v2_media_type='a.contexts_com_snowplowanalytics_snowplow_media_player_2[0].media_type::STRING',
       media_media_type='a.contexts_org_whatwg_media_element_1[0].media_type::STRING'
     ) }},
     {{ playback_quality_col(
+      v2_quality='a.contexts_com_snowplowanalytics_snowplow_media_player_2[0].quality::STRING',
       youtube_quality='a.contexts_com_youtube_youtube_1[0].playback_quality::STRING',
       video_width='a.contexts_org_whatwg_video_element_1[0].video_width::STRING',
       video_height='a.contexts_org_whatwg_video_element_1[0].video_height::STRING'

@@ -122,7 +122,6 @@ seeds:
           base_currency: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           etl_tags: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           dvce_sent_tstamp: timestamp
-          refr_domain_userid: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           refr_dvce_tstamp: timestamp
           derived_tstamp: timestamp
           true_tstamp: timestamp
@@ -133,12 +132,18 @@ seeds:
         +quote_columns: true
         +column_types:
           root_tstamp: timestamp
+          current_time: float
+          percent_progress: integer
+          duration: float
 
       com_snowplowanalytics_snowplow_media_player_2:
         +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
         +quote_columns: true
         +column_types:
           root_tstamp: timestamp
+          current_time: float
+          duration: float
+          quality: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
 
       com_snowplowanalytics_snowplow_media_session_1:
         +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
@@ -151,6 +156,7 @@ seeds:
         +quote_columns: true
         +column_types:
           root_tstamp: timestamp
+          pod_position: integer
 
       com_snowplowanalytics_snowplow_media_ad_break_1:
         +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'

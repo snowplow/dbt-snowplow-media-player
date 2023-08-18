@@ -31,7 +31,7 @@ new_media_ad_views as (
     cast({{ dateadd('hour', var("snowplow__max_media_pv_window", 10), 'a.viewed_at') }} as {{ type_timestamp() }}) < {{ snowplow_utils.current_timestamp_in_utc() }}
     -- and it has not been processed yet
     and (
-      exists(select 1 from {{ this }}) = false or -- no records in the table
+      not exists(select 1 from {{ this }}) or -- no records in the table
       a.viewed_at > ( select max(last_view) from {{ this }} )
     )
   {% endif %}
@@ -51,7 +51,7 @@ new_media_ad_views as (
     max(a.name) as name,
     max(a.creative_id) as creative_id,
     max(a.duration_secs) as duration_secs,
-    bool_or(a.skippable) as skippable,
+    sum(case when a.skippable then 1 else 0 end) > 0 as skippable,
     avg(a.pod_position) as pod_position,
 
     count(*) as views,
@@ -137,7 +137,7 @@ new_media_ad_views as (
     max(a.name) as name,
     max(a.creative_id) as creative_id,
     max(a.duration_secs) as duration_secs,
-    bool_or(a.skippable) as skippable,
+    sum(case when a.skippable then 1 else 0 end) > 0 as skippable,
     sum(a.pod_position * a.views) / sum(a.views) as pod_position,
 
     sum(a.views) as views,
@@ -147,6 +147,14 @@ new_media_ad_views as (
     sum(a._50_percent_reached) as _50_percent_reached,
     sum(a._75_percent_reached) as _75_percent_reached,
     sum(a._100_percent_reached) as _100_percent_reached,
+
+    sum(a.views_unique) as views_unique,
+    sum(a.clicked_unique) as clicked_unique,
+    sum(a.skipped_unique) as skipped_unique,
+    sum(a._25_percent_reached_unique) as _25_percent_reached_unique,
+    sum(a._50_percent_reached_unique) as _50_percent_reached_unique,
+    sum(a._75_percent_reached_unique) as _75_percent_reached_unique,
+    sum(a._100_percent_reached_unique) as _100_percent_reached_unique,
 
     min(a.first_view) as first_view,
     max(a.last_view) as last_view
@@ -181,13 +189,13 @@ new_media_ad_views as (
     a._75_percent_reached,
     a._100_percent_reached,
 
-    b.views_unique,
-    b.clicked_unique,
-    b.skipped_unique,
-    b._25_percent_reached_unique,
-    b._50_percent_reached_unique,
-    b._75_percent_reached_unique,
-    b._100_percent_reached_unique,
+    coalesce(b.views_unique, a.views_unique) as views_unique,
+    coalesce(b.clicked_unique, a.clicked_unique) as clicked_unique,
+    coalesce(b.skipped_unique, a.skipped_unique) as skipped_unique,
+    coalesce(b._25_percent_reached_unique, a._25_percent_reached_unique) as _25_percent_reached_unique,
+    coalesce(b._50_percent_reached_unique, a._50_percent_reached_unique) as _50_percent_reached_unique,
+    coalesce(b._75_percent_reached_unique, a._75_percent_reached_unique) as _75_percent_reached_unique,
+    coalesce(b._100_percent_reached_unique, a._100_percent_reached_unique) as _100_percent_reached_unique,
 
     a.first_view,
     a.last_view

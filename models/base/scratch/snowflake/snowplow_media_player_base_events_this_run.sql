@@ -16,14 +16,30 @@
   {{ exceptions.raise_compiler_error("No media context enabled. Please enable as many of the following variables as required: snowplow__enable_youtube, snowplow__enable_whatwg_media, snowplow__enable_whatwg_video") }}
 {% endif %}
 
+{%- set player_1_prefix = 'a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:' %}
+{%- set player_2_prefix = 'a.contexts_com_snowplowanalytics_snowplow_media_player_2[0]:' %}
+{%- set media_event_prefix = 'a.unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1:' %}
+{%- set session_prefix = 'a.contexts_com_snowplowanalytics_snowplow_media_session_1[0]:' %}
+{%- set ad_prefix = 'a.contexts_com_snowplowanalytics_snowplow_media_ad_1[0]:' %}
+{%- set ad_break_prefix = 'a.contexts_com_snowplowanalytics_snowplow_media_ad_break_1[0]:' %}
+{%- set ad_quartile_prefix = 'a.unstruct_event_com_snowplowanalytics_snowplow_media_ad_quartile_event_1:' %}
+{%- set youtube_prefix = 'a.contexts_com_youtube_youtube_1[0]:' %}
+{%- set whatwg_media_prefix = 'a.contexts_org_whatwg_media_element_1[0]:' %}
+{%- set whatwg_video_prefix = 'a.contexts_org_whatwg_video_element_1[0]:' %}
+
 with prep as (
 
   select
 
     a.event_id,
-    a.contexts_com_snowplowanalytics_snowplow_web_page_1[0]:id::varchar as page_view_id,
+    {{ web_or_mobile_col(
+      web_property='a.contexts_com_snowplowanalytics_snowplow_web_page_1[0]:id::varchar',
+      mobile_property='a.contexts_com_snowplowanalytics_mobile_screen_1[0]:id::varchar'
+    ) }} as page_view_id,
     b.session_id,
     b.domain_userid,
+    a.user_id,
+    a.platform,
     a.page_referrer,
     a.page_url,
     a.geo_region_name,
@@ -35,50 +51,91 @@ with prep as (
     a.collector_tstamp,
 
     -- unpacking the media player event
-    a.unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1:label::varchar as media_label,
-    a.unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1:type::varchar as event_type,
+    {{ media_player_property_col(v1_property=media_event_prefix + 'label::varchar', v2_property=player_2_prefix + 'label::varchar') }} as media_label,
+    {{ media_event_type_col(
+      media_player_event_type='a.unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1:type::varchar',
+      event_name='a.event_name'
+    ) }},
 
     -- unpacking the media player object
-    round(a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:duration::float) as duration_secs,
-    a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:currentTime::float as player_current_time,
-    coalesce(a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:playbackRate::varchar, 1) as playback_rate,
-    cast(
-      case
-        when a.unstruct_event_com_snowplowanalytics_snowplow_media_player_event_1:type::varchar = 'ended' then '100'
-        when a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:percentProgress::varchar = '' then null
-        else a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:percentProgress::varchar
-      end as int
-    ) as percent_progress,
-    a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:muted::boolean as is_muted,
-    a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:isLive::varchar as is_live,
-    a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:loop::varchar as loop,
-    a.contexts_com_snowplowanalytics_snowplow_media_player_1[0]:volume::varchar as volume,
+    round({{ media_player_property_col(v1_property=player_1_prefix + 'duration::float', v2_property=player_2_prefix + 'duration::float') }}) as duration_secs,
+    {{ media_player_property_col(v1_property=player_1_prefix + 'currentTime::float', v2_property=player_2_prefix + 'currentTime::float') }} as current_time,
+    {{ media_player_property_col(
+      v1_property=player_1_prefix + 'playbackRate::float',
+      v2_property=player_2_prefix + 'playbackRate::float',
+      default='1.0'
+    ) }} as playback_rate,
+    {{ percent_progress_col(
+        v1_percent_progress=player_1_prefix + 'percentProgress::varchar',
+        v1_event_type=media_event_prefix + 'type::varchar',
+        event_name='a.event_name',
+        v2_current_time=player_2_prefix + 'currentTime::float',
+        v2_duration=player_2_prefix + 'duration::float'
+    ) }},
+    {{ media_player_property_col(v1_property=player_1_prefix + 'muted::boolean', v2_property=player_2_prefix + 'muted::boolean') }} as is_muted,
+
+    -- media session properties
+    {{ media_session_property_col(property=session_prefix + 'mediaSessionId::varchar') }} as media_session_id,
+    {{ media_session_property_col(property=session_prefix + 'timePlayed::float') }} as media_session_time_played,
+    {{ media_session_property_col(property=session_prefix + 'timePlayedMuted::float') }} as media_session_time_played_muted,
+    {{ media_session_property_col(property=session_prefix + 'timePaused::float') }} as media_session_time_paused,
+    {{ media_session_property_col(property=session_prefix + 'contentWatched::float') }} as media_session_content_watched,
+    {{ media_session_property_col(property=session_prefix + 'timeBuffering::float') }} as media_session_time_buffering,
+    {{ media_session_property_col(property=session_prefix + 'timeSpentAds::float') }} as media_session_time_spent_ads,
+    {{ media_session_property_col(property=session_prefix + 'ads::integer') }} as media_session_ads,
+    {{ media_session_property_col(property=session_prefix + 'adsClicked::integer') }} as media_session_ads_clicked,
+    {{ media_session_property_col(property=session_prefix + 'adsSkipped::integer') }} as media_session_ads_skipped,
+    {{ media_session_property_col(property=session_prefix + 'adBreaks::integer') }} as media_session_ad_breaks,
+    {{ media_session_property_col(property=session_prefix + 'avgPlaybackRate::float') }} as media_session_avg_playback_rate,
+
+    -- ad properties
+    {{ media_ad_property_col(property=ad_prefix + 'name::varchar') }} as ad_name,
+    {{ media_ad_property_col(property=ad_prefix + 'adId::varchar') }} as ad_id,
+    {{ media_ad_property_col(property=ad_prefix + 'creativeId::varchar') }} as ad_creative_id,
+    {{ media_ad_property_col(property=ad_prefix + 'podPosition::integer') }} as ad_pod_position,
+    {{ media_ad_property_col(property=ad_prefix + 'duration::float') }} as ad_duration,
+    {{ media_ad_property_col(property=ad_prefix + 'skippable::boolean') }} as ad_skippable,
+
+    -- ad break properties
+    {{ media_ad_break_property_col(property=ad_break_prefix + 'name::varchar') }} as ad_break_name,
+    {{ media_ad_break_property_col(property=ad_break_prefix + 'breakId::varchar') }} as ad_break_id,
+    {{ media_ad_break_property_col(property=ad_break_prefix + 'breakType::varchar') }} as ad_break_type,
+
+    -- ad quartile event
+    {{ media_ad_quartile_event_property_col(property=ad_quartile_prefix + 'percentProgress::integer') }} as ad_percent_progress,
 
     -- combined media properties
     {{ media_id_col(
-      youtube_player_id='a.contexts_com_youtube_youtube_1[0]:playerId',
-      media_player_id='a.contexts_org_whatwg_media_element_1[0]:htmlId::varchar'
+      v2_player_label=player_2_prefix + 'label::varchar',
+      youtube_player_id=youtube_prefix + 'playerId::varchar',
+      media_player_id=whatwg_media_prefix + 'htmlId::varchar'
     ) }},
     {{ media_player_type_col(
-      youtube_player_id='a.contexts_com_youtube_youtube_1[0]:playerId',
-      media_player_id='a.contexts_org_whatwg_media_element_1[0]:htmlId::varchar'
+      v2_player_type=player_2_prefix + 'playerType::varchar',
+      youtube_player_id=youtube_prefix + 'playerId::varchar',
+      media_player_id=whatwg_media_prefix + 'htmlId::varchar'
     ) }},
     {{ source_url_col(
-      youtube_url='a.contexts_com_youtube_youtube_1[0]:url::varchar',
-      media_current_src='a.contexts_org_whatwg_media_element_1[0]:currentSrc::varchar'
+      youtube_url=youtube_prefix + 'url::varchar',
+      media_current_src=whatwg_media_prefix + 'currentSrc::varchar'
     ) }},
     {{ media_type_col(
-      media_media_type='a.contexts_org_whatwg_media_element_1[0]:mediaType::varchar'
+      v2_media_type=player_2_prefix + 'mediaType::varchar',
+      media_media_type=whatwg_media_prefix + 'mediaType::varchar'
     ) }},
     {{ playback_quality_col(
-      youtube_quality='a.contexts_com_youtube_youtube_1[0]:playbackQuality::varchar',
-      video_width='a.contexts_org_whatwg_video_element_1[0]:videoWidth::varchar',
-      video_height='a.contexts_org_whatwg_video_element_1[0]:videoHeight::varchar'
+        v2_quality=player_2_prefix + 'quality::varchar',
+        youtube_quality=youtube_prefix + 'playbackQuality::varchar',
+        video_width=whatwg_video_prefix + 'videoWidth::integer',
+        video_height=whatwg_video_prefix + 'videoHeight::integer'
     )}}
 
     from {{ var('snowplow__events') }} as a
     inner join {{ ref('snowplow_media_player_base_sessions_this_run') }} as b
-    on a.domain_sessionid = b.session_id
+    on {{ web_or_mobile_col(
+      web_property='a.domain_sessionid',
+      mobile_property='a.contexts_com_snowplowanalytics_snowplow_client_session_1[0]:sessionId::varchar'
+    ) }} = b.session_id
 
     where a.collector_tstamp <= {{ snowplow_utils.timestamp_add('day', var("snowplow__max_session_days", 3), 'b.start_tstamp') }}
     and a.dvce_sent_tstamp <= {{ snowplow_utils.timestamp_add('day', var("snowplow__days_late_allowed", 3), 'a.dvce_created_tstamp') }}
@@ -91,8 +148,14 @@ with prep as (
 )
 
 select
-  {{ dbt_utils.generate_surrogate_key(['p.page_view_id', 'p.media_id' ]) }} as play_id,
-  p.*,
+  coalesce(
+    p.media_session_id,
+    {{ dbt_utils.generate_surrogate_key(['p.page_view_id', 'p.media_id' ]) }}
+  ) as play_id,
+  p.* exclude (percent_progress),
+
+  cast(p.percent_progress as integer) as percent_progress,
+
   coalesce(
     cast(piv.weight_rate * p.duration_secs / 100 as {{ type_int() }}),
     0

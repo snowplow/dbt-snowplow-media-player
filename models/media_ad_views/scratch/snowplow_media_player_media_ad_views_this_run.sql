@@ -5,9 +5,9 @@
     sort='last_event',
     dist='media_ad_id',
     partition_by = snowplow_utils.get_value_by_target_type(bigquery_val={
-      "field": "first_view",
+      "field": "viewed_at",
       "data_type": "timestamp"
-    }, databricks_val='first_view_date'),
+    }, databricks_val='viewed_at_date'),
     cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["media_ad_id"]),
     sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt'))
   )
@@ -42,8 +42,8 @@ events_this_run as (
     max(ev.ad_name) as name,
     max(ev.ad_creative_id) as creative_id,
     max(ev.ad_duration) as duration_secs,
-    bool_or(ev.ad_skippable) as skippable,
     avg(ev.ad_pod_position) as pod_position,
+    sum(case when ev.ad_skippable then 1 else 0 end) > 0 as skippable,
 
     max(case when ev.event_type in ('adclick') then 1 else 0 end) > 0 as clicked,
     max(case when ev.event_type in ('adskip') then 1 else 0 end) > 0 as skipped,
@@ -52,7 +52,12 @@ events_this_run as (
     max(case when ev.event_type in ('adcomplete') or (ev.event_type in ('adquartile') and ev.ad_percent_progress >= 75) then 1 else 0 end) > 0 as _75_percent_reached,
     max(case when ev.event_type in ('adcomplete') then 1 else 0 end) > 0 as _100_percent_reached,
 
-    min(case when ev.event_type in ('adstart') then ev.start_tstamp end) as viewed_at
+    min(case when ev.event_type in ('adstart') then ev.start_tstamp end) as viewed_at,
+    max(ev.start_tstamp) as last_event
+
+    {% if target.type in ['databricks', 'spark'] -%}
+      , date(ev.viewed_at) as viewed_at_date
+    {%- endif %}
 
   from events_this_run as ev
 
