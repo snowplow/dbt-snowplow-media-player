@@ -45,7 +45,10 @@ from {{ ref("snowplow_media_player_base") }} p
 where -- enough time has passed since the page_view's start_tstamp to be able to process it as a whole (please bear in mind the late arriving data)
 cast({{ dateadd('hour', var("snowplow__max_media_pv_window", 10), 'p.end_tstamp ') }} as {{ type_timestamp() }}) < {{ snowplow_utils.current_timestamp_in_utc() }}
 -- and it has not been processed yet
-and p.start_tstamp > ( select max(last_base_tstamp) from {{ this }} )
+and (
+  not exists(select 1 from {{ this }}) or -- no records in the table
+  p.start_tstamp > ( select max(last_base_tstamp) from {{ this }} )
+)
 
 group by 1,2,4,5
 
