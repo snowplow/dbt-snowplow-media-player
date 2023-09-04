@@ -1,3 +1,14 @@
+snowplow-media-player 0.5.3 (2023-09-04)
+---------------------------------------
+## Summary
+This release fixes a problem reported with the media_stats model failing during incremental runs when the table is empty.
+
+## Fixes
+Fix errors during media_stats incremental runs in case the table is empty (close #51)
+
+## Upgrading
+To upgrade simply bump the snowplow-web and snowplow-media-player version in your `packages.yml` file.
+
 snowplow-media-player 0.5.2 (2023-08-16)
 ---------------------------------------
 ## Summary
