@@ -61,7 +61,7 @@ events_this_run as (
     {{ media_ad_quartile_event_field("max(case when ev.event_type = 'adcomplete' or (ev.event_type = 'adquartile' and ev.ad_percent_progress >= 75) then 1 else 0 end) > 0") }} as percent_reached_75,
     max(case when ev.event_type = 'adcomplete' then 1 else 0 end) > 0 as percent_reached_100,
 
-    min(case when ev.event_type = 'adstart' then ev.start_tstamp end) as viewed_at,
+    min(ev.start_tstamp) as viewed_at,
     max(ev.start_tstamp) as last_event
 
   from events_this_run as ev

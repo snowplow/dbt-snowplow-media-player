@@ -55,5 +55,7 @@ models:
         description: '{{ doc("col_percent_reached_100") }}'
       - name: viewed_at
         description: '{{ doc("col_viewed_at") }}'
+        tests:
+          - not_null
       - name: last_event
         description: '{{ doc("col_last_event") }}'
