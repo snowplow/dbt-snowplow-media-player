@@ -1,3 +1,19 @@
+snowplow-media-player 0.6.0 (2023-09-20)
+---------------------------------------
+## Summary
+This release brings support for new media event and context entity schemas tracked using the JavaScript as well as mobile (iOS and Android) trackers. It also adds new features on top of the new media schemas such as ad tracking models and more accurate playback metrics.
+
+## Features
+Add support for new Snowplow media event and entity schemas on Web and mobile (close #49)
+Replace snowplow_web with a base that can be compatible with mobile events (close #45)
+
+## Under the hood
+Update license to SPAL
+Bump support for utils versions
+
+## 🚨 Breaking Changes 🚨
+This version requires a full refresh run if you have been using any previous versions. You will not be able to upgrade and have the package work without doing a full refresh. Check out the [migration guide](https://docs.snowplow.io/docs/modeling-your-data/modeling-your-data-with-dbt/migration-guides/media-player/) for more information when you upgrade.
+
 snowplow-media-player 0.5.3 (2023-09-04)
 ---------------------------------------
 ## Summary
