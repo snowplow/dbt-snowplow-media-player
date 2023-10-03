@@ -1,3 +1,15 @@
+snowplow-media-player 0.6.1 (2023-10-04)
+---------------------------------------
+## Summary
+This release fixes an issue for users using a utils version 0.15.1 or greater, and fixes an issue with disabling the new contexts on databricks and redshift.
+
+## Fixes
+- Fix error with new utils version on end hook
+- Fix issue with disabling new contexts on redshift and databricks
+
+## Upgrading
+To upgrade simply bump the snowplow-media-player version in your `packages.yml` file.
+
 snowplow-media-player 0.6.0 (2023-09-20)
 ---------------------------------------
 ## Summary
