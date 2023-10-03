@@ -33,7 +33,7 @@ with prep AS (
       domain_sessionid,
       derived_tstamp
 
-      {% if var('snowplow__enable_load_tstamp', true) %}
+      {% if not var('snowplow__enable_load_tstamp', true) %}
       , load_tstamp
       {% endif %}
     ),

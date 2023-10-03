@@ -1,5 +1,5 @@
 name: 'snowplow_media_player'
-version: '0.6.0'
+version: '0.6.1'
 config-version: 2
 
 require-dbt-version: ['>=1.4.0', '<2.0.0']
@@ -48,6 +48,8 @@ vars:
     snowplow__upsert_lookback_days: 30
     snowplow__allow_refresh: false
     snowplow__app_id: []
+
+    snowplow__session_timestamp: collector_tstamp # Used to manage utils version higher than 0.15.1, do not change until new base macro is used
 
     # Variables - Contexts, filters, and logs
     # please set any of the below three variables to true if the related context schemas are enabled for your warehouse, please note it cannot be used to filter the data:
