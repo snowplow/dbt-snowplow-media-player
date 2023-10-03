@@ -89,7 +89,7 @@ group by 1,2,4,5
     (n.avg_percent_played * n.plays / nullif((n.plays + coalesce(t.plays, 0)),0)) + (coalesce(t.avg_percent_played, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_percent_played,
     (n.avg_retention_rate * n.plays / nullif((n.plays + coalesce(t.plays, 0)), 0)) + (coalesce(t.avg_retention_rate, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_retention_rate,
     (n.avg_playback_rate * n.plays / nullif((n.plays + coalesce(t.plays, 0)), 0)) + (coalesce(t.avg_playback_rate, 0) * coalesce(t.plays, 0) / nullif((n.plays + coalesce(t.plays, 0)), 0)) as avg_playback_rate,
-    {{ media_session_field('(coalesce(n.avg_content_watched_sec, 0) / cast(60 as ' + type_float() + ') * n.plays + coalesce(t.avg_content_watched_mins, 0) * coalesce(t.plays, 0)) / nullif((n.plays + coalesce(t.plays, 0)), 0)') }} as avg_content_watched_mins
+    cast({{ media_session_field('(coalesce(n.avg_content_watched_sec, 0.0) / cast(60 as ' + type_float() + ') * n.plays + coalesce(t.avg_content_watched_mins, 0.0) * coalesce(t.plays, 0.0)) / nullif((n.plays + coalesce(t.plays, 0.0)), 0.0)') }} as {{ type_float() }}) as avg_content_watched_mins
 
   from new_data n
 
@@ -193,11 +193,11 @@ with prep as (
     avg(case when is_played then coalesce({{ media_session_field('p.content_watched_secs') }}, p.play_time_secs, 0) / nullif(p.duration_secs, 0) end) as avg_percent_played,
     avg(case when is_played then p.retention_rate end) as avg_retention_rate,
     avg(case when is_played then p.avg_playback_rate end) as avg_playback_rate,
-    {{ media_session_field('avg(
+    cast({{ media_session_field('avg(
       case
         when is_played and p.content_watched_secs is not null
         then p.content_watched_secs / cast(60 as ' + type_float() + ') end
-    )') }} as avg_content_watched_mins
+    )') }} as {{ type_float() }}) as avg_content_watched_mins
 
 
 from {{ ref("snowplow_media_player_base") }} p

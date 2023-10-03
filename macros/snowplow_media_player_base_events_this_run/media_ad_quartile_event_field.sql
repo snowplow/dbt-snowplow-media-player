@@ -12,6 +12,12 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
         col_prefix='unstruct_event_com_snowplowanalytics_snowplow_media_ad_quartile_event_1'
       ) }}
     {%- else -%}
-      null
+      {% if property is string and target.type not in ['postgres', 'redshift'] -%}
+          {{ property }}
+        {% elif target.type not in ['postgres', 'redshift'] %}
+          cast(null as {{ property.get('dtype', 'string') }})
+        {%- else -%}
+          null
+        {% endif %}
     {%- endif -%}
 {% endmacro %}

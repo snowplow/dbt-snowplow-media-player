@@ -13,7 +13,13 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
         col_prefix='contexts_com_snowplowanalytics_snowplow_media_player_2'
       ) }}
     {%- else -%}
-      null
+      {% if v2_quality is string and target.type not in ['postgres', 'redshift'] -%}
+          {{ v2_quality }}
+        {% elif target.type not in ['postgres', 'redshift'] %}
+          cast(null as {{ v2_quality.get('dtype', 'string') }})
+        {%- else -%}
+          null
+        {% endif %}
     {%- endif %},
     {% if var("snowplow__enable_youtube") -%}
       {{ field(
@@ -21,7 +27,13 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
         col_prefix='contexts_com_youtube_youtube_1'
       ) }}
     {%- else -%}
-      null
+      {% if youtube_quality is string and target.type not in ['postgres', 'redshift'] -%}
+          {{ youtube_quality }}
+        {% elif target.type not in ['postgres', 'redshift'] %}
+          cast(null as {{ youtube_quality.get('dtype', 'string') }})
+        {%- else -%}
+          null
+        {% endif %}
     {%- endif %},
     {% if var("snowplow__enable_whatwg_media") and var("snowplow__enable_whatwg_video") -%}
       {{ field(
@@ -32,7 +44,13 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
         col_prefix='contexts_org_whatwg_video_element_1'
       ) }}
     {%- else -%}
-      null
+      {% if video_width is string and target.type not in ['postgres', 'redshift'] -%}
+          {{ video_width }}
+        {% elif target.type not in ['postgres', 'redshift'] %}
+          cast(null as {{ video_width.get('dtype', 'string') }})
+        {%- else -%}
+          null
+        {% endif %}
     {% endif %},
     'N/A'
    )

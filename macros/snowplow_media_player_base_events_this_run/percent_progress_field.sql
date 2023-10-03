@@ -30,7 +30,13 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
           ) }}
         end
       {%- else -%}
-        null
+        {% if v1_percent_progress is string and target.type not in ['postgres', 'redshift'] -%}
+          {{ v1_percent_progress }}
+        {% elif target.type not in ['postgres', 'redshift'] %}
+          cast(null as {{ v1_percent_progress.get('dtype', 'string') }})
+        {%- else -%}
+          null
+        {% endif %}
       {%- endif %},
       {% if var("snowplow__enable_media_player_v2") -%}
         case
@@ -54,7 +60,13 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
             else null
         end
       {%- else -%}
-        null
+        {% if v2_duration is string and target.type not in ['postgres', 'redshift'] -%}
+          {{ v2_duration }}
+        {% elif target.type not in ['postgres', 'redshift'] %}
+          cast(null as {{ v2_duration.get('dtype', 'string') }})
+        {%- else -%}
+          null
+        {% endif %}
       {%- endif %}
     )
 {% endmacro %}

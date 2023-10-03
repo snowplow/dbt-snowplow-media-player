@@ -10,12 +10,24 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
       {% if var("snowplow__enable_web_events") -%}
         {{ field(web) }}
       {%- else -%}
-        null
+        {% if web is string and target.type not in ['postgres', 'redshift'] -%}
+          {{ web }}
+        {% elif target.type not in ['postgres', 'redshift'] %}
+          cast(null as {{ web.get('dtype', 'string') }})
+        {%- else -%}
+          null
+        {% endif %}
       {%- endif %},
       {% if var("snowplow__enable_mobile_events") -%}
         {{ field(mobile) }}
       {%- else -%}
-        null
+        {% if mobile is string and target.type not in ['postgres', 'redshift'] -%}
+          {{ mobile }}
+        {% elif target.type not in ['postgres', 'redshift'] %}
+          cast(null as {{ mobile.get('dtype', 'string') }})
+        {%- else -%}
+          null
+        {% endif %}
       {%- endif %}
     )
 {% endmacro %}
