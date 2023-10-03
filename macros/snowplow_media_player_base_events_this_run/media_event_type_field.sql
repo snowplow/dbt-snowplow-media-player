@@ -15,7 +15,13 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
         field='type'
       ) }}
     {%- else -%}
-      null
+      {% if media_player_event_type is string and target.type not in ['postgres', 'redshift'] -%}
+          {{ media_player_event_type }}
+        {% elif target.type not in ['postgres', 'redshift'] %}
+          cast(null as {{ media_player_event_type.get('dtype', 'string') }})
+        {%- else -%}
+          null
+        {% endif %}
     {%- endif %},
     -- for v2 media schemas, the type is the event name, remove underscores to match v1 event types
     case 

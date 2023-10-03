@@ -13,7 +13,13 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
           col_prefix='contexts_com_snowplowanalytics_snowplow_media_player_2'
         ) }}
       {%- else -%}
-        null
+        {% if v2_player_type is string and target.type not in ['postgres', 'redshift'] -%}
+          {{ v2_player_type }}
+        {% elif target.type not in ['postgres', 'redshift'] %}
+          cast(null as {{ v2_player_type.get('dtype', 'string') }})
+        {%- else -%}
+          null
+        {% endif %}
       {%- endif %},
       {% if var("snowplow__enable_youtube") and var("snowplow__enable_whatwg_media") -%}
         case
@@ -32,7 +38,13 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
       {% elif var("snowplow__enable_whatwg_media") -%}
         'org.whatwg-media_element'
       {%- else -%}
-        null
+        {% if youtube_player_id is string and target.type not in ['postgres', 'redshift'] -%}
+          {{ youtube_player_id }}
+        {% elif target.type not in ['postgres', 'redshift'] %}
+          cast(null as {{ youtube_player_id.get('dtype', 'string') }})
+        {%- else -%}
+          null
+        {% endif %}
       {% endif %}
     )
 {% endmacro %}

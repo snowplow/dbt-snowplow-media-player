@@ -266,7 +266,7 @@ prep as (
     {{ media_player_field(v1='mp.muted', v2='mp2.muted') }} as is_muted,
 
     -- media session properties
-    {{ media_session_field('ms.media_session_id') }} as media_session_id,
+    cast({{ media_session_field('ms.media_session_id') }} as {{ type_string() }}) as media_session_id, {# This is the only key actually used regardless, redshift doesn't like casting a null at a later time#}
     {{ media_session_field('ms.time_played') }} as media_session_time_played,
     {{ media_session_field('ms.time_played_muted') }} as media_session_time_played_muted,
     {{ media_session_field('ms.time_paused') }} as media_session_time_paused,

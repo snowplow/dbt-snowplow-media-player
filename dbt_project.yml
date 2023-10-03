@@ -100,7 +100,7 @@ on-run-end:
 models:
   snowplow_media_player:
     +bind: false
-    +materialized: view
+    +materialized: table
     base:
       manifest:
         +schema: "snowplow_manifest"
