@@ -124,13 +124,13 @@ select
 {% endraw %}
 {% enddocs %}
 
-{% docs macro_media_id_field %}
+{% docs macro_player_id_field %}
 {% raw %}
-This macro produces the value media_id column in the snowplow_media_player_base_events_this_run table based on the values of the youtube_player_id and media_player_id columns.
+This macro produces the value player_id column in the snowplow_media_player_base_events_this_run table based on the values of the youtube_player_id and media_player_id columns.
 
 #### Returns
 
-The query for the media_id column.
+The query for the player_id column.
 
 #### Usage
 

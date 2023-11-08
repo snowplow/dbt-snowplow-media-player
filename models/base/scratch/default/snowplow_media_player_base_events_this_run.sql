@@ -296,7 +296,7 @@ prep as (
     {{ media_ad_quartile_event_field('aq.percent_progress') }} as ad_percent_progress,
 
     -- combined media properties
-    {{ media_id_field(v2_player_label='mp2.label', youtube_player_id='yt.player_id', media_player_id='me.html_id') }} as media_id,
+    {{ player_id_field(youtube_player_id='yt.player_id', media_player_id='me.html_id') }} as player_id,
     {{ media_player_type_field(v2_player_type='mp2.player_type', youtube_player_id='yt.player_id', media_player_id='me.html_id') }} as media_player_type,
     {{ source_url_field(youtube_url='yt.url', media_current_src='me.current_src')}} as source_url,
     {{ media_type_field(v2_media_type='mp2.media_type', media_media_type='me.media_type')}} as media_type,
@@ -363,10 +363,11 @@ where
 )
 
 select
- coalesce(
+  coalesce(
     p.media_session_id,
-    {{ dbt_utils.generate_surrogate_key(['p.page_view_id', 'p.media_id' ]) }}
-  ) play_id,
+    {{ dbt_utils.generate_surrogate_key(['p.page_view_id', 'p.player_id', 'p.media_label', 'p.media_type', 'p.media_player_type']) }}
+  ) as play_id,
+  {{ dbt_utils.generate_surrogate_key(['p.player_id', 'p.media_label', 'p.media_type', 'p.media_player_type']) }} as media_identifier,
   p.*,
   coalesce(cast(round(piv.weight_rate * p.duration_secs / 100) as {{ type_int() }}), 0) as play_time_secs,
   coalesce(cast(case when p.is_muted then round(piv.weight_rate * p.duration_secs / 100) end as {{ type_int() }}), 0) as play_time_muted_secs

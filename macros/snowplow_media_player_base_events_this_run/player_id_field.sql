@@ -5,7 +5,7 @@ and you may not use this file except in compliance with the Snowplow Personal an
 You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 at https://docs.snowplow.io/personal-and-academic-license-1.0/
 #}
 
-{% macro media_id_field(v2_player_label, youtube_player_id, media_player_id) %}
+{% macro player_id_field(youtube_player_id, media_player_id) %}
     coalesce(
       {% if var("snowplow__enable_youtube") -%}
         {{ field(
@@ -31,22 +31,6 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
           {{ media_player_id }}
         {% elif target.type not in ['postgres', 'redshift'] %}
           cast(null as {{ media_player_id.get('dtype', 'string') }})
-        {%- else -%}
-          null
-        {% endif %}
-      {%- endif %},
-      {% if var("snowplow__enable_media_player_v2") -%}
-        {{ dbt_utils.generate_surrogate_key([
-          field(
-            v2_player_label,
-            col_prefix='contexts_com_snowplowanalytics_snowplow_media_player_2'
-          )
-        ]) }}
-      {%- else -%}
-        {% if v2_player_label is string and target.type not in ['postgres', 'redshift'] -%}
-          {{ v2_player_label }}
-        {% elif target.type not in ['postgres', 'redshift'] %}
-          cast(null as {{ v2_player_label.get('dtype', 'string') }})
         {%- else -%}
           null
         {% endif %}

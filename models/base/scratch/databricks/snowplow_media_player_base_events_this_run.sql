@@ -111,11 +111,10 @@ with prep AS (
     {{ media_ad_quartile_event_field({ 'field': 'percent_progress', 'dtype': 'integer' }) }} as ad_percent_progress,
 
     -- combined media properties
-    {{ media_id_field(
-      v2_player_label={ 'field': 'label', 'dtype': 'string' },
+    {{ player_id_field(
       youtube_player_id={ 'field': 'player_id', 'dtype': 'string' },
       media_player_id={ 'field': 'html_id', 'dtype': 'string' }
-    ) }} as media_id,
+    ) }} as player_id,
     {{ media_player_type_field(
       v2_player_type={ 'field': 'player_type', 'dtype': 'string' },
       youtube_player_id={ 'field': 'player_id', 'dtype': 'string' },
@@ -156,8 +155,9 @@ with prep AS (
 select
   coalesce(
     p.media_session_id,
-    {{ dbt_utils.generate_surrogate_key(['p.page_view_id', 'p.media_id' ]) }}
+    {{ dbt_utils.generate_surrogate_key(['p.page_view_id', 'p.player_id', 'p.media_label', 'p.media_type', 'p.media_player_type']) }}
   ) as play_id,
+  {{ dbt_utils.generate_surrogate_key(['p.player_id', 'p.media_label', 'p.media_type', 'p.media_player_type']) }} as media_identifier,
   p.* except (percent_progress),
 
   cast(p.percent_progress as integer) as percent_progress,
