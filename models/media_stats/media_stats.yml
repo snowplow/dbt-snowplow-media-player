@@ -4,13 +4,15 @@ models:
   - name: snowplow_media_player_media_stats
     description: '{{ doc("table_media_stats") }}'
     columns:
-      - name: media_id
+      - name: media_identifier
         description: The primary key of this table
         tags:
           - primary-key
         tests:
           - unique
           - not_null
+      - name: player_id
+        description: '{{ doc("col_player_id") }}'
       - name: media_label
         description: '{{ doc("col_media_label") }}'
       - name: duration_secs

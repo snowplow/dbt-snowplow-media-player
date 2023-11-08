@@ -13,7 +13,7 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
       "field": "start_tstamp",
       "data_type": "timestamp"
     }, databricks_val='start_tstamp_date'),
-    cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["media_id"]),
+    cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["media_identifier"]),
     sort = 'start_tstamp',
     dist = 'play_id',
     sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt'))
@@ -35,7 +35,8 @@ events_this_run as (
   select
     i.play_id,
     i.page_view_id,
-    i.media_id,
+    i.media_identifier,
+    i.player_id,
     i.media_label,
     i.session_identifier,
     i.domain_userid,
@@ -67,7 +68,7 @@ events_this_run as (
 
   from events_this_run as i
 
-  group by 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 15, 16, 17, 18, 19
+  group by 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20
 
 )
 
@@ -140,7 +141,7 @@ events_this_run as (
 , duration_fix as (
 
   select
-    f.media_id,
+    f.media_identifier,
     max(f.duration_secs) as duration_secs
 
   from events_this_run as f
@@ -156,7 +157,8 @@ events_this_run as (
 select
   d.play_id,
   d.page_view_id,
-  d.media_id,
+  d.media_identifier,
+  d.player_id,
   d.media_label,
   d.session_identifier,
   d.domain_userid,
@@ -237,7 +239,7 @@ left join retention_rate as r
   on r.play_id = d.play_id
 
 left join duration_fix as f
-  on f.media_id = d.media_id
+  on f.media_identifier = d.media_identifier
 
 left join media_sessions as s
   on s.media_session_id = d.play_id

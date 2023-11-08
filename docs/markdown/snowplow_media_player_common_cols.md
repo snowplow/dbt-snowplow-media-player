@@ -2,12 +2,16 @@
 A UUID for each event e.g. `c6ef3124-b53a-4b13-a233-0088f79dcbcb`.
 {% enddocs %}
 
-{% docs col_media_id %}
-The unique identifier of a specific media element. It is the `player_id` in case of YouTube and `html_id` in case of HTML5.
+{% docs col_media_identifier %}
+The surrogate key generated from `media_id`, `media_label`, `media_type` and `media_player_type` to create a unique media element identifier.
+{% enddocs %}
+
+{% docs col_player_id %}
+The HTML id attribute of the media content. It is the `player_id` in case of YouTube and `html_id` in case of HTML5.
 {% enddocs %}
 
 {% docs col_play_id %}
-The surrogate key generated from `page_view_id` and `media_id `to create a unique play event identifier.
+The surrogate key generated from `page_view_id`, `media_id`, `media_label`, `media_type` and `media_player_type` to create a unique play event identifier.
 {% enddocs %}
 
 {% docs col_page_view_id %}
@@ -199,7 +203,7 @@ Average playback rate (1 is normal speed).
 {% enddocs %}
 
 {% docs col_play_rate %}
-Total plays divided by impressions. Please note that as the base for media plays is pageview / media_id, in case the same video is played multiple times within the same pageview, it will still count as one play.
+Total plays divided by impressions. Please note that as the base for media plays is pageview / media_identifier, in case the same video is played multiple times within the same pageview, it will still count as one play.
 {% enddocs %}
 
 {% docs col_complete_plays %}
@@ -905,7 +909,7 @@ The index of the event in the corresponding session.
 {% enddocs %}
 
 {% docs col_media_ad_id %}
-Generated identifier that identifies an ad (identified using the ad_id) played with a specific media (identified using the media_id) and on a specific platform (based on the platform property).
+Generated identifier that identifies an ad (identified using the ad_id) played with a specific media (identified using the media_identifier) and on a specific platform (based on the platform property).
 {% enddocs %}
 
 {% docs col_ad_id %}

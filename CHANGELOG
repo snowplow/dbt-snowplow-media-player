@@ -1,3 +1,16 @@
+snowplow-media-player 0.7.0 (2023-xx-xx)
+---------------------------------------
+## Summary
+This release adds a more robust unique media identifier. This fixes an issue where duplicate `media_id` values could occur in the media stats table as a result of incorrect tracking implementation (e.g. sharing the same media label across different media types).
+
+## Features
+Add unique media identifier (close #59)
+
+## Under the hood
+
+## 🚨 Breaking Changes 🚨
+This version requires a full refresh run if you have been using any previous versions. You will not be able to upgrade and have the package work without doing a full refresh. Check out the [migration guide](https://docs.snowplow.io/docs/modeling-your-data/modeling-your-data-with-dbt/migration-guides/media-player/) for more information when you upgrade.
+
 snowplow-media-player 0.6.1 (2023-10-04)
 ---------------------------------------
 ## Summary

@@ -1,5 +1,5 @@
 name: 'snowplow_media_player'
-version: '0.6.1'
+version: '0.7.0'
 config-version: 2
 
 require-dbt-version: ['>=1.4.0', '<2.0.0']
