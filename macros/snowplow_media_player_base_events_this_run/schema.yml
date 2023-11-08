@@ -46,12 +46,9 @@ macros:
         type: string
         description: The event name used for v2 media schemas
 
-  - name: media_id_field
-    description: '{{ doc("macro_media_id_field") }}'
+  - name: player_id_field
+    description: '{{ doc("macro_player_id_field") }}'
     arguments:
-      - name: v2_player_label
-        type: string
-        description: The label value in the v2 of the player context entity
       - name: youtube_player_id
         type: string
         description: The name of the player_id column in the YouTube context

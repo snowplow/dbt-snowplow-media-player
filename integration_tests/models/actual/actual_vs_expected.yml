@@ -10,7 +10,8 @@ models:
           compare_columns:
             - play_id
             - page_view_id
-            - media_id
+            - media_identifier
+            - player_id
             - media_label
             - session_identifier
             - domain_userid
@@ -54,7 +55,8 @@ models:
       - dbt_utils.equality:
           compare_model: ref('snowplow_media_player_media_stats_expected_stg')
           compare_columns:
-            - media_id
+            - media_identifier
+            - player_id
             - media_label
             - duration_secs
             - media_type
@@ -88,7 +90,7 @@ models:
           compare_columns:
             - media_ad_id
             - platform
-            - media_id
+            - media_identifier
             - media_label
             - domain_userid
             - user_id
@@ -118,7 +120,7 @@ models:
           compare_columns:
             - media_ad_id
             - platform
-            - media_id
+            - media_identifier
             - media_label
             - ad_id
             - name

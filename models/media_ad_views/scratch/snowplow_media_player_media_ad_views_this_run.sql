@@ -26,17 +26,17 @@ with
 events_this_run as (
 
     select * from {{ ref('snowplow_media_player_base_events_this_run') }}
-    where ad_id is not null and media_id is not null
+    where ad_id is not null and media_identifier is not null
 
 )
 
 , prep as (
 
   select
-    {{ dbt_utils.generate_surrogate_key(['ev.platform', 'ev.media_id', 'ev.ad_id']) }} as media_ad_id,
+    {{ dbt_utils.generate_surrogate_key(['ev.platform', 'ev.media_identifier', 'ev.ad_id']) }} as media_ad_id,
 
     ev.platform,
-    ev.media_id,
+    ev.media_identifier,
     max(ev.media_label) as media_label,
     ev.domain_userid,
     ev.session_identifier,

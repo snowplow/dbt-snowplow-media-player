@@ -57,7 +57,7 @@ The package contains multiple staging models however the mart models are as foll
 |------------------------------------------|------------------------------------------------------------------------------------------------------------------|
 | snowplow_media_player_base               | A table summarizing media player events by media and pageview including impressions.                             |
 | snowplow_media_player_plays_by_pageview  | A view summarizing media plays by media on a pageview level.                                                     |
-| snowplow_media_player_media_stats        | An aggregated table of media metrics on a media_id level.                                                        |
+| snowplow_media_player_media_stats        | An aggregated table of media metrics on a media_identifier level.                                                        |
 | snowplow_media_player_media_ad_views     | A view summarizing each ad viewed within a media playback (only for v2 schemas, see above).                      |
 | snowplow_media_player_media_ads          | An aggregated table of ad metrics for each ad played within each media content (only for v2 schemas, see above). |
 

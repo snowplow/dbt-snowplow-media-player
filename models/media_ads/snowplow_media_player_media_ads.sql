@@ -52,7 +52,7 @@ new_media_ad_views as (
     a.media_ad_id,
 
     a.platform,
-    a.media_id,
+    a.media_identifier,
     max(a.media_label) as media_label,
 
     {{ media_ad_field('a.ad_id') }} as ad_id,
@@ -139,7 +139,7 @@ new_media_ad_views as (
     a.media_ad_id,
 
     a.platform,
-    a.media_id,
+    a.media_identifier,
     max(a.media_label) as media_label,
 
     {{ media_ad_field('a.ad_id') }} as ad_id,
@@ -180,7 +180,7 @@ new_media_ad_views as (
     a.media_ad_id,
 
     a.platform,
-    a.media_id,
+    a.media_identifier,
     a.media_label,
 
     a.ad_id,

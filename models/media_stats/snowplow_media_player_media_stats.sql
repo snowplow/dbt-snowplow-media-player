@@ -8,15 +8,15 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
 {{
   config(
     materialized= 'incremental',
-    unique_key = 'media_id',
+    unique_key = 'media_identifier',
     sort = 'last_play',
-    dist = 'media_id',
+    dist = 'media_identifier',
     tags=["derived"],
     partition_by = snowplow_utils.get_value_by_target_type(bigquery_val={
       "field": "first_play",
       "data_type": "timestamp"
     }, databricks_val='first_play_date'),
-    cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["media_id"]),
+    cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["media_identifier"]),
     sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt')),
     tblproperties={
       'delta.autoOptimize.optimizeWrite' : 'true',
@@ -30,7 +30,8 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
 with new_data as (
 
   select
-    p.media_id,
+    p.media_identifier,
+    p.player_id,
     p.media_label,
     max(p.duration_secs) as duration_secs,
     p.media_type,
@@ -58,14 +59,15 @@ and (
   p.start_tstamp > ( select max(last_base_tstamp) from {{ this }} )
 )
 
-group by 1,2,4,5
+group by 1,2,3,5,6
 
 )
 
 , prep as (
 
   select
-    n.media_id,
+    n.media_identifier,
+    n.player_id,
     n.media_label,
     greatest(n.duration_secs, coalesce(t.duration_secs, 0)) as duration_secs,
     n.media_type,
@@ -94,14 +96,14 @@ group by 1,2,4,5
   from new_data n
 
   left join {{ this }} t
-  on n.media_id = t.media_id
+  on n.media_identifier = t.media_identifier
 
 )
 
 , percent_progress_reached as (
 
     select
-      media_id,
+      p.media_identifier,
       {{ snowplow_utils.get_split_to_array('percent_progress_reached', 'p') }} as percent_progress_reached
 
     from {{ ref("snowplow_media_player_base") }} p
@@ -117,14 +119,14 @@ group by 1,2,4,5
 
 , unnesting as (
 
-  {{ snowplow_utils.unnest('media_id', 'percent_progress_reached', 'value_reached', 'percent_progress_reached') }}
+  {{ snowplow_utils.unnest('media_identifier', 'percent_progress_reached', 'value_reached', 'percent_progress_reached') }}
 
 )
 
 , pivoting as (
 
   select
-    u.media_id,
+    u.media_identifier,
   {{ dbt_utils.pivot(
     column='u.value_reached',
     values=dbt_utils.get_column_values( table=ref('snowplow_media_player_pivot_base'), column='percent_progress', default=[]) | sort,
@@ -144,7 +146,7 @@ group by 1,2,4,5
 , addition as (
 
   select
-    coalesce(p.media_id, t.media_id) as media_id,
+    coalesce(p.media_identifier, t.media_identifier) as media_identifier,
 
   {% for element in get_percentage_boundaries(var("snowplow__percent_progress_boundaries")) %}
 
@@ -167,7 +169,7 @@ group by 1,2,4,5
   from pivoting p
 
   full outer join {{ this }} t
-  on t.media_id = p.media_id
+  on t.media_identifier = p.media_identifier
 
 )
 
@@ -176,7 +178,8 @@ group by 1,2,4,5
 with prep as (
 
   select
-    p.media_id,
+    p.media_identifier,
+    p.player_id,
     p.media_label,
     max(p.duration_secs) as duration_secs,
     p.media_type,
@@ -202,14 +205,14 @@ with prep as (
 
 from {{ ref("snowplow_media_player_base") }} p
 
-group by 1,2,4,5
+group by 1,2,3,5,6
 
 )
 
 , percent_progress_reached as (
 
     select
-      media_id,
+      p.media_identifier,
       {{ snowplow_utils.get_split_to_array('percent_progress_reached', 'p') }} as percent_progress_reached
 
     from {{ ref("snowplow_media_player_base") }} p
@@ -218,7 +221,7 @@ group by 1,2,4,5
 
 , unnesting as (
 
-  {{ snowplow_utils.unnest('media_id', 'percent_progress_reached', 'value_reached', 'percent_progress_reached') }}
+  {{ snowplow_utils.unnest('media_identifier', 'percent_progress_reached', 'value_reached', 'percent_progress_reached') }}
 
 )
 
@@ -226,7 +229,8 @@ group by 1,2,4,5
 
 
 select
-  p.media_id,
+  p.media_identifier,
+  p.player_id,
   p.media_label,
   p.duration_secs,
   p.media_type,
@@ -282,13 +286,13 @@ select
   {% if is_incremental() %}
 
   left join addition a
-  on a.media_id = p.media_id
+  on a.media_identifier = p.media_identifier
 
   {% else %}
 
   left join unnesting un
-  on un.media_id = p.media_id
+  on un.media_identifier = p.media_identifier
 
-  {{ dbt_utils.group_by(n=20) }}
+  {{ dbt_utils.group_by(n=21) }}
 
 {% endif %}
