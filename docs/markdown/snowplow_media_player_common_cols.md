@@ -3,7 +3,7 @@ A UUID for each event e.g. `c6ef3124-b53a-4b13-a233-0088f79dcbcb`.
 {% enddocs %}
 
 {% docs col_media_identifier %}
-The surrogate key generated from `media_id`, `media_label`, `media_type` and `media_player_type` to create a unique media element identifier.
+The surrogate key generated from `player_id`, `media_label`, `media_type` and `media_player_type` to create a unique media element identifier.
 {% enddocs %}
 
 {% docs col_player_id %}
@@ -11,7 +11,7 @@ The HTML id attribute of the media content. It is the `player_id` in case of You
 {% enddocs %}
 
 {% docs col_play_id %}
-The surrogate key generated from `page_view_id`, `media_id`, `media_label`, `media_type` and `media_player_type` to create a unique play event identifier.
+The surrogate key generated from `page_view_id`, `player_id`, `media_label`, `media_type` and `media_player_type` to create a unique play event identifier.
 {% enddocs %}
 
 {% docs col_page_view_id %}
@@ -301,7 +301,7 @@ The number of pageviews with audio plays of any duration.
 {% enddocs %}
 
 {% docs col_last_base_tstamp %}
-The start_tstamp of the last processed page_view across all media_ids to be used as a lower limit for subsequent incremental runs.
+The start_tstamp of the last processed page_view across all media_identifiers to be used as a lower limit for subsequent incremental runs.
 {% enddocs %}
 
 {% docs col_player_current_time %}

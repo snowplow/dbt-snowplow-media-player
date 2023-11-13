@@ -8,6 +8,7 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
 {{
   config(
     materialized= "incremental",
+    unique_key= 'media_ad_view_id',
     upsert_date_key='last_event',
     sort = 'last_event',
     dist = 'media_ad_id',

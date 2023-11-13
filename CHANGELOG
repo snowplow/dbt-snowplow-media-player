@@ -1,10 +1,11 @@
 snowplow-media-player 0.7.0 (2023-xx-xx)
 ---------------------------------------
 ## Summary
-This release adds a more robust unique media identifier. This fixes an issue where duplicate `media_id` values could occur in the media stats table as a result of incorrect tracking implementation (e.g. sharing the same media label across different media types).
+This release adds a more robust unique media identifier. This fixes an issue where duplicate `media_id` values could occur in the media stats table as a result of incorrect tracking implementation (e.g. sharing the same media label across different media types). This release also fixes the incremental materialization of the media_ad_views table by adding a unique primary key.
 
-## Features
-Add unique media identifier (close #59)
+## Fixes
+- Add unique media identifier (close #59)
+- Add missing primary key to media_ad_views
 
 ## Under the hood
 
