@@ -137,10 +137,10 @@ The query for the player_id column.
 ```sql
 select
     ...,
-    {{ media_id_field(
+    {{ player_id_field(
         youtube_player_id='a.contexts_com_youtube_youtube_1[0]:playerId',
         media_player_id='a.contexts_org_whatwg_media_element_1[0]:htmlId::varchar'
-    ) }} as media_id
+    ) }} as player_id
     from {{ var('snowplow__events') }} as a
 ```
 

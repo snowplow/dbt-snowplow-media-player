@@ -5,6 +5,13 @@ models:
     +tags: "snowplow_media_player_incremental"
     description: '{{ doc("table_base") }}'
     columns:
+      - name: media_ad_view_id
+        description: The primary key of this table
+        tags:
+          - primary-key
+        tests:
+          - unique
+          - not_null
       - name: media_ad_id
         description: '{{ doc("col_media_ad_id") }}'
         tests:
