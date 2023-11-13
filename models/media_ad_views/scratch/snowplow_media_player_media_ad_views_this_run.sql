@@ -70,8 +70,11 @@ events_this_run as (
 
 )
 
-select *
-    {% if target.type in ['databricks', 'spark'] -%}
-      , date(prep.viewed_at) as viewed_at_date
-    {%- endif %}
-  from prep
+select
+  {{ dbt_utils.generate_surrogate_key(['p.play_id', 'p.ad_break_id', 'p.media_ad_id']) }} as media_ad_view_id
+  , p.*
+  {% if target.type in ['databricks', 'spark'] -%}
+    , date(p.viewed_at) as viewed_at_date
+  {%- endif %}
+
+from prep as p

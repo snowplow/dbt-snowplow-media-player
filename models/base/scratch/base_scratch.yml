@@ -44,7 +44,7 @@ models:
         description: '{{ doc("col_domain_userid") }}'
       - name: media_identifier
         description: '{{ doc("col_media_identifier") }}'
-      - name: media_id
+      - name: player_id
         description: '{{ doc("col_player_id") }}'
       - name: media_label
         description: '{{ doc("col_media_label") }}'
