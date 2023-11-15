@@ -16,7 +16,7 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
                                                                           'start_tstamp',
                                                                           'end_tstamp') %}
 
--- check for exceptions
+{# Check for exceptions #}
 {% if var("snowplow__enable_whatwg_media") is false and var("snowplow__enable_whatwg_video") %}
   {{ exceptions.raise_compiler_error("variable: snowplow__enable_whatwg_video is enabled but variable: snowplow__enable_whatwg_media is not, both need to be enabled for modelling html5 video tracking data.") }}
 {% elif not var("snowplow__enable_media_player_v1") and not var("snowplow__enable_media_player_v2") %}
@@ -25,28 +25,40 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
   {{ exceptions.raise_compiler_error("No media context enabled. Please enable as many of the following variables as required: snowplow__enable_media_player_v2, snowplow__enable_youtube, snowplow__enable_whatwg_media, snowplow__enable_whatwg_video") }}
 {% endif %}
 
-with prep as (
+{% set base_events_query = snowplow_utils.base_create_snowplow_events_this_run(
+    sessions_this_run_table='snowplow_media_player_base_sessions_this_run',
+    session_identifiers=session_identifiers(),
+    session_sql=var('snowplow__session_sql', none),
+    session_timestamp=var('snowplow__session_timestamp', 'collector_tstamp'),
+    derived_tstamp_partitioned=var('snowplow__derived_tstamp_partitioned', true),
+    days_late_allowed=var('snowplow__days_late_allowed', 3),
+    max_session_days=var('snowplow__max_session_days', 3),
+    app_ids=var('snowplow__app_id', []),
+    snowplow_events_database=var('snowplow__database', target.database) if target.type not in ['databricks', 'spark'] else var('snowplow__databricks_catalog', 'hive_metastore') if target.type in ['databricks'] else var('snowplow__atomic_schema', 'atomic'),
+    snowplow_events_schema=var('snowplow__atomic_schema', 'atomic'),
+    snowplow_events_table=var('snowplow__events_table', 'events'),
+    entities_or_sdes=contexts,
+    custom_sql=var('snowplow__custom_sql', '')
+) %}
+
+with base_query as (
+  {{ base_events_query }}
+),
+
+prep as (
 
   select
-
-    a.* exclude (
-      domain_userid,
-      domain_sessionid,
-      derived_tstamp
-
-      {% if not var('snowplow__enable_load_tstamp', true) %}
-      , load_tstamp
-      {% endif %}
-    ),
-
+    a.*,
     a.derived_tstamp as start_tstamp,
-    b.domain_userid, -- take domain_userid from manifest. This ensures only 1 domain_userid per session.
-    b.session_id as session_identifier,
 
     {{ web_or_mobile_field(
       web={ 'field': 'id', 'col_prefix': 'contexts_com_snowplowanalytics_snowplow_web_page_1', 'dtype': 'varchar' },
       mobile={ 'field': 'id', 'col_prefix': 'contexts_com_snowplowanalytics_mobile_screen_1', 'dtype': 'varchar' }
     ) }} as page_view_id,
+    {{ web_or_mobile_field(
+      web='a.domain_sessionid',
+      mobile={ 'field': 'sessionId', 'col_prefix': 'contexts_com_snowplowanalytics_snowplow_client_session_1', 'dtype': 'varchar' }
+    ) }} as original_session_identifier,
 
     -- unpacking the media player event
     {{ media_player_field(
@@ -63,7 +75,7 @@ with prep as (
     {{ media_player_field(
       v1={ 'field': 'currentTime', 'dtype': 'float' },
       v2={ 'field': 'currentTime', 'dtype': 'float' }
-    ) }} as current_time,
+    ) }} as player_current_time,
     {{ media_player_field(
       v1={ 'field': 'playbackRate', 'dtype': 'float' },
       v2={ 'field': 'playbackRate', 'dtype': 'float' },
@@ -136,21 +148,11 @@ with prep as (
         video_height={ 'field': 'videoHeight', 'dtype': 'integer' }
     )}} as playback_quality
 
-    from {{ var('snowplow__events') }} as a
-    inner join {{ ref('snowplow_media_player_base_sessions_this_run') }} as b
-    on {{ web_or_mobile_field(
-      web='a.domain_sessionid',
-      mobile={ 'field': 'sessionId', 'col_prefix': 'contexts_com_snowplowanalytics_snowplow_client_session_1', 'dtype': 'varchar' }
-    ) }} = b.session_id
+    from base_query as a
 
-    where a.collector_tstamp <= {{ snowplow_utils.timestamp_add('day', var("snowplow__max_session_days", 3), 'b.start_tstamp') }}
-    and a.dvce_sent_tstamp <= {{ snowplow_utils.timestamp_add('day', var("snowplow__days_late_allowed", 3), 'a.dvce_created_tstamp') }}
-    and a.collector_tstamp >= {{ lower_limit }}
-    and a.collector_tstamp <= {{ upper_limit }}
-    and {{ snowplow_utils.app_id_filter(var("snowplow__app_id",[])) }}
-    and {{ snowplow_media_player.event_name_filter(var("snowplow__media_event_names", "['media_player_event']")) }}
+    where
+      {{ snowplow_media_player.event_name_filter(var("snowplow__media_event_names", "['media_player_event']")) }}
 
-    qualify row_number() over (partition by a.event_id order by a.collector_tstamp) = 1
 )
 
 select

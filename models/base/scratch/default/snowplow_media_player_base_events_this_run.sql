@@ -13,11 +13,9 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
     )
 }}
 
-{%- set lower_limit, upper_limit = snowplow_utils.return_limits_from_model(ref('snowplow_media_player_base_sessions_this_run'),
-                                                                            'start_tstamp',
-                                                                            'end_tstamp') %}
 
--- check for exceptions
+
+{# Check for exceptions #}
 {% if var("snowplow__enable_whatwg_media") is false and var("snowplow__enable_whatwg_video") %}
   {{ exceptions.raise_compiler_error("variable: snowplow__enable_whatwg_video is enabled but variable: snowplow__enable_whatwg_media is not, both need to be enabled for modelling html5 video tracking data.") }}
 {% elif not var("snowplow__enable_media_player_v1") and not var("snowplow__enable_media_player_v2") %}
@@ -26,340 +24,153 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
   {{ exceptions.raise_compiler_error("No media context enabled. Please enable as many of the following variables as required: snowplow__enable_media_player_v2, snowplow__enable_youtube, snowplow__enable_whatwg_media, snowplow__enable_whatwg_video") }}
 {% endif %}
 
-with
+{# Setting sdes or contexts for Postgres / Redshift. dbt passes variables by reference so need to use copy to avoid altering the list multiple times #}
+{% set contexts = var('snowplow__entities_or_sdes', []).copy() %}
 
 {% if var("snowplow__enable_mobile_events") %}
--- unpacking the screen context entity
-{{ snowplow_utils.get_sde_or_context(var('snowplow__atomic_schema', 'atomic'), var('snowplow__context_screen'), lower_limit, upper_limit) }},
--- unpacking the client session context entity
-{{ snowplow_utils.get_sde_or_context(var('snowplow__atomic_schema', 'atomic'), var('snowplow__context_mobile_session'), lower_limit, upper_limit) }},
+  {% do contexts.append({'schema': var('snowplow__context_screen'), 'prefix': 'mobile_screen_', 'single_entity': True}) %}
+  {% do contexts.append({'schema': var('snowplow__context_mobile_session'), 'prefix': 'mobile_session_', 'single_entity': True}) %}
 {% endif %}
-
-/* Dedupe logic: Per dupe event_id keep earliest row ordered by collector_tstamp.
-   If multiple earliest rows, take arbitrary one using row_number(). */
-
-events_this_run AS (
-
-    select
-        a.app_id,
-        a.platform,
-        a.etl_tstamp,
-        a.collector_tstamp,
-        a.dvce_created_tstamp,
-        a.event,
-        a.event_id,
-        a.txn_id,
-        a.name_tracker,
-        a.v_tracker,
-        a.v_collector,
-        a.v_etl,
-        a.user_id,
-        a.user_ipaddress,
-        a.user_fingerprint,
-        b.domain_userid, -- take domain_userid from manifest. This ensures only 1 domain_userid per session.
-        a.domain_sessionidx,
-        a.network_userid,
-        a.geo_country,
-        a.geo_region,
-        a.geo_city,
-        a.geo_zipcode,
-        a.geo_latitude,
-        a.geo_longitude,
-        a.geo_region_name,
-        a.ip_isp,
-        a.ip_organization,
-        a.ip_domain,
-        a.ip_netspeed,
-        a.page_url,
-        a.page_title,
-        a.page_referrer,
-        a.page_urlscheme,
-        a.page_urlhost,
-        a.page_urlport,
-        a.page_urlpath,
-        a.page_urlquery,
-        a.page_urlfragment,
-        a.refr_urlscheme,
-        a.refr_urlhost,
-        a.refr_urlport,
-        a.refr_urlpath,
-        a.refr_urlquery,
-        a.refr_urlfragment,
-        a.refr_medium,
-        a.refr_source,
-        a.refr_term,
-        a.mkt_medium,
-        a.mkt_source,
-        a.mkt_term,
-        a.mkt_content,
-        a.mkt_campaign,
-        a.se_category,
-        a.se_action,
-        a.se_label,
-        a.se_property,
-        a.se_value,
-        a.tr_orderid,
-        a.tr_affiliation,
-        a.tr_total,
-        a.tr_tax,
-        a.tr_shipping,
-        a.tr_city,
-        a.tr_state,
-        a.tr_country,
-        a.ti_orderid,
-        a.ti_sku,
-        a.ti_name,
-        a.ti_category,
-        a.ti_price,
-        a.ti_quantity,
-        a.pp_xoffset_min,
-        a.pp_xoffset_max,
-        a.pp_yoffset_min,
-        a.pp_yoffset_max,
-        a.useragent,
-        a.br_name,
-        a.br_family,
-        a.br_version,
-        a.br_type,
-        a.br_renderengine,
-        a.br_lang,
-        a.br_features_pdf,
-        a.br_features_flash,
-        a.br_features_java,
-        a.br_features_director,
-        a.br_features_quicktime,
-        a.br_features_realplayer,
-        a.br_features_windowsmedia,
-        a.br_features_gears,
-        a.br_features_silverlight,
-        a.br_cookies,
-        a.br_colordepth,
-        a.br_viewwidth,
-        a.br_viewheight,
-        a.os_name,
-        a.os_family,
-        a.os_manufacturer,
-        a.os_timezone,
-        a.dvce_type,
-        a.dvce_ismobile,
-        a.dvce_screenwidth,
-        a.dvce_screenheight,
-        a.doc_charset,
-        a.doc_width,
-        a.doc_height,
-        a.tr_currency,
-        a.tr_total_base,
-        a.tr_tax_base,
-        a.tr_shipping_base,
-        a.ti_currency,
-        a.ti_price_base,
-        a.base_currency,
-        a.geo_timezone,
-        a.mkt_clickid,
-        a.mkt_network,
-        a.etl_tags,
-        a.dvce_sent_tstamp,
-        a.refr_domain_userid,
-        a.refr_dvce_tstamp,
-        b.session_id as session_identifier,
-        a.derived_tstamp as start_tstamp,
-        a.event_vendor,
-        a.event_name,
-        a.event_format,
-        a.event_version,
-        a.event_fingerprint,
-        a.true_tstamp,
-        {% if var('snowplow__enable_load_tstamp', true) %}
-        a.load_tstamp,
-        {% endif %}
-
-        row_number() over (partition by a.event_id order by a.collector_tstamp) as event_id_dedupe_index,
-        count(*) over (partition by a.event_id) as event_id_dedupe_count
-
-    from {{ var('snowplow__events') }} as a
-    {% if var('snowplow__enable_mobile_events', false) -%}
-        left join {{ var('snowplow__context_mobile_session') }} cs on a.event_id = cs.client_session__id and a.collector_tstamp = cs.client_session__tstamp
-    {%- endif %}
-        inner join {{ ref('snowplow_media_player_base_sessions_this_run') }} as b
-        on {{ web_or_mobile_field(
-          web='a.domain_sessionid',
-          mobile='cs.session_id'
-        ) }} = b.session_id
-
-    where a.collector_tstamp <= {{ snowplow_utils.timestamp_add('day', var("snowplow__max_session_days", 3), 'b.start_tstamp') }}
-        and a.dvce_sent_tstamp <= {{ snowplow_utils.timestamp_add('day', var("snowplow__days_late_allowed", 3), 'a.dvce_created_tstamp') }}
-        and a.collector_tstamp >= {{ lower_limit }}
-        and a.collector_tstamp <= {{ upper_limit }}
-        and {{ snowplow_utils.app_id_filter(var("snowplow__app_id",[])) }}
-        and {{ snowplow_media_player.event_name_filter(var("snowplow__media_event_names", "['media_player_event']")) }}
-
-),
 
 {% if var("snowplow__enable_media_player_v1") %}
--- unpacking the media player event
-{{ snowplow_utils.get_sde_or_context(var('snowplow__atomic_schema', 'atomic'), var('snowplow__media_player_event_context'), lower_limit, upper_limit) }},
--- unpacking the media player context entity
-{{ snowplow_utils.get_sde_or_context(var('snowplow__atomic_schema', 'atomic'), var('snowplow__media_player_context'), lower_limit, upper_limit) }},
+  {% do contexts.append({'schema': var('snowplow__media_player_event_context'), 'prefix': 'media_player_event_', 'single_entity': True}) %}
+  {% do contexts.append({'schema': var('snowplow__media_player_context'), 'prefix': 'media_player_', 'single_entity': True}) %}
 {% endif %}
+
 {% if var("snowplow__enable_media_player_v2") %}
--- unpacking the media player context entity v2
-{{ snowplow_utils.get_sde_or_context(var('snowplow__atomic_schema', 'atomic'), var('snowplow__media_player_v2_context'), lower_limit, upper_limit) }},
+  {% do contexts.append({'schema': var('snowplow__media_player_v2_context'), 'prefix': 'media_player_v2_', 'single_entity': True}) %}
 {% endif %}
+
 {% if var("snowplow__enable_media_session") %}
--- unpacking the media session context entity
-{{ snowplow_utils.get_sde_or_context(var('snowplow__atomic_schema', 'atomic'), var('snowplow__media_session_context'), lower_limit, upper_limit) }},
+  {% do contexts.append({'schema': var('snowplow__media_session_context'), 'prefix': 'media_session_', 'single_entity': True}) %}
 {% endif %}
+
 {% if var("snowplow__enable_media_ad") %}
--- unpacking the media ad context entity
-{{ snowplow_utils.get_sde_or_context(var('snowplow__atomic_schema', 'atomic'), var('snowplow__media_ad_context'), lower_limit, upper_limit) }},
+  {% do contexts.append({'schema': var('snowplow__media_ad_context'), 'prefix': 'media_ad_', 'single_entity': True}) %}
 {% endif %}
+
 {% if var("snowplow__enable_media_ad_break") %}
--- unpacking the media ad break context entity
-{{ snowplow_utils.get_sde_or_context(var('snowplow__atomic_schema', 'atomic'), var('snowplow__media_ad_break_context'), lower_limit, upper_limit) }},
+  {% do contexts.append({'schema': var('snowplow__media_ad_break_context'), 'prefix': 'media_ad_break_', 'single_entity': True}) %}
 {% endif %}
--- unpacking the youtube context entity
+
 {%- if var("snowplow__enable_youtube") -%}
-    {{ snowplow_utils.get_sde_or_context(var('snowplow__atomic_schema', 'atomic'), var('snowplow__youtube_context'), lower_limit, upper_limit) }},
+  {% do contexts.append({'schema': var('snowplow__youtube_context'), 'prefix': 'youtube_', 'single_entity': True}) %}
 {%- endif %}
--- unpacking the whatwg media context entity
+
 {% if var("snowplow__enable_whatwg_media") -%}
-    {{ snowplow_utils.get_sde_or_context(var('snowplow__atomic_schema', 'atomic'), var('snowplow__html5_media_element_context'), lower_limit, upper_limit) }},
+  {% do contexts.append({'schema': var('snowplow__html5_media_element_context'), 'prefix': 'html5_media_element_', 'single_entity': True}) %}
 {%- endif %}
--- unpacking the whatwg video context entity
+
 {% if var("snowplow__enable_whatwg_video") -%}
-    {{ snowplow_utils.get_sde_or_context(var('snowplow__atomic_schema', 'atomic'), var('snowplow__html5_video_element_context'), lower_limit, upper_limit) }},
+  {% do contexts.append({'schema': var('snowplow__html5_video_element_context'), 'prefix': 'html5_video_element_', 'single_entity': True}) %}
 {%- endif %}
+
 {% if var("snowplow__enable_web_events") %}
--- unpacking the web page context entity
-{{ snowplow_utils.get_sde_or_context(var('snowplow__atomic_schema', 'atomic'), var('snowplow__context_web_page'), lower_limit, upper_limit) }},
+  {% do contexts.append({'schema': var('snowplow__context_web_page'), 'prefix': 'web_page_', 'single_entity': True}) %}
 {% endif %}
+
 {% if var("snowplow__enable_ad_quartile_event") %}
--- unpacking the ad quartile event
-{{ snowplow_utils.get_sde_or_context(var('snowplow__atomic_schema', 'atomic'), var('snowplow__media_ad_quartile_event'), lower_limit, upper_limit) }},
+  {% do contexts.append({'schema': var('snowplow__media_ad_quartile_event'), 'prefix': 'ad_quartile_event_', 'single_entity': True}) %}
 {% endif %}
+
+{% set base_events_query = snowplow_utils.base_create_snowplow_events_this_run(
+    sessions_this_run_table='snowplow_media_player_base_sessions_this_run',
+    session_identifiers=session_identifiers(),
+    session_sql=var('snowplow__session_sql', none),
+    session_timestamp=var('snowplow__session_timestamp', 'collector_tstamp'),
+    derived_tstamp_partitioned=var('snowplow__derived_tstamp_partitioned', true),
+    days_late_allowed=var('snowplow__days_late_allowed', 3),
+    max_session_days=var('snowplow__max_session_days', 3),
+    app_ids=var('snowplow__app_id', []),
+    snowplow_events_database=var('snowplow__database', target.database) if target.type not in ['databricks', 'spark'] else var('snowplow__databricks_catalog', 'hive_metastore') if target.type in ['databricks'] else var('snowplow__atomic_schema', 'atomic'),
+    snowplow_events_schema=var('snowplow__atomic_schema', 'atomic'),
+    snowplow_events_table=var('snowplow__events_table', 'events'),
+    entities_or_sdes=contexts,
+    custom_sql=var('snowplow__custom_sql', '')
+) %}
+
+with base_query as (
+  {{ base_events_query }}
+),
 
 prep as (
   select
     ev.*,
 
-    {{ web_or_mobile_field(web='pv.id', mobile='sv.id') }} as page_view_id,
+    {{ web_or_mobile_field(web='ev.web_page__id', mobile='ev.mobile_screen__id') }} as page_view_id,
+    {{ web_or_mobile_field(web='ev.domain_sessionid', mobile='ev.mobile_session__session_id') }} as original_session_identifier,
 
     -- unpacking the media player event
-    {{ media_player_field(v1='mpe.label', v2='mp2.label') }} as media_label,
-    {{ media_event_type_field(media_player_event_type='mpe.type', event_name='ev.event_name') }} as event_type,
+    {{ media_player_field(v1='ev.media_player_event__label', v2='ev.media_player_v2__label') }} as media_label,
+    {{ media_event_type_field(media_player_event_type='ev.media_player_event__type', event_name='ev.event_name') }} as event_type,
 
     -- unpacking the media player object
-    round({{ media_player_field(v1='mp.duration', v2='mp2.duration') }}) as duration_secs,
-    {{ media_player_field(v1='mp.current_time', v2='mp2.current_time') }} as current_time,
+    round({{ media_player_field(v1='ev.media_player__duration', v2='ev.media_player_v2__duration') }}) as duration_secs,
+    {{ media_player_field(v1='ev.media_player__current_time', v2='ev.media_player_v2__current_time') }} as player_current_time,
     {{ media_player_field(
-        v1='mp.playback_rate',
-        v2='mp2.playback_rate',
+        v1='ev.media_player__playback_rate',
+        v2='ev.media_player_v2__playback_rate',
         default='1'
     ) }} as playback_rate,
     {{ percent_progress_field(
-        v1_percent_progress='mp.percent_progress',
-        v1_event_type='mpe.type',
+        v1_percent_progress='ev.media_player__percent_progress',
+        v1_event_type='ev.media_player_event__type',
         event_name='ev.event_name',
-        v2_current_time='mp2.current_time',
-        v2_duration='mp2.duration'
+        v2_current_time='ev.media_player_v2__current_time',
+        v2_duration='ev.media_player_v2__duration'
     ) }} as percent_progress,
-    {{ media_player_field(v1='mp.muted', v2='mp2.muted') }} as is_muted,
+    {{ media_player_field(v1='ev.media_player__muted', v2='ev.media_player_v2__muted') }} as is_muted,
 
     -- media session properties
-    cast({{ media_session_field('ms.media_session_id') }} as {{ type_string() }}) as media_session_id, {# This is the only key actually used regardless, redshift doesn't like casting a null at a later time#}
-    {{ media_session_field('ms.time_played') }} as media_session_time_played,
-    {{ media_session_field('ms.time_played_muted') }} as media_session_time_played_muted,
-    {{ media_session_field('ms.time_paused') }} as media_session_time_paused,
-    {{ media_session_field('ms.content_watched') }} as media_session_content_watched,
-    {{ media_session_field('ms.time_buffering') }} as media_session_time_buffering,
-    {{ media_session_field('ms.time_spent_ads') }} as media_session_time_spent_ads,
-    {{ media_session_field('ms.ads') }} as media_session_ads,
-    {{ media_session_field('ms.ads_clicked') }} as media_session_ads_clicked,
-    {{ media_session_field('ms.ads_skipped') }} as media_session_ads_skipped,
-    {{ media_session_field('ms.ad_breaks') }} as media_session_ad_breaks,
-    {{ media_session_field('ms.avg_playback_rate') }} as media_session_avg_playback_rate,
+    cast({{ media_session_field('ev.media_session__media_session_id') }} as {{ type_string() }}) as media_session_id, -- This is the only key actually used regardless, redshift doesn't like casting a null at a later time
+    {{ media_session_field('ev.media_session__time_played') }} as media_session_time_played,
+    {{ media_session_field('ev.media_session__time_played_muted') }} as media_session_time_played_muted,
+    {{ media_session_field('ev.media_session__time_paused') }} as media_session_time_paused,
+    {{ media_session_field('ev.media_session__content_watched') }} as media_session_content_watched,
+    {{ media_session_field('ev.media_session__time_buffering') }} as media_session_time_buffering,
+    {{ media_session_field('ev.media_session__time_spent_ads') }} as media_session_time_spent_ads,
+    {{ media_session_field('ev.media_session__ads') }} as media_session_ads,
+    {{ media_session_field('ev.media_session__ads_clicked') }} as media_session_ads_clicked,
+    {{ media_session_field('ev.media_session__ads_skipped') }} as media_session_ads_skipped,
+    {{ media_session_field('ev.media_session__ad_breaks') }} as media_session_ad_breaks,
+    {{ media_session_field('ev.media_session__avg_playback_rate') }} as media_session_avg_playback_rate,
 
     -- ad properties
-    {{ media_ad_field('ma.name') }} as ad_name,
-    {{ media_ad_field('ma.ad_id') }} as ad_id,
-    {{ media_ad_field('ma.creative_id') }} as ad_creative_id,
-    {{ media_ad_field('ma.pod_position') }} as ad_pod_position,
-    {{ media_ad_field('ma.duration') }} as ad_duration_secs,
-    {{ media_ad_field('ma.skippable') }} as ad_skippable,
+    {{ media_ad_field('ev.media_ad__name') }} as ad_name,
+    {{ media_ad_field('ev.media_ad__ad_id') }} as ad_id,
+    {{ media_ad_field('ev.media_ad__creative_id') }} as ad_creative_id,
+    {{ media_ad_field('ev.media_ad__pod_position') }} as ad_pod_position,
+    {{ media_ad_field('ev.media_ad__duration') }} as ad_duration_secs,
+    {{ media_ad_field('ev.media_ad__skippable') }} as ad_skippable,
 
     -- ad break properties
-    {{ media_ad_break_field('mb.name') }} as ad_break_name,
-    {{ media_ad_break_field('mb.break_id') }} as ad_break_id,
-    {{ media_ad_break_field('mb.break_type') }} as ad_break_type,
+    {{ media_ad_break_field('ev.media_ad_break__name') }} as ad_break_name,
+    {{ media_ad_break_field('ev.media_ad_break__break_id') }} as ad_break_id,
+    {{ media_ad_break_field('ev.media_ad_break__break_type') }} as ad_break_type,
 
     -- ad quartile event
-    {{ media_ad_quartile_event_field('aq.percent_progress') }} as ad_percent_progress,
+    {{ media_ad_quartile_event_field('ev.ad_quartile_event__percent_progress') }} as ad_percent_progress,
 
     -- combined media properties
-    {{ player_id_field(youtube_player_id='yt.player_id', media_player_id='me.html_id') }} as player_id,
-    {{ media_player_type_field(v2_player_type='mp2.player_type', youtube_player_id='yt.player_id', media_player_id='me.html_id') }} as media_player_type,
-    {{ source_url_field(youtube_url='yt.url', media_current_src='me.current_src')}} as source_url,
-    {{ media_type_field(v2_media_type='mp2.media_type', media_media_type='me.media_type')}} as media_type,
+    {{ player_id_field(youtube_player_id='ev.youtube__player_id', media_player_id='ev.html5_media_element__html_id') }} as player_id,
+    {{ media_player_type_field(v2_player_type='ev.media_player_v2__player_type', youtube_player_id='youtube__player_id', media_player_id='ev.html5_media_element__html_id') }} as media_player_type,
+    {{ source_url_field(youtube_url='ev.youtube__url', media_current_src='ev.html5_media_element__current_src')}} as source_url,
+    {{ media_type_field(v2_media_type='ev.media_player_v2__media_type', media_media_type='ev.html5_media_element__media_type')}} as media_type,
     {{ playback_quality_field(
-        v2_quality='mp2.quality',
-        youtube_quality='yt.playback_quality',
-        video_width='ve.video_width',
-        video_height='ve.video_height'
+        v2_quality='ev.media_player_v2__quality',
+        youtube_quality='ev.youtube__playback_quality',
+        video_width='ev.html5_video_element__video_width',
+        video_height='ev.html5_video_element__video_height'
     )}} as playback_quality,
 
-    dense_rank() over (partition by session_identifier order by start_tstamp) AS event_in_session_index
+    dense_rank() over (partition by ev.session_identifier order by ev.derived_tstamp) as event_in_session_index,
+    ev.derived_tstamp as start_tstamp
 
-    from events_this_run ev
+    from base_query ev
 
-    -- youtube context entity
-    {% if var("snowplow__enable_youtube") %}
-        left join {{ var('snowplow__youtube_context') }} yt on ev.event_id = yt.youtube__id and ev.collector_tstamp = yt.youtube__tstamp
-    {%- endif %}
-    -- whatwg media context entity
-    {% if var("snowplow__enable_whatwg_media") %}
-    left join {{ var('snowplow__html5_media_element_context') }} me on ev.event_id = me.media_element__id and ev.collector_tstamp = me.media_element__tstamp
-    {%- endif %}
-    -- whatwg video context entity
-    {% if var("snowplow__enable_whatwg_video") %}
-    left join {{ var('snowplow__html5_video_element_context') }} ve on ev.event_id = ve.video_element__id and ev.collector_tstamp = ve.video_element__tstamp
-    {%- endif %}
-    {% if var("snowplow__enable_media_player_v1") %}
-    -- media player event
-    left join {{ var('snowplow__media_player_event_context') }} mpe on ev.event_id = mpe.media_player_event__id and ev.collector_tstamp = mpe.media_player_event__tstamp
-    -- media player context entity
-    left join {{ var('snowplow__media_player_context') }} mp on ev.event_id = mp.media_player__id and ev.collector_tstamp = mp.media_player__tstamp
-    {% endif %}
-    {% if var("snowplow__enable_media_player_v2") %}
-    -- media player v2 context entity
-    left join {{ var('snowplow__media_player_v2_context') }} mp2 on ev.event_id = mp2.media_player__id and ev.collector_tstamp = mp2.media_player__tstamp
-    {% endif %}
-    {% if var("snowplow__enable_media_session") %}
-    -- media session context entity
-    left join {{ var('snowplow__media_session_context') }} ms on ev.event_id = ms.session__id and ev.collector_tstamp = ms.session__tstamp
-    {% endif %}
-    {% if var("snowplow__enable_media_ad") %}
-    -- media ad context entity
-    left join {{ var('snowplow__media_ad_context') }} ma on ev.event_id = ma.ad__id and ev.collector_tstamp = ma.ad__tstamp
-    {% endif %}
-    {% if var("snowplow__enable_media_ad_break") %}
-    -- media ad break context entity
-    left join {{ var('snowplow__media_ad_break_context') }} mb on ev.event_id = mb.ad_break__id and ev.collector_tstamp = mb.ad_break__tstamp
-    {% endif %}
-    {% if var("snowplow__enable_web_events") %}
-    -- web page context entity
-    left join {{ var('snowplow__context_web_page') }} pv on ev.platform = 'web' and ev.event_id = pv.web_page__id and ev.collector_tstamp = pv.web_page__tstamp
-    {% endif %}
-    {% if var("snowplow__enable_mobile_events") %}
-    -- screen context entity
-    left join {{ var('snowplow__context_screen') }} sv on ev.platform = 'mob' and ev.event_id = sv.screen__id and ev.collector_tstamp = sv.screen__tstamp
-    {% endif %}
-    {% if var("snowplow__enable_ad_quartile_event") %}
-    -- ad quartile event
-    left join {{ var('snowplow__media_ad_quartile_event') }} aq on ev.event_id = aq.ad_quartile_event__id and ev.collector_tstamp = aq.ad_quartile_event__tstamp
-    {% endif %}
+    where
+      {{ snowplow_media_player.event_name_filter(var("snowplow__media_event_names", "['media_player_event']")) }}
 
-where
-    ev.event_id_dedupe_index = 1
 )
 
 select

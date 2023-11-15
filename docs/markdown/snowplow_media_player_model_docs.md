@@ -1,7 +1,3 @@
-{% docs table_interactions_this_run %}
-This staging table shows all media player events within the current incremental run and calculates play_time. It could be used in custom models for more in-depth time based calculations.
-{% enddocs %}
-
 {% docs table_base_this_run %}
 This staging table aggregates media player interactions within the current run to a pageview level that is considered a base level for media plays.
 {% enddocs %}
@@ -15,11 +11,11 @@ This view removes impressions from the derived snowplow_media_player_base table 
 {% enddocs %}
 
 {% docs table_session_stats %}
-This table aggregates the pageview level interactions to show session level media stats.
+This table aggregates the base level plays to show session level media stats.
 {% enddocs %}
 
 {% docs table_user_stats %}
-This table aggregates the pageview level interactions to show user level media stats.
+This table aggregates the session level stats to show user level media stats.
 {% enddocs %}
 
 {% docs table_media_stats %}
@@ -37,5 +33,5 @@ This derived table aggregates information about ad views. Each ad view (a user v
 {% enddocs %}
 
 {% docs table_media_ads %}
-This derived table aggregates information about ads. Each row represents one ad played within a certain media on a certain platform. Stats about the number of ad clicks, progress reached and more are calculated as total values but also as counts of unique users (identified using `domain_userid`).
+This derived table aggregates information about ads. Each row represents one ad played within a certain media on a certain platform. Stats about the number of ad clicks, progress reached and more are calculated as total values but also as counts of unique users (identified using `user_identifier`).
 {% enddocs %}

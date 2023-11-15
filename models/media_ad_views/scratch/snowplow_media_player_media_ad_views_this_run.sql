@@ -33,48 +33,94 @@ events_this_run as (
 , prep as (
 
   select
-    {{ dbt_utils.generate_surrogate_key(['ev.platform', 'ev.media_identifier', 'ev.ad_id']) }} as media_ad_id,
+    {{ dbt_utils.generate_surrogate_key(['ev.platform', 'ev.media_identifier', 'ev.ad_id']) }} as media_ad_id
 
-    ev.platform,
-    ev.media_identifier,
-    max(ev.media_label) as media_label,
-    ev.domain_userid,
-    ev.session_identifier,
-    ev.user_id,
-    ev.play_id,
+    ,ev.platform
+    ,ev.media_identifier
+    ,ev.user_identifier
+    ,ev.session_identifier
+    ,ev.user_id
+    ,ev.play_id
+    ,{{ media_ad_break_field('ev.ad_break_id') }} as ad_break_id
+    ,{{ media_ad_field('ev.ad_id') }} as ad_id
 
-    {{ media_ad_break_field('ev.ad_break_id') }} as ad_break_id,
-    {{ media_ad_break_field('max(ev.ad_break_name)' ) }} as ad_break_name,
-    {{ media_ad_break_field('max(ev.ad_break_type)' ) }} as ad_break_type,
+    {%- if var('snowplow__ad_views_passthroughs', []) -%}
+      {%- set passthrough_names = [] -%}
+      {%- for identifier in var('snowplow__ad_views_passthroughs', []) %}
+      {# Check if it is a simple column or a sql+alias #}
+      {%- if identifier is mapping -%}
+        ,{{identifier['sql']}} as {{identifier['alias']}}
+        {%- do passthrough_names.append(identifier['alias']) -%}
+      {%- else -%}
+        ,ev.{{identifier}}
+        {%- do passthrough_names.append(identifier) -%}
+      {%- endif -%}
+      {% endfor -%}
+    {%- endif %}
 
-    {{ media_ad_field('ev.ad_id') }} as ad_id,
-    {{ media_ad_field('max(ev.ad_name)') }} as name,
-    {{ media_ad_field('max(ev.ad_creative_id)') }} as creative_id,
-    {{ media_ad_field('max(ev.ad_duration_secs)') }} as duration_secs,
-    {{ media_ad_field('avg(ev.ad_pod_position)') }} as pod_position,
-    {{ media_ad_field('sum(case when ev.ad_skippable then 1 else 0 end) > 0') }} as skippable,
+    ,max(ev.media_label) as media_label
+    ,{{ media_ad_break_field('max(ev.ad_break_name)' ) }} as ad_break_name
+    ,{{ media_ad_break_field('max(ev.ad_break_type)' ) }} as ad_break_type
 
-    max(case when ev.event_type = 'adclick' then 1 else 0 end) > 0 as clicked,
-    max(case when ev.event_type = 'adskip' then 1 else 0 end) > 0 as skipped,
-    {{ media_ad_quartile_event_field("max(case when ev.event_type = 'adcomplete' or (ev.event_type = 'adquartile' and ev.ad_percent_progress >= 25) then 1 else 0 end) > 0") }} as percent_reached_25,
-    {{ media_ad_quartile_event_field("max(case when ev.event_type = 'adcomplete' or (ev.event_type = 'adquartile' and ev.ad_percent_progress >= 50) then 1 else 0 end) > 0") }} as percent_reached_50,
-    {{ media_ad_quartile_event_field("max(case when ev.event_type = 'adcomplete' or (ev.event_type = 'adquartile' and ev.ad_percent_progress >= 75) then 1 else 0 end) > 0") }} as percent_reached_75,
-    max(case when ev.event_type = 'adcomplete' then 1 else 0 end) > 0 as percent_reached_100,
+    ,{{ media_ad_field('max(ev.ad_name)') }} as name
+    ,{{ media_ad_field('max(ev.ad_creative_id)') }} as creative_id
+    ,{{ media_ad_field('max(ev.ad_duration_secs)') }} as duration_secs
+    ,{{ media_ad_field('avg(ev.ad_pod_position)') }} as pod_position
+    ,{{ media_ad_field('sum(case when ev.ad_skippable then 1 else 0 end) > 0') }} as skippable
 
-    min(ev.start_tstamp) as viewed_at,
-    max(ev.start_tstamp) as last_event
+    ,max(case when ev.event_type = 'adclick' then 1 else 0 end) > 0 as clicked
+    ,max(case when ev.event_type = 'adskip' then 1 else 0 end) > 0 as skipped
+    ,{{ media_ad_quartile_event_field("max(case when ev.event_type = 'adcomplete' or (ev.event_type = 'adquartile' and ev.ad_percent_progress >= 25) then 1 else 0 end) > 0") }} as percent_reached_25
+    ,{{ media_ad_quartile_event_field("max(case when ev.event_type = 'adcomplete' or (ev.event_type = 'adquartile' and ev.ad_percent_progress >= 50) then 1 else 0 end) > 0") }} as percent_reached_50
+    ,{{ media_ad_quartile_event_field("max(case when ev.event_type = 'adcomplete' or (ev.event_type = 'adquartile' and ev.ad_percent_progress >= 75) then 1 else 0 end) > 0") }} as percent_reached_75
+    ,max(case when ev.event_type = 'adcomplete' then 1 else 0 end) > 0 as percent_reached_100
+
+    ,min(ev.start_tstamp) as viewed_at
+    ,max(ev.start_tstamp) as last_event
+    ,{{ snowplow_utils.get_string_agg('original_session_identifier', 'ev', is_distinct=True) }} as domain_sessionid_array
 
   from events_this_run as ev
 
-  group by 1, 2, 3, 5, 6, 7, 8, 9, 12
+  {{ dbt_utils.group_by(n=9+(var('snowplow__ad_views_passthroughs', [])|length)) }}
 
 )
 
 select
   {{ dbt_utils.generate_surrogate_key(['p.play_id', 'p.ad_break_id', 'p.media_ad_id']) }} as media_ad_view_id
-  , p.*
+  ,p.media_ad_id
+  ,p.platform
+  ,p.media_identifier
+  ,p.media_label
+  ,p.user_identifier
+  ,p.session_identifier
+  ,p.domain_sessionid_array
+  ,p.user_id
+  ,p.play_id
+  ,p.ad_break_id
+  ,p.ad_break_name
+  ,p.ad_break_type
+  ,p.ad_id
+  ,p.name
+  ,p.creative_id
+  ,p.duration_secs
+  ,p.pod_position
+  ,p.skippable
+  ,p.clicked
+  ,p.skipped
+  ,p.percent_reached_25
+  ,p.percent_reached_50
+  ,p.percent_reached_75
+  ,p.percent_reached_100
+  ,p.viewed_at
+  ,p.last_event
   {% if target.type in ['databricks', 'spark'] -%}
     , date(p.viewed_at) as viewed_at_date
+  {%- endif %}
+  -- passthrough fields
+  {%- if var('snowplow__ad_views_passthroughs', []) -%}
+    {%- for col in passthrough_names %}
+      , p.{{col}}
+    {%- endfor -%}
   {%- endif %}
 
 from prep as p

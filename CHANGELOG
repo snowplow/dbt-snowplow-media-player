@@ -1,11 +1,22 @@
 snowplow-media-player 0.7.0 (2023-xx-xx)
 ---------------------------------------
 ## Summary
-This release adds a more robust unique media identifier. This fixes an issue where duplicate `media_id` values could occur in the media stats table as a result of incorrect tracking implementation (e.g. sharing the same media label across different media types). This release also fixes the incremental materialization of the media_ad_views table by adding a unique primary key.
+This version adds new features powered by a complete refactor of the core processing of the package by moving it out to the new `base` macro functionality provided in `snowplow_utils`. This enables users to now specify custom fields for sessionization and user identification, to add custom entities/SDEs fields to the base events table for redshift/postgres, and to add passthrough fields to the derived tables so you can now more easily add your own fields to our tables.
+
+The default session identifier has been updated from using the domain_sessionid, to now be the media session id (or the page/screen view id if the media session entity is not set). Previously media events from a play that overlapped to a new domain_sessionid were discarded, this update ensures the complete media play is modeled. It is still possible to perform the original session level analysis using the new `domain_sessionid_array` field.
+
+In addition this release adds a more robust unique media identifier. This fixes an issue where duplicate `media_id` values could occur in the media stats table as a result of incorrect tracking implementation (e.g. sharing the same media label across different media types). This release also fixes the incremental materialization of the media_ad_views table by adding a unique primary key.
+
+## Features
+- Migrate base models to the new `base` macros for flexibility and consistency
+- Updated the default session identifier be the media session id (or page/screen view id if the media session entity is not set)
+- Add ability to pass fields through to derived media base and ad views tables
+- Add new field `domain_sessionid_array` to derived tables (where applicable)
 
 ## Fixes
 - Add unique media identifier (close #59)
 - Add missing primary key to media_ad_views
+- Fix field names in custom session stats model yaml (close #63)
 
 ## Under the hood
 
