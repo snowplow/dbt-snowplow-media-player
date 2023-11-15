@@ -5,7 +5,7 @@ models:
     description: '{{ doc("table_media_stats") }}'
     columns:
       - name: media_identifier
-        description: The primary key of this table
+        description: 'The primary key of this table'
         tags:
           - primary-key
         tests:

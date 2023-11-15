@@ -19,7 +19,19 @@ A UUID for each page view e.g. `c6ef3124-b53a-4b13-a233-0088f79dcbcb`.
 {% enddocs %}
 
 {% docs col_session_identifier %}
-A visit / session UUID e.g. `c6ef3124-b53a-4b13-a233-0088f79dcbcb`.
+The session identifier as defined in your project variables. Default to the media_session_id, or to page_view_id if the media session entity is not enabled.
+{% enddocs %}
+
+{% docs col_original_session_identifier %}
+The session identifier set by Snowplow using 1st party cookie. This is the domain_sessionid or session_id from the mobile session context.
+{% enddocs %}
+
+{% docs col_domain_sessionid_array %}
+All domain_sessionids seen for a play_id.
+{% enddocs %}
+
+{% docs col_user_identifier %}
+The user identifier as defined in your project variables. Default to domain_userid.
 {% enddocs %}
 
 {% docs col_domain_userid %}
@@ -1005,31 +1017,31 @@ Datetime of the last event.
 {% enddocs %}
 
 {% docs col_views_unique %}
-Number of users that viewed the ad (identified by their domain_userid).
+Number of users that viewed the ad (identified by their user_identifier).
 {% enddocs %}
 
 {% docs col_clicked_unique %}
-Number of users that clicked on the ad (identified by their domain_userid).
+Number of users that clicked on the ad (identified by their user_identifier).
 {% enddocs %}
 
 {% docs col_skipped_unique %}
-Number of users that skipped the ad (identified by their domain_userid).
+Number of users that skipped the ad (identified by their user_identifier).
 {% enddocs %}
 
 {% docs col_percent_reached_25_unique %}
-Number of users that watched 25% of the ad (identified by their domain_userid).
+Number of users that watched 25% of the ad (identified by their user_identifier).
 {% enddocs %}
 
 {% docs col_percent_reached_50_unique %}
-Number of users that watched 50% of the ad (identified by their domain_userid).
+Number of users that watched 50% of the ad (identified by their user_identifier).
 {% enddocs %}
 
 {% docs col_percent_reached_75_unique %}
-Number of users that watched 75% of the ad (identified by their domain_userid).
+Number of users that watched 75% of the ad (identified by their user_identifier).
 {% enddocs %}
 
 {% docs col_percent_reached_100_unique %}
-Number of users that watched 100% of the ad (identified by their domain_userid).
+Number of users that watched 100% of the ad (identified by their user_identifier).
 {% enddocs %}
 
 {% docs col_media_session_id %}

@@ -9,12 +9,12 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
   config(
     materialized = 'table',
     sort = 'start_tstamp',
-    dist = 'session_identifier',
+    dist = 'domain_sessionid',
     partition_by = snowplow_utils.get_value_by_target_type(bigquery_val={
       "field": "start_tstamp",
       "data_type": "timestamp"
     }, databricks_val='start_tstamp_date'),
-    cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["domain_userid"]),
+    cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["user_identifier"]),
     sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt'))
   )
 }}
@@ -22,8 +22,15 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
 with prep as (
 
   select
-    session_identifier,
-    domain_userid,
+    -- get the first domain_sessionid in the array
+    {% if target.name in ('bigquery', 'databricks', 'snowflake') %}
+      cast(({{ snowplow_utils.get_split_to_array('domain_sessionid_array', 'b') }})[0] as {{ type_string() }}) as domain_sessionid,
+    {% elif target.name == 'redshift' %}
+      split_part(domain_sessionid_array, ',', 1) as domain_sessionid,
+    {% else %}
+      cast(({{ snowplow_utils.get_split_to_array('domain_sessionid_array', 'b') }})[1] as {{ type_string() }}) as domain_sessionid,
+    {% endif %}
+    user_identifier,
     count(*) as impressions,
     count(distinct case when media_type = 'video' and is_played then media_identifier end) as videos_played,
     count(distinct case when media_type = 'audio' and is_played then media_identifier end) as audio_played,
@@ -40,7 +47,7 @@ with prep as (
     coalesce(avg(case when is_played then coalesce(play_time_secs / nullif(duration_secs, 0), 0) end),0) as avg_percent_played,
     sum(case when is_complete_play then 1 else 0 end) as complete_plays
 
-  from {{ ref("snowplow_media_player_base") }}
+  from {{ ref("snowplow_media_player_base") }} as b
 
   group by 1,2
 

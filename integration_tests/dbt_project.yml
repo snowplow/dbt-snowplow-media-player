@@ -37,6 +37,12 @@ models:
         +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
       snowflake:
         +enabled: '{{ target.type == "snowflake" | as_bool() }}'
+  snowplow_media_player:
+    +persist_docs:
+      relation: false
+      columns: false
+    custom:
+      +enabled: true
 
 vars:
   snowplow__enable_media_ad: true
@@ -45,6 +51,7 @@ vars:
     # Variables - Warehouse and tracker
     snowplow__percent_progress_boundaries: [10, 25, 50, 75]
     snowplow__events: '{{ ref("snowplow_media_player_events_stg") }}'
+    snowplow__events_table: 'snowplow_media_player_events_stg'
     snowplow__start_date: '2022-01-17'
     snowplow__atomic_schema: '{{ target.schema }}_snplw_media_player_int_tests'
 
@@ -62,9 +69,8 @@ vars:
     snowplow__enable_media_ad_break: true
     snowplow__enable_ad_quartile_event: true
     snowplow__enable_mobile_events: true
-
-    # Variables - Warehouse Specific
-    snowplow__page_view_context: 'snowplow_web_page_view_context'
+    snowplow__base_passthroughs: ['v_collector', {'sql': 'v_tracker || app_id', 'alias': 'tracker_app_id'}]
+    snowplow__ad_views_passthroughs: ['v_collector', {'sql': 'v_tracker || app_id', 'alias': 'tracker_app_id'}]
 
 seeds:
   quote_columns: false
@@ -227,7 +233,8 @@ seeds:
           player_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           media_label: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           session_identifier: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
-          domain_userid: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          domain_sessionid_array: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          user_identifier: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           user_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           page_referrer: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           page_url: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
@@ -293,11 +300,14 @@ seeds:
 
       snowplow_media_player_media_ad_views_expected:
         +column_types:
+          media_ad_view_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           media_ad_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           platform: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           media_identifier: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           media_label: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
-          domain_userid: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          user_identifier: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          session_identifier: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          domain_sessionid_array: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           user_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           play_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           ad_break_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'

@@ -21,8 +21,12 @@ models:
         description: '{{ doc("col_media_label") }}'
       - name: session_identifier
         description: '{{ doc("col_session_identifier") }}'
-      - name: domain_userid
-        description: '{{ doc("col_domain_userid") }}'
+      - name: domain_sessionid_array
+        description: '{{ doc("col_domain_sessionid_array") }}'
+      - name: user_identifier
+        description: '{{ doc("col_user_identifier") }}'
+      - name: user_id
+        description: '{{ doc("col_user_id")}}'
       - name: page_referrer
         description: '{{ doc("col_page_referrer") }}'
       - name: page_url

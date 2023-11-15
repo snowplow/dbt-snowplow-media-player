@@ -79,13 +79,13 @@ new_media_ad_views as (
       {{ media_ad_quartile_event_field('0') }} as percent_reached_75_unique,
       0 as percent_reached_100_unique,
     {% else %}
-      count(distinct a.domain_userid) as views_unique,
-      count(distinct case when a.clicked then a.domain_userid end) as clicked_unique,
-      count(distinct case when a.skipped then a.domain_userid end) as skipped_unique,
-      {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_25 then domain_userid end)') }} as percent_reached_25_unique,
-      {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_50 then domain_userid end)') }} as percent_reached_50_unique,
-      {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_75 then domain_userid end)') }} as percent_reached_75_unique,
-      count(distinct case when a.percent_reached_100 then domain_userid end) as percent_reached_100_unique,
+      count(distinct a.user_identifier) as views_unique,
+      count(distinct case when a.clicked then a.user_identifier end) as clicked_unique,
+      count(distinct case when a.skipped then a.user_identifier end) as skipped_unique,
+      {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_25 then user_identifier end)') }} as percent_reached_25_unique,
+      {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_50 then user_identifier end)') }} as percent_reached_50_unique,
+      {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_75 then user_identifier end)') }} as percent_reached_75_unique,
+      count(distinct case when a.percent_reached_100 then user_identifier end) as percent_reached_100_unique,
     {% endif %}
 
     min(viewed_at) as first_view,
@@ -103,13 +103,13 @@ new_media_ad_views as (
 
   select
     a.media_ad_id,
-    count(distinct a.domain_userid) as views_unique,
-    count(distinct case when a.clicked then a.domain_userid end) as clicked_unique,
-    count(distinct case when a.skipped then a.domain_userid end) as skipped_unique,
-    {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_25 then domain_userid end)') }} as percent_reached_25_unique,
-    {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_50 then domain_userid end)') }} as percent_reached_50_unique,
-    {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_75 then domain_userid end)') }} as percent_reached_75_unique,
-    count(distinct case when a.percent_reached_100 then domain_userid end) as percent_reached_100_unique
+    count(distinct a.user_identifier) as views_unique,
+    count(distinct case when a.clicked then a.user_identifier end) as clicked_unique,
+    count(distinct case when a.skipped then a.user_identifier end) as skipped_unique,
+    {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_25 then user_identifier end)') }} as percent_reached_25_unique,
+    {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_50 then user_identifier end)') }} as percent_reached_50_unique,
+    {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_75 then user_identifier end)') }} as percent_reached_75_unique,
+    count(distinct case when a.percent_reached_100 then user_identifier end) as percent_reached_100_unique
 
   from {{ ref("snowplow_media_player_media_ad_views") }} a
 
