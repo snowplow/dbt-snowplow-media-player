@@ -33,53 +33,75 @@ events_this_run as (
 , prep as (
 
   select
-    i.play_id,
-    i.page_view_id,
-    i.media_identifier,
-    i.player_id,
-    i.media_label,
-    i.session_identifier,
-    i.domain_userid,
-    i.user_id,
-    i.platform,
-    max(i.duration_secs) as duration_secs,
-    i.media_type,
-    i.media_player_type,
-    i.page_referrer,
-    i.page_url,
-    max(i.source_url) as source_url,
-    i.geo_region_name,
-    i.br_name,
-    i.dvce_type,
-    i.os_name,
-    i.os_timezone,
-    min(start_tstamp) as start_tstamp,
-    max(start_tstamp) as end_tstamp,
-    sum(case when i.event_type = 'play' then 1 else 0 end) as plays,
-    sum(case when i.event_type in ('seek', 'seeked', 'seekend') then 1 else 0 end) as seeks,
-    sum(i.play_time_secs) as play_time_secs,
-    sum(i.play_time_muted_secs) as play_time_muted_secs,
-    coalesce(
+    i.play_id
+    ,i.page_view_id
+    ,i.media_identifier
+    ,i.player_id
+    ,i.media_label
+    ,i.session_identifier
+    ,i.user_identifier
+    ,i.user_id
+    ,i.platform
+    ,i.media_type
+    ,i.media_player_type
+    ,i.page_referrer
+    ,i.page_url
+    ,i.geo_region_name
+    ,i.br_name
+    ,i.dvce_type
+    ,i.os_name
+    ,i.os_timezone
+
+    {%- if var('snowplow__base_passthroughs', []) -%}
+      {%- set passthrough_names = [] -%}
+      {%- for identifier in var('snowplow__base_passthroughs', []) %}
+      {# Check if it is a simple column or a sql+alias #}
+      {%- if identifier is mapping -%}
+        ,{{identifier['sql']}} as {{identifier['alias']}}
+        {%- do passthrough_names.append(identifier['alias']) -%}
+      {%- else -%}
+        ,i.{{identifier}}
+        {%- do passthrough_names.append(identifier) -%}
+      {%- endif -%}
+      {% endfor -%}
+    {%- endif %}
+
+    ,max(i.source_url) as source_url
+    ,max(i.duration_secs) as duration_secs
+    ,min(start_tstamp) as start_tstamp
+    ,max(start_tstamp) as end_tstamp
+    ,sum(case when i.event_type = 'play' then 1 else 0 end) as plays
+    ,sum(case when i.event_type in ('seek', 'seeked', 'seekend') then 1 else 0 end) as seeks
+    ,sum(i.play_time_secs) as play_time_secs
+    ,sum(i.play_time_muted_secs) as play_time_muted_secs
+    ,coalesce(
       sum(i.playback_rate * i.play_time_secs) / nullif(sum(i.play_time_secs), 0),
       max(i.playback_rate)
-    ) as avg_playback_rate,
-    min(case when i.event_type in ('seek', 'seeked', 'seekstart', 'seekend') then start_tstamp end) as first_seek_time,
-    max(i.percent_progress) as max_percent_progress
+    ) as avg_playback_rate
+    ,min(case when i.event_type in ('seek', 'seeked', 'seekstart', 'seekend') then start_tstamp end) as first_seek_time
+    ,max(i.percent_progress) as max_percent_progress
+    ,{{ snowplow_utils.get_string_agg('original_session_identifier', 'i', is_distinct=True) }} as domain_sessionid_array
+
 
   from events_this_run as i
 
-  group by 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20
+  {{ dbt_utils.group_by(n=18+(var('snowplow__base_passthroughs', [])|length)) }}
 
 )
 
 , dedupe as (
 
   select
-    *,
-    row_number()
-      over (partition by play_id order by start_tstamp) as duplicate_count
+    p.*
+    {% if target.type == 'postgres' %}
+      ,row_number() over (partition by p.play_id order by p.start_tstamp) as duplicate_count
+    {% endif %}
 
-  from prep
+  from prep as p
+
+  {% if target.type not in ['postgres'] %}
+    qualify row_number() over (partition by p.play_id order by p.start_tstamp) = 1
+  {% endif %}
 
 )
 
@@ -161,7 +183,8 @@ select
   d.player_id,
   d.media_label,
   d.session_identifier,
-  d.domain_userid,
+  d.domain_sessionid_array,
+  d.user_identifier,
   d.user_id,
   d.page_referrer,
   d.page_url,
@@ -233,6 +256,13 @@ select
   , date(d.start_tstamp) as start_tstamp_date
   {%- endif %}
 
+  -- passthrough fields
+  {%- if var('snowplow__base_passthroughs', []) -%}
+    {%- for col in passthrough_names %}
+      , d.{{col}}
+    {%- endfor -%}
+  {%- endif %}
+
 from dedupe as d
 
 left join retention_rate as r
@@ -247,4 +277,6 @@ left join media_sessions as s
 left join percent_progress_by_play_id as p
   on p.play_id = d.play_id
 
-where d.duplicate_count = 1
+{% if target.type == 'postgres' %}
+  where d.duplicate_count = 1
+{% endif %}

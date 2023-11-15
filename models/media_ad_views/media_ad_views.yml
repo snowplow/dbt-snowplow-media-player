@@ -22,8 +22,8 @@ models:
         description: '{{ doc("col_media_identifier") }}'
       - name: media_label
         description: '{{ doc("col_media_label") }}'
-      - name: domain_userid
-        description: '{{ doc("col_domain_userid")}}'
+      - name: user_identifier
+        description: '{{ doc("col_user_identifier")}}'
       - name: user_id
         description: '{{ doc("col_user_id")}}'
       - name: session_identifier
@@ -66,3 +66,5 @@ models:
           - not_null
       - name: last_event
         description: '{{ doc("col_last_event") }}'
+      - name: domain_sessionid_array
+        description: '{{ doc("col_domain_sessionid_array") }}'

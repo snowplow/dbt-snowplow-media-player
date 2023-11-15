@@ -5,7 +5,7 @@ models:
     description: '{{ doc("table_media_ads") }}'
     columns:
       - name: media_ad_id
-        description: The primary key of this table
+        description: 'The primary key of this table'
         tags:
           - primary-key
         tests:

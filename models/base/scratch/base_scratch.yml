@@ -5,22 +5,22 @@ models:
     description: '{{ doc("table_base_new_event_limits") }}'
     columns:
       - name: lower_limit
-        description: The lower `collector_tstamp` limit for the run
+        description: 'The lower `collector_tstamp` limit for the run'
       - name: upper_limit
-        description: The upper `collector_tstamp` limit for the run
+        description: 'The upper `collector_tstamp` limit for the run'
 
   - name: snowplow_media_player_base_sessions_this_run
     description: '{{ doc("table_base_sessions_this_run") }}'
     columns:
-      - name: session_id
+      - name: session_identifier
         description: '{{ doc("col_session_identifier") }}'
         tags:
           - primary-key
         tests:
           - unique
           - not_null
-      - name: domain_userid
-        description: '{{ doc("col_domain_userid") }}'
+      - name: user_identifier
+        description: '{{ doc("col_user_identifier") }}'
       - name: start_tstamp
         description: The `collector_tstamp` when the session began
       - name: end_tstamp
@@ -38,10 +38,12 @@ models:
           - not_null
       - name: page_view_id
         description: '{{ doc("col_page_view_id") }}'
+      - name: original_session_identifier
+        description: '{{ doc("col_original_session_identifier") }}'
       - name: session_identifier
         description: '{{ doc("col_session_identifier") }}'
-      - name: domain_userid
-        description: '{{ doc("col_domain_userid") }}'
+      - name: user_identifier
+        description: '{{ doc("col_user_identifier") }}'
       - name: media_identifier
         description: '{{ doc("col_media_identifier") }}'
       - name: player_id
@@ -79,7 +81,7 @@ models:
         description: '{{ doc("col_event_type") }}'
       - name: start_tstamp
         description: '{{ doc("col_start_tstamp") }}'
-      - name: current_time
+      - name: player_current_time
         description: '{{ doc("col_player_current_time") }}'
       - name: playback_rate
         description: '{{ doc("col_playback_rate") }}'

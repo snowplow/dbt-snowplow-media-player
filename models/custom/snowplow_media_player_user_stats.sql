@@ -9,12 +9,12 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
   config(
     materialized = 'table',
     sort = 'first_play',
-    dist = 'domain_userid',
+    dist = 'user_identifier',
     partition_by = snowplow_utils.get_value_by_target_type(bigquery_val={
       "field": "first_play",
       "data_type": "timestamp"
     }, databricks_val='first_play_date'),
-    cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["domain_userid"]),
+    cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["user_identifier"]),
     sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt'))
   )
 }}
@@ -22,7 +22,7 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
 with prep as (
 
   select
-    domain_userid,
+    user_identifier,
     min(case when (video_plays + audio_plays) > 0 then start_tstamp end) as first_play,
     max(case when (video_plays + audio_plays) > 0 then start_tstamp end) as last_play,
     sum(video_plays) as video_plays,

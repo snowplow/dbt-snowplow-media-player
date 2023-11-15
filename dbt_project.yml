@@ -32,6 +32,7 @@ vars:
     snowplow__dev_target_name: 'dev'
     # snowplow__atomic_schema: 'atomic' # Only set if not using 'atomic' schema for Snowplow events data
     # snowplow__database:  # Only set if not using target.database for Snowplow events data -- WILL BE IGNORED FOR DATABRICKS
+    # snowplow__events_table: 'events' # Only set if not using 'events' table for Snowplow events data
 
     # Variables - Operation and logic
     snowplow__complete_play_rate: 0.99
@@ -48,8 +49,12 @@ vars:
     snowplow__upsert_lookback_days: 30
     snowplow__allow_refresh: false
     snowplow__app_id: []
-
-    snowplow__session_timestamp: collector_tstamp # Used to manage utils version higher than 0.15.1, do not change until new base macro is used
+    snowplow__session_timestamp: collector_tstamp
+    # please refer to the macros within identifiers.sql for default session and user values
+    snowplow__session_identifiers: []
+    # snowplow__session_sql: 'sc.session_id' # takes priority over session_identifiers
+    snowplow__user_identifiers: []
+    # snowplow__user_sql: 'sc.user_id' # takes priority over user identifiers
 
     # Variables - Contexts, filters, and logs
     # please set any of the below three variables to true if the related context schemas are enabled for your warehouse, please note it cannot be used to filter the data:
@@ -67,6 +72,9 @@ vars:
     snowplow__enable_web_events: true
     snowplow__enable_mobile_events: false
     snowplow__enable_ad_quartile_event: false
+    # add extra custom fields:
+    snowplow__base_passthroughs: []
+    snowplow__ad_views_passthroughs: []
 
     # Variables - Warehouse Specific
     snowplow__media_player_event_context: 'com_snowplowanalytics_snowplow_media_player_event_1'
@@ -85,6 +93,7 @@ vars:
     snowplow__derived_tstamp_partitioned: true
     snowplow__query_tag: 'snowplow_dbt'
     snowplow__enable_load_tstamp: true
+    snowplow__entities_or_sdes: []
     # Databricks Only
     # Depending on the use case it should either be the catalog (for Unity Catalog users from databricks connector 1.1.1 onwards) or the same value as your snowplow__atomic_schema (unless changed it should be 'atomic')
     # snowplow__databricks_catalog: 'hive_metastore'
@@ -93,9 +102,9 @@ vars:
 on-run-start:
   - '{{ snowplow_media_player_delete_from_manifest(var("models_to_remove",[])) }}'
 
-# Update manifest table with last event consumed per sucessfully executed node/model
+# Update manifest table with last event consumed per successfully executed node/model
 on-run-end:
-  - '{{ snowplow_utils.snowplow_incremental_post_hook("snowplow_media_player") }}'
+  - '{{ snowplow_utils.snowplow_incremental_post_hook("snowplow_media_player", "snowplow_media_player_incremental_manifest", "snowplow_media_player_base_events_this_run", var("snowplow__session_tstamp", "collector_tstamp")) }}'
 
 models:
   snowplow_media_player:
@@ -104,14 +113,6 @@ models:
     base:
       manifest:
         +schema: "snowplow_manifest"
-        bigquery:
-          +enabled: "{{ target.type == 'bigquery' | as_bool() }}"
-        databricks:
-          +enabled: "{{ target.type in ['databricks', 'spark'] | as_bool() }}"
-        default:
-          +enabled: "{{ target.type in ['redshift', 'postgres'] | as_bool() }}"
-        snowflake:
-          +enabled: "{{ target.type == 'snowflake' | as_bool() }}"
       scratch:
         +schema: 'scratch'
         +tags: 'scratch'
