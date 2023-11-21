@@ -34,12 +34,12 @@ models:
         description: '{{ doc("col_end_tstamp") }}'
       - name: seeks
         description: '{{ doc("col_seeks") }}'
-      - name: play_time_secs
-        description: '{{ doc("col_play_time_secs") }}'
-      - name: play_time_muted_secs
-        description: '{{ doc("col_play_time_muted_secs") }}'
-      - name: avg_play_time_sec
-        description: '{{ doc("col_avg_play_time_sec") }}'
+      - name: play_time_mins
+        description: '{{ doc("col_play_time_mins") }}'
+      - name: play_time_muted_mins
+        description: '{{ doc("col_play_time_muted_mins") }}'
+      - name: avg_play_time_mins
+        description: '{{ doc("col_avg_play_time_mins") }}'
       - name: avg_percent_played
         description: '{{ doc("col_avg_percent_played") }}'
       - name: complete_plays
