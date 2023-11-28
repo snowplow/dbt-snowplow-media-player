@@ -1,83 +1,134 @@
-{% docs macro_field %}
+{% docs macro_dtype_to_type %}
 {% raw %}
-This macro is used to define a path to a column either as a string or using a dictionary definition.
-
-On BigQuery, the `snowplow_utils.get_optional_fields` macro is used.
+This macro retrieves the database specific data type from the dtype property.
 
 #### Returns
 
-The query path for the field.
+dbt `{{ type_...() }}` macro.
+
+{% endraw %}
+{% enddocs %}
+
+{% docs macro_field_alias %}
+This macro returns a field alias in snake case with the prefix if set.
+
+#### Returns
+
+Field alias.
 
 #### Usage
 
 ```sql
-select
-    ...,
-    {{ field('a.contexts_com_youtube_youtube_1[0]:playerId') }},
-    {{ field({ 'field': 'playerId', 'col_prefix': 'a.contexts_com_youtube_youtube_1' }) }},
-    from {{ var('snowplow__events') }} as a
+field_alias(field={'field': 'sessionId', 'dtype': 'string'}, prefix='media_session_')
+```
+Returns `media_session__session_id`.
+
+{% raw %}
+{% endraw %}
+{% enddocs %}
+
+{% docs macro_get_context_fields %}
+{% raw %}
+This macro returns specified fields from a context column.
+
+#### Returns
+
+Fields from context column. If `enabled` is false, it casts the fields as nulls.
+
+#### Usage
+
+```sql
+{{ get_context_fields(
+      enabled=var('snowplow__enable_whatwg_video', false),
+      context='contexts_org_whatwg_video_element_1',
+      prefix='html5_video_element_',
+      fields=[
+        {'field':'videoWidth', 'dtype':'integer'},
+        {'field':'videoHeight', 'dtype':'integer'},
+      ]) }}
 ```
 
 {% endraw %}
 {% enddocs %}
 
-{% docs macro_media_ad_break_field %}
+{% docs macro_get_enabled_context_fields %}
 {% raw %}
-This macro retrieves a property from the media ad break context entity.
+This macro is used in the `get_context_fields` macro and returns fields from a context column if enabled. For BigQuery, it uses the `snowplow_utils.get_optional_fields`, else the `snowplow_utils.get_fields` macro is used. For Postgres/Redshift nothing is returned as context fields are already extracted in the base macro.
 
 #### Returns
 
-The query path for the field.
-
-#### Usage
-
-```sql
-select
-    ...,
-    {{ media_ad_break_field({ 'field': 'name' }) }},
-    from {{ var('snowplow__events') }} as a
-```
+Fields from context column.
 
 {% endraw %}
 {% enddocs %}
 
-{% docs macro_media_ad_field %}
+{% docs macro_snakeify_case %}
 {% raw %}
-This macro retrieves a property from the media ad context entity.
+This macro takes a string in camel/pascal case and transforms it to snake case.
 
 #### Returns
 
-The query path for the field.
+String in snake case.
 
 #### Usage
 
 ```sql
-select
-    ...,
-    {{ media_ad_field({ 'field': 'name' }) }},
-    from {{ var('snowplow__events') }} as a
+{{ snakeify_case('mediaSessionId') }}
 ```
+Returns `media_session_id`
 
 {% endraw %}
 {% enddocs %}
 
-{% docs macro_media_ad_quartile_event_field %}
+
+{% docs macro_allow_refresh %}
 {% raw %}
-This macro retrieves a property from the media ad quartile self-describing event.
+This macro is used to determine if a full-refresh is allowed (depending on the environment), using the `snowplow__allow_refresh` variable.
 
 #### Returns
 
-The query path for the field.
+`snowplow__allow_refresh` if environment is not `dev`, `none` otherwise.
 
-#### Usage
+{% endraw %}
+{% enddocs %}
 
-```sql
-select
-    ...,
-    {{ media_ad_quartile_event_field({ 'field': 'percent_progress' }) }},
-    from {{ var('snowplow__events') }} as a
-```
+{% docs macro_event_name_filter %}
+{% raw %}
+This macro is used to add a filter on `event_name` if provided.
 
+#### Returns
+
+Filter for `event_name` values inputted `event_names` list or `lower(event_vendor) = 'com.snowplowanalytics.snowplow.media'`
+{% endraw %}
+{% enddocs %}
+
+{% docs macro_get_percentage_boundaries %}
+{% raw %}
+This macro gets the list of percentage boundaries which are set in the tracker.
+
+#### Returns
+
+Percentage boundaries, e.g. `[25,50,75,100]`
+{% endraw %}
+{% enddocs %}
+
+{% docs macro_session_identifiers %}
+{% raw %}
+This macro is used to set the `session_identifier` used in the base macros.
+
+#### Returns
+
+`snowplow__session_identifiers` if set. Otherwise it defaults to the media session id if enabled, else the page/screen view id from web and mobile.
+{% endraw %}
+{% enddocs %}
+
+{% docs macro_user_identifiers %}
+{% raw %}
+This macro is used to set the `user_identifier` used in the base macros.
+
+#### Returns
+
+`snowplow__user_identifiers` if set. Otherwise it defaults to the domain_userid for web or user_id from the client session context for mobile.
 {% endraw %}
 {% enddocs %}
 
@@ -87,62 +138,7 @@ Retrieves the event type either from the media player event in case of v1 media 
 
 #### Returns
 
-The query path for the field.
-
-#### Usage
-
-```sql
-select
-    ...,
-    {{ media_event_type_field(media_player_event_type={ 'dtype': 'string' }, event_name='a.event_name') }} as event_type,
-    from {{ var('snowplow__events') }} as a
-```
-
-{% endraw %}
-{% enddocs %}
-
-{% docs macro_media_player_field %}
-{% raw %}
-This macro retrieves a property from either the v2 or v1 media player context entity.
-
-#### Returns
-
-The query path for the field.
-
-#### Usage
-
-```sql
-select
-    ...,
-    round({{ media_player_field(
-      v1={ 'field': 'duration', 'dtype': 'double' },
-      v2={ 'field': 'duration', 'dtype': 'double' }
-    ) }}) as duration_secs,
-    from {{ var('snowplow__events') }} as a
-```
-
-{% endraw %}
-{% enddocs %}
-
-{% docs macro_player_id_field %}
-{% raw %}
-This macro produces the value player_id column in the snowplow_media_player_base_events_this_run table based on the values of the youtube_player_id and media_player_id columns.
-
-#### Returns
-
-The query for the player_id column.
-
-#### Usage
-
-```sql
-select
-    ...,
-    {{ player_id_field(
-        youtube_player_id='a.contexts_com_youtube_youtube_1[0]:playerId',
-        media_player_id='a.contexts_org_whatwg_media_element_1[0]:htmlId::varchar'
-    ) }} as player_id
-    from {{ var('snowplow__events') }} as a
-```
+The query for the event_type column.
 
 {% endraw %}
 {% enddocs %}
@@ -155,38 +151,6 @@ This macro produces the value media_player_type column in the snowplow_media_pla
 
 The query for the media_player_type column.
 
-#### Usage
-
-```sql
-select
-    ...,
-    {{ media_player_type_field(
-        youtube_player_id='a.contexts_com_youtube_youtube_1[0]:playerId',
-        media_player_id='a.contexts_org_whatwg_media_element_1[0]:htmlId::varchar'
-    ) }} as media_player_type
-    from {{ var('snowplow__events') }} as a
-```
-
-{% endraw %}
-{% enddocs %}
-
-{% docs macro_media_session_field %}
-{% raw %}
-This macro retrieves a property from the media session context entity.
-
-#### Returns
-
-The query path for the field.
-
-#### Usage
-
-```sql
-select
-    ...,
-    {{ media_session_field({ 'field': 'time_played' }) }},
-    from {{ var('snowplow__events') }} as a
-```
-
 {% endraw %}
 {% enddocs %}
 
@@ -197,17 +161,6 @@ This macro produces the value media_type column in the snowplow_media_player_bas
 #### Returns
 
 The query for the media_type column.
-
-#### Usage
-
-```sql
-select
-    ...,
-    {{ media_type_field(
-      media_media_type='a.contexts_org_whatwg_media_element_1[0]:mediaType::varchar'
-    ) }} as media_type
-    from {{ var('snowplow__events') }} as a
-```
 
 {% endraw %}
 {% enddocs %}
@@ -222,21 +175,6 @@ For v2 media schemas, it is calculated based on the current time, duration and d
 
 The query for the percent_progress field.
 
-#### Usage
-
-```sql
-select
-    ...,
-    {{ percent_progress_field(
-        v1_percent_progress={ 'field': 'percent_progress', 'dtype': 'string' },
-        v1_event_type={ 'field': 'type', 'dtype': 'string' },
-        event_name='a.event_name',
-        v2_current_time={ 'field': 'current_time', 'dtype': 'double' },
-        v2_duration={ 'field': 'duration', 'dtype': 'double' }
-    ) }} as percent_progress
-    from {{ var('snowplow__events') }} as a
-```
-
 {% endraw %}
 {% enddocs %}
 
@@ -248,64 +186,13 @@ This macro produces the value for the playback_quality column in the snowplow_me
 
 The query for the playback_quality column.
 
-#### Usage
-
-```sql
-select
-    ...,
-    {{ playback_quality_field(
-      youtube_quality='a.contexts_com_youtube_youtube_1[0]:playbackQuality::varchar',
-      video_width='a.contexts_org_whatwg_video_element_1[0]:videoWidth::varchar',
-      video_height='a.contexts_org_whatwg_video_element_1[0]:videoHeight::varchar'
-    )}} as playback_quality
-    from {{ var('snowplow__events') }} as a
-```
-
 {% endraw %}
 {% enddocs %}
 
-{% docs macro_source_url_field %}
+{% docs macro_config_check %}
 {% raw %}
-This macro produces the value source_url column in the snowplow_media_player_base_events_this_run table based on the columns for the url in YouTube context and current_src in media context.
 
-#### Returns
-
-The query for the source_url column.
-
-#### Usage
-
-```sql
-select
-    ...,
-    {{ source_url_field(
-      youtube_url='a.contexts_com_youtube_youtube_1[0]:url::varchar',
-      media_current_src='a.contexts_org_whatwg_media_element_1[0]:currentSrc::varchar'
-    ) }} as source_url
-    from {{ var('snowplow__events') }} as a
-```
-
-{% endraw %}
-{% enddocs %}
-
-{% docs macro_web_or_mobile_field %}
-{% raw %}
-This macro retrieves a property from the given fields based on whether web or mobile or both events are enabled.
-
-#### Returns
-
-The query path for the field.
-
-#### Usage
-
-```sql
-select
-    ...,
-    {{ web_or_mobile_field(
-      web='a.contexts_com_snowplowanalytics_snowplow_web_page_1_0_0[safe_offset(0)].id',
-      mobile={'field': 'id', 'col_prefix': 'contexts_com_snowplowanalytics_mobile_screen_1_' }
-    ) }} as page_view_id,
-    from {{ var('snowplow__events') }} as a
-```
+A macro that checks if at least one of the platform enabling variables is true and if the media player contexts variable configuration is valid before the run starts. Raises and error to alert users in the case the variable configuration is not valid.
 
 {% endraw %}
 {% enddocs %}

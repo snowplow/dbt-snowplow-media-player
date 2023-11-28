@@ -26,7 +26,7 @@ events_this_run as (
     select
       *,
       row_number()
-        over (partition by media_session_id order by start_tstamp desc) as media_session_index
+        over (partition by media_session__media_session_id order by start_tstamp desc) as media_session_index
     from {{ ref('snowplow_media_player_base_events_this_run') }}
 )
 
@@ -108,18 +108,18 @@ events_this_run as (
 , media_sessions as (
 
   select
-    media_session_id,
-    media_session_time_played,
-    media_session_time_played_muted,
-    media_session_time_paused,
-    media_session_content_watched,
-    media_session_time_buffering,
-    media_session_time_spent_ads,
-    media_session_ads,
-    media_session_ads_clicked,
-    media_session_ads_skipped,
-    media_session_ad_breaks,
-    media_session_avg_playback_rate
+    media_session__media_session_id as media_session_id,
+    media_session__time_played as media_session_time_played,
+    media_session__time_played_muted as media_session_time_played_muted,
+    media_session__time_paused as media_session_time_paused,
+    media_session__content_watched as media_session_content_watched,
+    media_session__time_buffering as media_session_time_buffering,
+    media_session__time_spent_ads as media_session_time_spent_ads,
+    media_session__ads as media_session_ads,
+    media_session__ads_clicked as media_session_ads_clicked,
+    media_session__ads_skipped as media_session_ads_skipped,
+    media_session__ad_breaks as media_session_ad_breaks,
+    media_session__avg_playback_rate as media_session_avg_playback_rate
 
   from events_this_run
   where media_session_index = 1
@@ -173,7 +173,7 @@ events_this_run as (
 )
 
 {% set play_time_secs -%}
-  coalesce({{ media_session_field('s.media_session_time_played') }}, d.play_time_secs)
+  coalesce(s.media_session_time_played, d.play_time_secs)
 {%- endset %}
 
 select
@@ -205,23 +205,23 @@ select
   d.start_tstamp,
   d.end_tstamp,
   coalesce(
-    {{ media_session_field('s.media_session_avg_playback_rate') }},
+    s.media_session_avg_playback_rate,
     cast(d.avg_playback_rate as {{ type_float() }})
   ) as avg_playback_rate,
 
   -- time spent
   {{ play_time_secs }} as play_time_secs,
-  coalesce({{ media_session_field('s.media_session_time_played_muted') }}, d.play_time_muted_secs) as play_time_muted_secs,
-  {{ media_session_field('s.media_session_time_paused') }} as paused_time_secs,
-  {{ media_session_field('s.media_session_time_buffering') }} as buffering_time_secs,
-  {{ media_session_field('s.media_session_time_spent_ads') }} as ads_time_secs,
+  coalesce(s.media_session_time_played_muted, d.play_time_muted_secs) as play_time_muted_secs,
+  s.media_session_time_paused as paused_time_secs,
+  s.media_session_time_buffering as buffering_time_secs,
+  s.media_session_time_spent_ads as ads_time_secs,
 
   -- event counts
   d.seeks,
-  {{ media_session_field('s.media_session_ads') }} as ads,
-  {{ media_session_field('s.media_session_ads_clicked') }} as ads_clicked,
-  {{ media_session_field('s.media_session_ads_skipped') }} as ads_skipped,
-  {{ media_session_field('s.media_session_ad_breaks') }} as ad_breaks,
+  s.media_session_ads as ads,
+  s.media_session_ads_clicked as ads_clicked,
+  s.media_session_ads_skipped as ads_skipped,
+  s.media_session_ad_breaks as ad_breaks,
 
   -- playback progress
   d.plays > 0 as is_played,
@@ -231,7 +231,7 @@ select
   end as is_valid_play,
   case
     when
-      coalesce({{ media_session_field('s.media_session_content_watched') }}, d.play_time_secs) / nullif(f.duration_secs, 0)
+      coalesce(s.media_session_content_watched, d.play_time_secs) / nullif(f.duration_secs, 0)
       >= {{ var("snowplow__complete_play_rate") }}
       then true else
       false
@@ -243,11 +243,11 @@ select
   -- to correct incorrect result due to duplicate session_identifier (one removed)
   end, 0) as {{ type_float() }}) as retention_rate,
   p.percent_progress_reached,
-  {{ media_session_field('s.media_session_content_watched') }} as content_watched_secs,
+  s.media_session_content_watched as content_watched_secs,
   case
-    when d.duration_secs is not null and {{ media_session_field('s.media_session_content_watched') }} is not null and d.duration_secs > 0
+    when d.duration_secs is not null and s.media_session_content_watched is not null and d.duration_secs > 0
     then least(
-      {{ media_session_field('s.media_session_content_watched') }} / d.duration_secs,
+      s.media_session_content_watched / d.duration_secs,
       1.0
     )
   end as content_watched_percent

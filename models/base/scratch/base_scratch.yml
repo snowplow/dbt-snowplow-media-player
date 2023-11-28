@@ -100,52 +100,52 @@ models:
       - name: event_in_session_index
         description: '{{ doc("col_event_in_session_index") }}'
 
-      - name: media_session_id
+      - name: media_session__media_session_id
         description: '{{ doc("col_media_session_id") }}'
-      - name: media_session_time_played
+      - name: media_session__time_played
         description: '{{ doc("col_media_session_time_played") }}'
-      - name: media_session_time_played_muted
+      - name: media_session__time_played_muted
         description: '{{ doc("col_media_session_time_played_muted") }}'
-      - name: media_session_time_paused
+      - name: media_session__time_paused
         description: '{{ doc("col_media_session_time_paused") }}'
-      - name: media_session_content_watched
+      - name: media_session__content_watched
         description: '{{ doc("col_media_session_content_watched") }}'
-      - name: media_session_time_buffering
+      - name: media_session__time_buffering
         description: '{{ doc("col_media_session_time_buffering") }}'
-      - name: media_session_time_spent_ads
+      - name: media_session__time_spent_ads
         description: '{{ doc("col_media_session_time_spent_ads") }}'
-      - name: media_session_ads
+      - name: media_session__ads
         description: '{{ doc("col_media_session_ads") }}'
-      - name: media_session_ads_clicked
+      - name: media_session__ads_clicked
         description: '{{ doc("col_media_session_ads_clicked") }}'
-      - name: media_session_ads_skipped
+      - name: media_session__ads_skipped
         description: '{{ doc("col_media_session_ads_skipped") }}'
-      - name: media_session_ad_breaks
+      - name: media_session__ad_breaks
         description: '{{ doc("col_media_session_ad_breaks") }}'
-      - name: media_session_avg_playback_rate
+      - name: media_session__avg_playback_rate
         description: '{{ doc("col_media_session_avg_playback_rate") }}'
 
-      - name: ad_name
+      - name: media_ad__name
         description: '{{ doc("col_ad_name") }}'
-      - name: ad_id
+      - name: media_ad__id
         description: '{{ doc("col_ad_id") }}'
-      - name: ad_creative_id
+      - name: media_ad__creative_id
         description: '{{ doc("col_ad_creative_id") }}'
-      - name: ad_pod_position
+      - name: media_ad__pod_position
         description: '{{ doc("col_ad_pod_position") }}'
-      - name: ad_duration_secs
+      - name: media_ad__duration_secs
         description: '{{ doc("col_ad_duration_secs") }}'
-      - name: ad_skippable
+      - name: media_ad__skippable
         description: '{{ doc("col_ad_skippable") }}'
 
-      - name: ad_break_name
+      - name: media_ad_break__name
         description: '{{ doc("col_ad_break_name") }}'
-      - name: ad_break_id
+      - name: media_ad_break__break_id
         description: '{{ doc("col_ad_break_id") }}'
-      - name: ad_break_type
+      - name: media_ad_break__break_type
         description: '{{ doc("col_ad_break_type") }}'
 
-      - name: ad_percent_progress
+      - name: ad_quartile_event__percent_progress
         description: '{{ doc("col_ad_percent_progress") }}'
 
   - name: snowplow_media_player_pivot_base

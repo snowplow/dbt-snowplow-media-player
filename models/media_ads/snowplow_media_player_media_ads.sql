@@ -55,36 +55,36 @@ new_media_ad_views as (
     a.media_identifier,
     max(a.media_label) as media_label,
 
-    {{ media_ad_field('a.ad_id') }} as ad_id,
-    {{ media_ad_field('max(a.name)') }} as name,
-    {{ media_ad_field('max(a.creative_id)') }} as creative_id,
-    {{ media_ad_field('max(a.duration_secs)') }} as duration_secs,
-    {{ media_ad_field('sum(case when a.skippable then 1 else 0 end) > 0') }} as skippable,
-    {{ media_ad_field('avg(a.pod_position)') }} as pod_position,
+    a.ad_id as ad_id,
+    max(a.name) as name,
+    max(a.creative_id) as creative_id,
+    max(a.duration_secs) as duration_secs,
+    sum(case when a.skippable then 1 else 0 end) > 0 as skippable,
+    avg(a.pod_position) as pod_position,
 
     count(*) as views,
     sum(case when a.clicked then 1 else 0 end) as clicked,
     sum(case when a.skipped then 1 else 0 end) as skipped,
-    {{ media_ad_quartile_event_field('sum(case when a.percent_reached_25 then 1 else 0 end)') }} as percent_reached_25,
-    {{ media_ad_quartile_event_field('sum(case when a.percent_reached_50 then 1 else 0 end)') }} as percent_reached_50,
-    {{ media_ad_quartile_event_field('sum(case when a.percent_reached_75 then 1 else 0 end)') }} as percent_reached_75,
+    sum(case when a.percent_reached_25 then 1 else 0 end) as percent_reached_25,
+    sum(case when a.percent_reached_50 then 1 else 0 end) as percent_reached_50,
+    sum(case when a.percent_reached_75 then 1 else 0 end) as percent_reached_75,
     sum(case when a.percent_reached_100 then 1 else 0 end) as percent_reached_100,
 
     {% if is_incremental() %}
       0 as views_unique,
       0 as clicked_unique,
       0 as skipped_unique,
-      {{ media_ad_quartile_event_field('0') }} as percent_reached_25_unique,
-      {{ media_ad_quartile_event_field('0') }} as percent_reached_50_unique,
-      {{ media_ad_quartile_event_field('0') }} as percent_reached_75_unique,
+      0 as percent_reached_25_unique,
+      0 as percent_reached_50_unique,
+      0 as percent_reached_75_unique,
       0 as percent_reached_100_unique,
     {% else %}
       count(distinct a.user_identifier) as views_unique,
       count(distinct case when a.clicked then a.user_identifier end) as clicked_unique,
       count(distinct case when a.skipped then a.user_identifier end) as skipped_unique,
-      {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_25 then user_identifier end)') }} as percent_reached_25_unique,
-      {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_50 then user_identifier end)') }} as percent_reached_50_unique,
-      {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_75 then user_identifier end)') }} as percent_reached_75_unique,
+      count(distinct case when a.percent_reached_25 then user_identifier end) as percent_reached_25_unique,
+      count(distinct case when a.percent_reached_50 then user_identifier end) as percent_reached_50_unique,
+      count(distinct case when a.percent_reached_75 then user_identifier end) as percent_reached_75_unique,
       count(distinct case when a.percent_reached_100 then user_identifier end) as percent_reached_100_unique,
     {% endif %}
 
@@ -106,9 +106,9 @@ new_media_ad_views as (
     count(distinct a.user_identifier) as views_unique,
     count(distinct case when a.clicked then a.user_identifier end) as clicked_unique,
     count(distinct case when a.skipped then a.user_identifier end) as skipped_unique,
-    {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_25 then user_identifier end)') }} as percent_reached_25_unique,
-    {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_50 then user_identifier end)') }} as percent_reached_50_unique,
-    {{ media_ad_quartile_event_field('count(distinct case when a.percent_reached_75 then user_identifier end)') }} as percent_reached_75_unique,
+    count(distinct case when a.percent_reached_25 then user_identifier end) as percent_reached_25_unique,
+    count(distinct case when a.percent_reached_50 then user_identifier end) as percent_reached_50_unique,
+    count(distinct case when a.percent_reached_75 then user_identifier end) as percent_reached_75_unique,
     count(distinct case when a.percent_reached_100 then user_identifier end) as percent_reached_100_unique
 
   from {{ ref("snowplow_media_player_media_ad_views") }} a
@@ -129,7 +129,7 @@ new_media_ad_views as (
   select * from new_data
   union all
   select * {% if target.type in ['databricks', 'spark'] %}except(first_view_date){% endif %}
-   from {{ this }}
+  from {{ this }}
 
 )
 
@@ -142,27 +142,27 @@ new_media_ad_views as (
     a.media_identifier,
     max(a.media_label) as media_label,
 
-    {{ media_ad_field('a.ad_id') }} as ad_id,
-    {{ media_ad_field('max(a.name)') }} as name,
-    {{ media_ad_field('max(a.creative_id)') }} as creative_id,
-    {{ media_ad_field('max(a.duration_secs)') }} as duration_secs,
-    {{ media_ad_field('sum(case when a.skippable then 1 else 0 end) > 0') }} as skippable,
-    {{ media_ad_field('sum(a.pod_position * a.views) / sum(a.views)') }} as pod_position,
+    a.ad_id as ad_id,
+    max(a.name) as name,
+    max(a.creative_id) as creative_id,
+    max(a.duration_secs) as duration_secs,
+    sum(case when a.skippable then 1 else 0 end) > 0 as skippable,
+    sum(a.pod_position * a.views) / sum(a.views) as pod_position,
 
     sum(a.views) as views,
     sum(a.clicked) as clicked,
     sum(a.skipped) as skipped,
-    {{ media_ad_quartile_event_field('sum(a.percent_reached_25)') }} as percent_reached_25,
-    {{ media_ad_quartile_event_field('sum(a.percent_reached_50)') }} as percent_reached_50,
-    {{ media_ad_quartile_event_field('sum(a.percent_reached_75)') }} as percent_reached_75,
+    sum(a.percent_reached_25) as percent_reached_25,
+    sum(a.percent_reached_50) as percent_reached_50,
+    sum(a.percent_reached_75) as percent_reached_75,
     sum(a.percent_reached_100) as percent_reached_100,
 
     sum(a.views_unique) as views_unique,
     sum(a.clicked_unique) as clicked_unique,
     sum(a.skipped_unique) as skipped_unique,
-    {{ media_ad_quartile_event_field('sum(a.percent_reached_25_unique)') }} as percent_reached_25_unique,
-    {{ media_ad_quartile_event_field('sum(a.percent_reached_50_unique)') }} as percent_reached_50_unique,
-    {{ media_ad_quartile_event_field('sum(a.percent_reached_75_unique)') }} as percent_reached_75_unique,
+    sum(a.percent_reached_25_unique) as percent_reached_25_unique,
+    sum(a.percent_reached_50_unique) as percent_reached_50_unique,
+    sum(a.percent_reached_75_unique) as percent_reached_75_unique,
     sum(a.percent_reached_100_unique) as percent_reached_100_unique,
 
     min(a.first_view) as first_view,
@@ -193,17 +193,17 @@ new_media_ad_views as (
     a.views,
     a.clicked,
     a.skipped,
-    {{ media_ad_quartile_event_field('a.percent_reached_25') }} as percent_reached_25,
-    {{ media_ad_quartile_event_field('a.percent_reached_50') }} as percent_reached_50,
-    {{ media_ad_quartile_event_field('a.percent_reached_75') }} as percent_reached_75,
+    a.percent_reached_25 as percent_reached_25,
+    a.percent_reached_50 as percent_reached_50,
+    a.percent_reached_75 as percent_reached_75,
     a.percent_reached_100,
 
     coalesce(b.views_unique, a.views_unique) as views_unique,
     coalesce(b.clicked_unique, a.clicked_unique) as clicked_unique,
     coalesce(b.skipped_unique, a.skipped_unique) as skipped_unique,
-    {{ media_ad_quartile_event_field('coalesce(b.percent_reached_25_unique, a.percent_reached_25_unique)') }} as percent_reached_25_unique,
-    {{ media_ad_quartile_event_field('coalesce(b.percent_reached_50_unique, a.percent_reached_50_unique)') }} as percent_reached_50_unique,
-    {{ media_ad_quartile_event_field('coalesce(b.percent_reached_75_unique, a.percent_reached_75_unique)') }} as percent_reached_75_unique,
+    coalesce(b.percent_reached_25_unique, a.percent_reached_25_unique) as percent_reached_25_unique,
+    coalesce(b.percent_reached_50_unique, a.percent_reached_50_unique) as percent_reached_50_unique,
+    coalesce(b.percent_reached_75_unique, a.percent_reached_75_unique) as percent_reached_75_unique,
     coalesce(b.percent_reached_100_unique, a.percent_reached_100_unique) as percent_reached_100_unique,
 
     a.first_view,

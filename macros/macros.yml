@@ -1,0 +1,98 @@
+version: 2
+
+macros:
+
+  - name: dtype_to_type
+    description: '{{ doc("macro_dtype_to_type") }}'
+    arguments:
+      - name: dtype
+        type: string
+        description: Data type
+
+  - name: field_alias
+    description: '{{ doc("macro_field_alias") }}'
+    arguments:
+      - name: field
+        type: string
+        description: Dictionary describing the field name and data type. Use keys `field` and `dtype`, e.g. `{'field':'playbackRate', 'dtype':'number'}`
+      - name: prefix
+        type: string
+        description: Prefix to use as for the column alias
+
+  - name: get_context_fields
+    description: '{{ doc("macro_get_context_fields") }}'
+    arguments:
+      - name: fields
+        type: string
+        description: List of dictionaries describing the field names and data types. Use keys `field` and `dtype`, e.g. `[{'field':'playbackRate', 'dtype':'number'}]`
+      - name: enabled
+        type: boolean
+        description: Whether context is enabled, if not the macro casts the fields as nulls
+      - name: context
+        type: string
+        description: Context column name
+      - name: prefix
+        type: string
+        description: Prefix to use as for the column alias
+
+  - name: get_enabled_context_fields
+    description: '{{ doc("macro_get_enabled_context_fields") }}'
+    arguments:
+      - name: fields
+        type: string
+        description: List of dictionaries describing the field names and data types. Use keys `field` and `dtype`, e.g. `[{'field':'playbackRate', 'dtype':'number'}]`
+      - name: col_prefix
+        type: string
+        description: Context column name
+      - name: field_prefix
+        type: string
+        description: Prefix to use as for the column alias
+
+  - name: media_event_type_field
+    description: '{{ doc("macro_media_event_type_field") }}'
+
+  - name: media_player_type_field
+    description: '{{ doc("macro_media_player_type_field") }}'
+
+  - name: media_type_field
+    description: '{{ doc("macro_media_type_field") }}'
+
+  - name: percent_progress_field
+    description: '{{ doc("macro_percent_progress_field") }}'
+
+
+  - name: playback_quality_field
+    description: '{{ doc("macro_playback_quality_field") }}'
+
+  - name: snakeify_case
+    description: '{{ doc("macro_snakeify_case") }}'
+    arguments:
+      - name: text
+        type: string
+        description: The string in camel/pascal case to change to snake case
+
+  - name: allow_refresh
+    description: '{{ doc("macro_allow_refresh") }}'
+
+  - name: event_name_filter
+    description: '{{ doc("macro_event_name_filter") }}'
+    arguments:
+      - name: event_names
+        type: list
+        description: List of event_name values to filter by
+
+  - name: get_percentage_boundaries
+    description: '{{ doc("macro_get_percentage_boundaries") }}'
+    arguments:
+      - name: tracked_boundaries
+        type: list
+        description: Percentage boundaries set in the tracker
+
+  - name: session_identifiers
+    description: '{{ doc("macro_session_identifiers") }}'
+
+  - name: user_identifiers
+    description: '{{ doc("macro_user_identifiers") }}'
+
+  - name: config_check
+    description: '{{ doc("macro_config_check") }}'
