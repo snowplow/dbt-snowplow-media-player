@@ -123,7 +123,7 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
 
 
 {% macro user_identifiers() %}
-  {{ return(adapter.dispatch('user_identifiers', 'snowplow_unified')()) }}
+  {{ return(adapter.dispatch('user_identifiers', 'snowplow_media_player')()) }}
 {% endmacro %}
 
 
