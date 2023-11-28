@@ -39,8 +39,8 @@ models:
         +enabled: '{{ target.type == "snowflake" | as_bool() }}'
   snowplow_media_player:
     +persist_docs:
-      relation: false
-      columns: false
+      relation: '{{ false if target.type in ["databricks"] else true }}'
+      columns: '{{ false if target.type in ["databricks"] else true }}'
     custom:
       +enabled: true
 

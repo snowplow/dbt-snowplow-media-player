@@ -17,6 +17,7 @@ In addition this release adds a more robust unique media identifier. This fixes 
 - Add unique media identifier (close #59)
 - Add missing primary key to media_ad_views
 - Fix field names in custom session stats model yaml (close #63)
+- Fix playback_quality_field macro (close #60)
 
 ## Under the hood
 
