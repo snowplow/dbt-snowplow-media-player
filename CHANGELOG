@@ -1,4 +1,4 @@
-snowplow-media-player 0.7.0 (2023-xx-xx)
+snowplow-media-player 0.7.0 (2023-12-07)
 ---------------------------------------
 ## Summary
 This version adds new features powered by a complete refactor of the core processing of the package by moving it out to the new `base` macro functionality provided in `snowplow_utils`. This enables users to now specify custom fields for sessionization and user identification, to add custom entities/SDEs fields to the base events table for redshift/postgres, and to add passthrough fields to the derived tables so you can now more easily add your own fields to our tables.
@@ -18,8 +18,6 @@ In addition this release adds a more robust unique media identifier. This fixes 
 - Add missing primary key to media_ad_views
 - Fix field names in custom session stats model yaml (close #63)
 - Fix playback_quality_field macro (close #60)
-
-## Under the hood
 
 ## 🚨 Breaking Changes 🚨
 This version requires a full refresh run if you have been using any previous versions. You will not be able to upgrade and have the package work without doing a full refresh. Check out the [migration guide](https://docs.snowplow.io/docs/modeling-your-data/modeling-your-data-with-dbt/migration-guides/media-player/) for more information when you upgrade.
