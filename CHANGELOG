@@ -1,3 +1,14 @@
+snowplow-media-player 0.7.1 (2024-01-26)
+---------------------------------------
+## Summary
+This version bumps the package dependency to add support for the latest snowplow utils package.
+
+## Under the hood
+- Bump support for latest utils
+
+## Upgrading
+To upgrade simply bump the snowplow-media-player version in your `packages.yml` file.
+
 snowplow-media-player 0.7.0 (2023-12-07)
 ---------------------------------------
 ## Summary
