@@ -6,3 +6,4 @@ logs/
 .DS_Store
 dbt-service-account.json
 .vscode/settings.json
+integration_tests/package-lock.yml
