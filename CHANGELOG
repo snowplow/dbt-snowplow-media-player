@@ -1,3 +1,20 @@
+snowplow-media-player 0.7.2 (2024-03-18)
+---------------------------------------
+## Summary
+This release makes a few internal tweaks, including adding support for [schema grants](https://docs.snowplow.io/docs/modeling-your-data/modeling-your-data-with-dbt/package-features/table-grants/#granting-usage-on-schemas)
+
+## Features
+- Add support for schema grants
+
+## Fix
+- Add missing argument in delete from manifest call
+
+## Under the hood
+- Enforce full refresh flag to refresh manifest tables
+
+## Upgrading
+To upgrade simply bump the snowplow-media-player version in your `packages.yml` file. Note the minimum version of snowplow-utils required is now 0.16.2
+
 snowplow-media-player 0.7.1 (2024-01-26)
 ---------------------------------------
 ## Summary
