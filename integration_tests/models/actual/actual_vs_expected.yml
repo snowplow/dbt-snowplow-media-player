@@ -10,6 +10,7 @@ models:
           compare_columns:
             - play_id
             - page_view_id
+            - page_view_id_array
             - media_identifier
             - player_id
             - media_label
