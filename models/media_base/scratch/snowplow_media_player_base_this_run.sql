@@ -82,7 +82,6 @@ events_this_run as (
     ,min(case when i.event_type in ('seek', 'seeked', 'seekstart', 'seekend') then start_tstamp end) as first_seek_time
     ,max(i.percent_progress) as max_percent_progress
     ,{{ snowplow_utils.get_string_agg('original_session_identifier', 'i', is_distinct=True) }} as domain_sessionid_array
-    ,{{ snowplow_utils.get_string_agg('page_view_id', 'i', is_distinct=True) }} as page_view_id_array
 
 
   from events_this_run as i
@@ -135,6 +134,17 @@ events_this_run as (
 
   from events_this_run as ev
   where play_id_index_asc = 1
+
+)
+
+, page_view_id_aggregation as (
+
+  select
+    i.play_id
+    ,{{ snowplow_utils.get_string_agg('page_view_id', 'i', is_distinct=True) }} as page_view_id_array
+
+  from events_this_run as i
+  group by 1
 
 )
 
@@ -191,7 +201,7 @@ events_this_run as (
 select
   d.play_id,
   pv.page_view_id,
-  d.page_view_id_array,
+  pva.page_view_id_array,
   d.media_identifier,
   d.player_id,
   d.media_label,
@@ -292,6 +302,9 @@ left join percent_progress_by_play_id as p
 
 left join first_page_views_by_play_id as pv
   on pv.play_id = d.play_id
+
+left join page_view_id_aggregation as pva
+  on pva.play_id = d.play_id
 
 {% if target.type == 'postgres' %}
   where d.duplicate_count = 1
