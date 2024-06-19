@@ -2,12 +2,19 @@ snowplow-media-player 0.8.0 (2024-06-17)
 ---------------------------------------
 ## Summary
 This release adds support for video playback across multiple pages/screens (e.g., while in picture-in-picture mode).
+It also fixes the calculation of impressions in the stats table to use distinct plays instead of page views. This allows for multiple videos on the same page.
 
 ## Features
 - Add support for picture-in-picture playback of videos across multiple pages/screens (#70)
 
-## Upgrading
-To upgrade simply bump the snowplow-media-player version in your `packages.yml` file. Note the minimum version of snowplow-utils required is now 0.16.2
+## Fix
+- Fix counting impressions based using distinct play_id instead of page_view_id (#72)
+
+## Under the hood
+- Run tests on Redshift in CI (#74)
+
+## 🚨 Breaking Changes 🚨
+This version requires a full refresh run if you have been using any previous versions. Otherwise the calculation of the `impressions` and `play_rate` columns in the media stats table will be inconsistent with historical data. Check out the [migration guide](https://docs.snowplow.io/docs/modeling-your-data/modeling-your-data-with-dbt/migration-guides/media-player/) for more information when you upgrade.
 
 snowplow-media-player 0.7.2 (2024-03-18)
 ---------------------------------------

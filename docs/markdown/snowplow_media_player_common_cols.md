@@ -213,7 +213,7 @@ The sum of all media plays that exceeds the minimum media length set within the 
 {% enddocs %}
 
 {% docs col_impressions %}
-The number of pageviews where a media content was rendered regardless of whether the media was actually played or not.
+The number of player instance (media sessions) where a media content was rendered regardless of whether the media was actually played or not.
 {% enddocs %}
 
 {% docs col_avg_playback_rate %}
@@ -221,7 +221,7 @@ Average playback rate (1 is normal speed).
 {% enddocs %}
 
 {% docs col_play_rate %}
-Total plays divided by impressions. Please note that as the base for media plays is pageview / media_identifier, in case the same video is played multiple times within the same pageview, it will still count as one play.
+Total plays divided by impressions. Please note that, if the media session ID is not available, as the base for media plays is pageview / media_identifier, in case the same video is played multiple times within the same pageview, it will still count as one play.
 {% enddocs %}
 
 {% docs col_complete_plays %}
