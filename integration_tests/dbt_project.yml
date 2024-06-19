@@ -229,6 +229,7 @@ seeds:
         +column_types:
           play_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           page_view_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
+          page_view_id_array: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           media_identifier: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           player_id: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'
           media_label: '{{ "string" if target.type in ["bigquery", "databricks", "spark"] else "varchar" }}'

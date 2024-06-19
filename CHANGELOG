@@ -1,3 +1,14 @@
+snowplow-media-player 0.8.0 (2024-06-17)
+---------------------------------------
+## Summary
+This release adds support for video playback across multiple pages/screens (e.g., while in picture-in-picture mode).
+
+## Features
+- Add support for picture-in-picture playback of videos across multiple pages/screens (#70)
+
+## Upgrading
+To upgrade simply bump the snowplow-media-player version in your `packages.yml` file. Note the minimum version of snowplow-utils required is now 0.16.2
+
 snowplow-media-player 0.7.2 (2024-03-18)
 ---------------------------------------
 ## Summary
