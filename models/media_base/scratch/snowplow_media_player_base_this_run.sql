@@ -24,9 +24,11 @@ with
 
 events_this_run as (
     select
-      *,
-      row_number()
-        over (partition by media_session__media_session_id order by start_tstamp desc) as media_session_index
+      *
+      ,row_number()
+        over (partition by media_session__media_session_id order by start_tstamp desc) as media_session_index_desc
+      ,row_number()
+        over (partition by play_id order by start_tstamp asc) as play_id_index_asc
     from {{ ref('snowplow_media_player_base_events_this_run') }}
 )
 
@@ -34,7 +36,6 @@ events_this_run as (
 
   select
     i.play_id
-    ,i.page_view_id
     ,i.media_identifier
     ,i.player_id
     ,i.media_label
@@ -85,7 +86,7 @@ events_this_run as (
 
   from events_this_run as i
 
-  {{ dbt_utils.group_by(n=18+(var('snowplow__base_passthroughs', [])|length)) }}
+  {{ dbt_utils.group_by(n=17+(var('snowplow__base_passthroughs', [])|length)) }}
 
 )
 
@@ -122,7 +123,28 @@ events_this_run as (
     media_session__avg_playback_rate as media_session_avg_playback_rate
 
   from events_this_run
-  where media_session_index = 1
+  where media_session_index_desc = 1
+
+)
+
+, first_page_views_by_play_id as (
+
+  select
+    ev.play_id, ev.page_view_id
+
+  from events_this_run as ev
+  where play_id_index_asc = 1
+
+)
+
+, page_view_id_aggregation as (
+
+  select
+    i.play_id
+    ,{{ snowplow_utils.get_string_agg('page_view_id', 'i', is_distinct=True) }} as page_view_id_array
+
+  from events_this_run as i
+  group by 1
 
 )
 
@@ -178,7 +200,8 @@ events_this_run as (
 
 select
   d.play_id,
-  d.page_view_id,
+  pv.page_view_id,
+  pva.page_view_id_array,
   d.media_identifier,
   d.player_id,
   d.media_label,
@@ -276,6 +299,12 @@ left join media_sessions as s
 
 left join percent_progress_by_play_id as p
   on p.play_id = d.play_id
+
+left join first_page_views_by_play_id as pv
+  on pv.play_id = d.play_id
+
+left join page_view_id_aggregation as pva
+  on pva.play_id = d.play_id
 
 {% if target.type == 'postgres' %}
   where d.duplicate_count = 1

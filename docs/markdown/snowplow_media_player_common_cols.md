@@ -16,6 +16,12 @@ The surrogate key generated from `page_view_id`, `player_id`, `media_label`, `me
 
 {% docs col_page_view_id %}
 A UUID for each page view e.g. `c6ef3124-b53a-4b13-a233-0088f79dcbcb`.
+If more than one page view IDs were tracked for a single play ID, the first page view ID is used.
+{% enddocs %}
+
+{% docs col_page_view_id_array %}
+All page_view_ids that were tracked for a play_id.
+A play_id may contain more than one page_view_id in case the video was played in picture-in-picture mode across multiple app pages/screens.
 {% enddocs %}
 
 {% docs col_session_identifier %}

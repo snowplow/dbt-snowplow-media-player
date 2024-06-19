@@ -14,6 +14,8 @@ models:
           - not_null
       - name: page_view_id
         description: '{{ doc("col_page_view_id") }}'
+      - name: page_view_id_array
+        description: '{{ doc("col_page_view_id_array") }}'
       - name: media_identifier
         description: '{{ doc("col_media_identifier") }}'
       - name: player_id
