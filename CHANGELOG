@@ -1,4 +1,4 @@
-snowplow-media-player 0.8.0 (2024-06-17)
+snowplow-media-player 0.8.0 (2024-06-20)
 ---------------------------------------
 ## Summary
 This release adds support for video playback across multiple pages/screens (e.g., while in picture-in-picture mode).
