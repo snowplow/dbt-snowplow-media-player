@@ -121,6 +121,33 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
 
 {% endmacro %}
 
+{% macro spark__session_identifiers() %}
+
+  {% if var('snowplow__session_identifiers') %}
+    {{ return(var('snowplow__session_identifiers')) }}
+
+  {% else %}
+    {% set identifiers = [] %}
+
+    {% if var('snowplow__enable_media_session') %}
+      {% do identifiers.append({'schema': 'contexts_com_snowplowanalytics_snowplow_media_session_1', 'field': 'media_session_id', 'prefix': 'media_session_'}) %}
+    {% endif %}
+
+    {% if var('snowplow__enable_mobile_events') %}
+      {% do identifiers.append({'schema': 'contexts_com_snowplowanalytics_mobile_screen_1', 'field': 'id', 'prefix': 'mobile_screen_'}) %}
+    {% endif %}
+
+    {% if var('snowplow__enable_web_events') %}
+      {% do identifiers.append({'schema': 'contexts_com_snowplowanalytics_snowplow_web_page_1', 'field': 'id', 'prefix': 'web_page_'}) %}
+    {% endif %}
+
+  {% endif %}
+
+  {{ return(identifiers) }}
+
+{% endmacro %}
+
+
 
 {% macro user_identifiers() %}
   {{ return(adapter.dispatch('user_identifiers', 'snowplow_media_player')()) }}
@@ -213,6 +240,28 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
 
     {% if var('snowplow__enable_mobile_events') %}
       {% do identifiers.append({'schema': 'com_snowplowanalytics_snowplow_client_session_1', 'field': 'user_id', 'prefix': 'user_'}) %}
+    {% endif %}
+
+    {{ return(identifiers) }}
+
+  {% endif %}
+
+{% endmacro %}
+
+{% macro spark__user_identifiers() %}
+
+  {% if var('snowplow__user_identifiers') %}
+    {{ return(var('snowplow__user_identifiers')) }}
+
+  {% else %}
+    {% set identifiers = [] %}
+
+    {% if var('snowplow__enable_web_events') %}
+      {% do identifiers.append( {'schema': 'atomic', 'field': 'domain_userid', 'prefix': 'user_'}) %}
+    {% endif %}
+
+    {% if var('snowplow__enable_mobile_events') %}
+      {% do identifiers.append({'schema': 'contexts_com_snowplowanalytics_snowplow_client_session_1', 'field': 'user_id', 'prefix': 'user_'}) %}
     {% endif %}
 
     {{ return(identifiers) }}
