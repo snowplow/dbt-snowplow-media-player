@@ -39,3 +39,6 @@
 {{ sessions_lifecycle_manifest_query }}
 
 where session_identifier is not null
+{% if target.type in ['spark'] %}
+order by start_tstamp_date asc
+{% endif -%}
