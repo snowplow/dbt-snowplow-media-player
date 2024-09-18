@@ -128,7 +128,7 @@ new_media_ad_views as (
 
   select * from new_data
   union all
-  select * {% if target.type in ['databricks', 'spark'] %}except(first_view_date){% endif %}
+  select * {% if target.type in ['databricks'] %}except(first_view_date){% endif %}
   from {{ this }}
 
 )
@@ -226,7 +226,7 @@ new_media_ad_views as (
 {% endif %}
 
 select *
-  {% if target.type in ['databricks', 'spark'] -%}
+  {% if target.type in ['databricks'] -%}
   , date(prep.first_view) as first_view_date
   {%- endif %}
 

@@ -10,7 +10,7 @@ do
   esac
 done
 
-declare -a SUPPORTED_DATABASES=("bigquery" "databricks" "postgres" "redshift" "snowflake")
+declare -a SUPPORTED_DATABASES=("bigquery" "databricks" "postgres" "redshift" "snowflake", "spark_iceberg")
 
 # set to lower case
 DATABASE="$(echo $DATABASE | tr '[:upper:]' '[:lower:]')"
@@ -28,7 +28,7 @@ for db in ${DATABASES[@]}; do
   eval "dbt seed --target $db --full-refresh" || exit 1;
 
   # This run and the subsequent incremental ones exist just to make sure that the models work with the newer contexts disabled
-  echo "Snowplow media player integration tests (v1 only): Execute models - run 1/6"
+  echo "Snowplow media player integration tests (v1 only): Execute models - run 1/2"
 
   eval "dbt run --target $db --full-refresh --vars '{snowplow__allow_refresh: true, snowplow__enable_media_player_v2: false, snowplow__enable_media_session: false, snowplow__enable_media_ad: false, snowplow__enable_media_ad_break: false, snowplow__enable_ad_quartile_event: false, snowplow__enable_mobile_events: false}'" || exit 1;
 
@@ -37,7 +37,7 @@ for db in ${DATABASES[@]}; do
   eval "dbt run --target $db --vars '{snowplow__allow_refresh: true, snowplow__enable_media_player_v2: false, snowplow__enable_media_session: false, snowplow__enable_media_ad: false, snowplow__enable_media_ad_break: false, snowplow__enable_ad_quartile_event: false, snowplow__enable_mobile_events: false}'" || exit 1;
 
   # This run and the subsequent incremental ones exist just to make sure that the models work with the older contexts disabled
-  echo "Snowplow media player integration tests (v2 only): Execute models - run 1/6"
+  echo "Snowplow media player integration tests (v2 only): Execute models - run 1/2"
 
   eval "dbt run --target $db --full-refresh --vars '{snowplow__allow_refresh: true, snowplow__backfill_limit_days: 3000, snowplow__enable_youtube: false, snowplow__enable_whatwg_media: false, snowplow__enable_whatwg_video: false, snowplow__enable_media_player_v1: false}'" || exit 1;
 
