@@ -27,20 +27,23 @@ quoting:
 models:
   snowplow_media_player_integration_tests:
     bind: false
+    +materialized: table
     +schema: 'snplw_media_player_int_tests'
     source:
       bigquery:
         +enabled: '{{ target.type == "bigquery" | as_bool() }}'
       databricks:
-        +enabled: '{{ target.type in ["databricks", "spark"] | as_bool() }}'
+        +enabled: '{{ target.type == "databricks" | as_bool() }}'
+      spark:
+        +enabled: '{{ target.type == "spark" | as_bool() }}'
       default:
         +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
       snowflake:
         +enabled: '{{ target.type == "snowflake" | as_bool() }}'
   snowplow_media_player:
     +persist_docs:
-      relation: '{{ false if target.type in ["databricks"] else true }}'
-      columns: '{{ false if target.type in ["databricks"] else true }}'
+      relation: '{{ false if target.type in ["spark","databricks"] else true }}'
+      columns: '{{ false if target.type in ["spark","databricks"] else true }}'
     custom:
       +enabled: true
 

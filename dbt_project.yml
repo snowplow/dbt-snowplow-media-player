@@ -115,6 +115,8 @@ models:
   snowplow_media_player:
     +bind: false
     +materialized: table
+    +incremental_strategy: "{{ none if target.type not in ['spark'] else 'merge' }}"
+    +file_format: "{{ 'delta' if target.type not in ['spark'] else 'iceberg'}}"
     base:
       manifest:
         +schema: "snowplow_manifest"
@@ -124,11 +126,13 @@ models:
         bigquery:
           +enabled: '{{ target.type == "bigquery" | as_bool() }}'
         databricks:
-          +enabled: '{{ target.type in ["databricks", "spark"] | as_bool() }}'
+          +enabled: '{{ target.type == "databricks" | as_bool() }}'
         default:
           +enabled: '{{ target.type in ["redshift", "postgres"] | as_bool() }}'
         snowflake:
           +enabled: '{{ target.type == "snowflake" | as_bool() }}'
+        spark:
+          +enabled: '{{ target.type == "spark" | as_bool() }}'
     media_base:
       +schema: 'derived'
       +tags: 'snowplow_media_player_incremental'
