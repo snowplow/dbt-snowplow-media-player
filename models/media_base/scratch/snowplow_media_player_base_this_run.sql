@@ -201,6 +201,7 @@ events_this_run as (
 
 select
   d.play_id,
+  d.app_id,
   pv.page_view_id,
   pva.page_view_id_array,
   d.media_identifier,
