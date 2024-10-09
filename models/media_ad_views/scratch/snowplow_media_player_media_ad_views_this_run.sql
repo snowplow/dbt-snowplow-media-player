@@ -43,6 +43,7 @@ events_this_run as (
     ,ev.play_id
     ,ev.media_ad_break__break_id as ad_break_id
     ,ev.media_ad__ad_id as ad_id
+    ,ev.app_id 
 
     {%- if var('snowplow__ad_views_passthroughs', []) -%}
       {%- set passthrough_names = [] -%}

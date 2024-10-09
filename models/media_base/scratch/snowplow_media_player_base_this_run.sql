@@ -36,6 +36,7 @@ events_this_run as (
 
   select
     i.play_id
+    ,i.app_id
     ,i.media_identifier
     ,i.player_id
     ,i.media_label
@@ -86,7 +87,7 @@ events_this_run as (
 
   from events_this_run as i
 
-  {{ dbt_utils.group_by(n=17+(var('snowplow__base_passthroughs', [])|length)) }}
+  {{ dbt_utils.group_by(n=18+(var('snowplow__base_passthroughs', [])|length)) }}
 
 )
 
