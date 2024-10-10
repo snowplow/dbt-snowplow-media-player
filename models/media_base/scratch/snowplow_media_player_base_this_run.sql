@@ -36,11 +36,11 @@ events_this_run as (
 
   select
     i.play_id
-    ,i.app_id
     ,i.media_identifier
     ,i.player_id
     ,i.media_label
     ,i.session_identifier
+    ,i.app_id
     ,i.user_identifier
     ,i.user_id
     ,i.platform
@@ -201,13 +201,13 @@ events_this_run as (
 
 select
   d.play_id,
-  d.app_id,
   pv.page_view_id,
   pva.page_view_id_array,
   d.media_identifier,
   d.player_id,
   d.media_label,
   d.session_identifier,
+  d.app_id,
   d.domain_sessionid_array,
   d.user_identifier,
   d.user_id,
