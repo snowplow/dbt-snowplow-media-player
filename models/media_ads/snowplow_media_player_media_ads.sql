@@ -52,6 +52,7 @@ new_media_ad_views as (
     a.media_ad_id,
 
     a.platform,
+    a.app_id,
     a.media_identifier,
     max(a.media_label) as media_label,
 
@@ -93,7 +94,7 @@ new_media_ad_views as (
 
   from new_media_ad_views a
 
-  group by 1, 2, 3, 5
+  group by 1, 2, 3, 4, 6
 
 )
 
@@ -139,6 +140,7 @@ new_media_ad_views as (
     a.media_ad_id,
 
     a.platform,
+    a.app_id,
     a.media_identifier,
     max(a.media_label) as media_label,
 
@@ -170,7 +172,7 @@ new_media_ad_views as (
 
   from all_data a
 
-  group by 1, 2, 3, 5
+  group by 1, 2, 3, 4, 6
 
 )
 
@@ -180,6 +182,7 @@ new_media_ad_views as (
     a.media_ad_id,
 
     a.platform,
+    a.app_id, 
     a.media_identifier,
     a.media_label,
 
