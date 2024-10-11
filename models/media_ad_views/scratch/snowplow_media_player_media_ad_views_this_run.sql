@@ -82,7 +82,7 @@ events_this_run as (
 
   from events_this_run as ev
 
-  {{ dbt_utils.group_by(n=9+(var('snowplow__ad_views_passthroughs', [])|length)) }}
+  {{ dbt_utils.group_by(n=10+(var('snowplow__ad_views_passthroughs', [])|length)) }}
 
 )
 
