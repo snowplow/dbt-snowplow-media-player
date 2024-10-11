@@ -1,3 +1,17 @@
+snowplow-media-player 0.9.0 (2024-10-15)
+---------------------------------------
+## Summary
+This release adds support for Apache Spark with the Iceberg file format and updates integration tests to ensure proper functionality.
+
+## Features
+- Add support for Apache Spark with Iceberg file format
+
+## Under the hood
+- Modify integration tests to support Spark
+
+## Upgrading
+Update the snowplow-media-player version in your `packages.yml` file.
+
 snowplow-media-player 0.8.0 (2024-06-20)
 ---------------------------------------
 ## Summary
