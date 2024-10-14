@@ -9,7 +9,6 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
 
 select
     {% for col in columns if col.name.lower() not in [
-        'app_id',
         'play_time_secs',
         'play_time_muted_secs',
         'avg_playback_rate',
