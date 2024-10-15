@@ -95,13 +95,13 @@ events_this_run as (
 
   select
     p.*
-    {% if target.type == 'postgres' %}
+    {% if target.type in ['postgres','spark'] %}
       ,row_number() over (partition by p.play_id order by p.start_tstamp) as duplicate_count
     {% endif %}
 
   from prep as p
 
-  {% if target.type not in ['postgres'] %}
+  {% if target.type not in ['postgres','spark'] %}
     qualify row_number() over (partition by p.play_id order by p.start_tstamp) = 1
   {% endif %}
 
@@ -308,6 +308,6 @@ left join first_page_views_by_play_id as pv
 left join page_view_id_aggregation as pva
   on pva.play_id = d.play_id
 
-{% if target.type == 'postgres' %}
+{% if target.type in ['postgres','spark'] %}
   where d.duplicate_count = 1
 {% endif %}

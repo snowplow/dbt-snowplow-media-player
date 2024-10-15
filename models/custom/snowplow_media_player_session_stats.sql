@@ -23,10 +23,12 @@ with prep as (
 
   select
     -- get the first domain_sessionid in the array
-    {% if target.name in ('bigquery', 'databricks', 'snowflake') %}
+    {% if target.type in ('bigquery', 'databricks', 'snowflake') %}
       cast(({{ snowplow_utils.get_split_to_array('domain_sessionid_array', 'b') }})[0] as {{ type_string() }}) as domain_sessionid,
-    {% elif target.name == 'redshift' %}
+    {% elif target.type == 'redshift' %}
       split_part(domain_sessionid_array, ',', 1) as domain_sessionid,
+    {% elif target.type == 'spark' %}
+      split(domain_sessionid_array, ',')[0] as domain_sessionid,
     {% else %}
       cast(({{ snowplow_utils.get_split_to_array('domain_sessionid_array', 'b') }})[1] as {{ type_string() }}) as domain_sessionid,
     {% endif %}

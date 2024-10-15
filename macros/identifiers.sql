@@ -15,7 +15,7 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
 {% endmacro %}
 
 
-{% macro databricks__session_identifiers() %}
+{% macro spark__session_identifiers() %}
 
   {% if var('snowplow__session_identifiers') %}
     {{ return(var('snowplow__session_identifiers')) }}
@@ -132,7 +132,7 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
 {% endmacro %}
 
 
-{% macro databricks__user_identifiers() %}
+{% macro spark__user_identifiers() %}
 
   {% if var('snowplow__user_identifiers') %}
     {{ return(var('snowplow__user_identifiers')) }}
