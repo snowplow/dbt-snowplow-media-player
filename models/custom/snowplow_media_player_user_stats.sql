@@ -23,7 +23,7 @@ with prep as (
 
   select
     user_identifier,
-    app_id,
+   --app_id,
     min(case when (video_plays + audio_plays) > 0 then start_tstamp end) as first_play,
     max(case when (video_plays + audio_plays) > 0 then start_tstamp end) as last_play,
     sum(video_plays) as video_plays,
@@ -39,7 +39,7 @@ with prep as (
 
   from {{ ref("snowplow_media_player_session_stats") }}
 
-  group by 1,2 
+  group by 1--,2 
 
 )
 
