@@ -39,6 +39,7 @@ events_this_run as (
     ,ev.media_identifier
     ,ev.user_identifier
     ,ev.session_identifier
+    ,ev.app_id 
     ,ev.user_id
     ,ev.play_id
     ,ev.media_ad_break__break_id as ad_break_id
@@ -81,7 +82,7 @@ events_this_run as (
 
   from events_this_run as ev
 
-  {{ dbt_utils.group_by(n=9+(var('snowplow__ad_views_passthroughs', [])|length)) }}
+  {{ dbt_utils.group_by(n=10+(var('snowplow__ad_views_passthroughs', [])|length)) }}
 
 )
 
@@ -93,6 +94,7 @@ select
   ,p.media_label
   ,p.user_identifier
   ,p.session_identifier
+  ,p.app_id
   ,p.domain_sessionid_array
   ,p.user_id
   ,p.play_id

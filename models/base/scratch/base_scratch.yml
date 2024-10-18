@@ -42,6 +42,8 @@ models:
         description: '{{ doc("col_original_session_identifier") }}'
       - name: session_identifier
         description: '{{ doc("col_session_identifier") }}'
+      - name: app_id
+        description: '{{doc("col_app_id")}}'
       - name: user_identifier
         description: '{{ doc("col_user_identifier") }}'
       - name: media_identifier

@@ -40,6 +40,7 @@ events_this_run as (
     ,i.player_id
     ,i.media_label
     ,i.session_identifier
+    ,i.app_id
     ,i.user_identifier
     ,i.user_id
     ,i.platform
@@ -86,7 +87,7 @@ events_this_run as (
 
   from events_this_run as i
 
-  {{ dbt_utils.group_by(n=17+(var('snowplow__base_passthroughs', [])|length)) }}
+  {{ dbt_utils.group_by(n=18+(var('snowplow__base_passthroughs', [])|length)) }}
 
 )
 
@@ -206,6 +207,7 @@ select
   d.player_id,
   d.media_label,
   d.session_identifier,
+  d.app_id,
   d.domain_sessionid_array,
   d.user_identifier,
   d.user_id,

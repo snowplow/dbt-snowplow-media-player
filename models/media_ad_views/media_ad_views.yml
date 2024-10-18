@@ -28,6 +28,8 @@ models:
         description: '{{ doc("col_user_id")}}'
       - name: session_identifier
         description: '{{ doc("col_session_identifier")}}'
+      - name: app_id
+        description: '{{doc("col_app_id")}}'
       - name: play_id
         description: '{{ doc("col_play_id")}}'
       - name: ad_break_id
