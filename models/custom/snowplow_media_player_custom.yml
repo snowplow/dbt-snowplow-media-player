@@ -14,8 +14,6 @@ models:
           - not_null
       - name: user_identifier
         description: '{{ doc("col_user_identifier") }}'
-      - name: app_id
-        description: '{{doc("col_app_id")}}'
       - name: impressions
         description: '{{ doc("col_impressions") }}'
       - name: videos_played

@@ -33,7 +33,6 @@ with prep as (
       cast(({{ snowplow_utils.get_split_to_array('domain_sessionid_array', 'b') }})[1] as {{ type_string() }}) as domain_sessionid,
     {% endif %}
     user_identifier,
-    app_id, 
     count(*) as impressions,
     count(distinct case when media_type = 'video' and is_played then media_identifier end) as videos_played,
     count(distinct case when media_type = 'audio' and is_played then media_identifier end) as audio_played,
@@ -52,7 +51,7 @@ with prep as (
 
   from {{ ref("snowplow_media_player_base") }} as b
 
-  group by 1,2,3
+  group by 1,2
 
 )
 
