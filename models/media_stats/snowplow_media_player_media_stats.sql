@@ -31,7 +31,6 @@ with new_data as (
 
   select
     p.media_identifier,
-    p.app_id,
     p.player_id,
     p.media_label,
     max(p.duration_secs) as duration_secs,
@@ -60,7 +59,7 @@ and (
   p.start_tstamp > ( select max(last_base_tstamp) from {{ this }} )
 )
 
-group by 1,2,3,4,6,7
+group by 1,2,3,5,6
 
 )
 
@@ -68,7 +67,6 @@ group by 1,2,3,4,6,7
 
   select
     n.media_identifier,
-    n.app_id,
     n.player_id,
     n.media_label,
     greatest(n.duration_secs, coalesce(t.duration_secs, 0)) as duration_secs,
@@ -181,7 +179,6 @@ with prep as (
 
   select
     p.media_identifier,
-    p.app_id,
     p.player_id,
     p.media_label,
     max(p.duration_secs) as duration_secs,
@@ -208,7 +205,7 @@ with prep as (
 
 from {{ ref("snowplow_media_player_base") }} p
 
-group by 1,2,3,4,6,7
+group by 1,2,3,5,6
 
 )
 
@@ -233,7 +230,6 @@ group by 1,2,3,4,6,7
 
 select
   p.media_identifier,
-  p.app_id,
   p.player_id,
   p.media_label,
   p.duration_secs,
@@ -297,6 +293,6 @@ select
   left join unnesting un
   on un.media_identifier = p.media_identifier
 
-  {{ dbt_utils.group_by(n=22) }}
+  {{ dbt_utils.group_by(n=21) }}
 
 {% endif %}

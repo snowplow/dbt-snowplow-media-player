@@ -11,8 +11,6 @@ models:
         tests:
           - unique
           - not_null
-      - name: app_id
-        description: '{{doc("col_app_id")}}'
       - name: player_id
         description: '{{ doc("col_player_id") }}'
       - name: media_label

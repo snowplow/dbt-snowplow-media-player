@@ -13,8 +13,6 @@ models:
           - not_null
       - name: platform
         description: '{{ doc("col_platform")}}'
-      - name: app_id
-        description: '{{doc("col_app_id")}}'
       - name: media_identifier
         description: '{{ doc("col_media_identifier") }}'
       - name: media_label
