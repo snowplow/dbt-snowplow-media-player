@@ -27,6 +27,8 @@ models:
         description: '{{ doc("col_user_id")}}'
       - name: session_identifier
         description: '{{ doc("col_session_identifier")}}'
+      - name: app_id
+        description: '{{doc("col_app_id")}}'
       - name: domain_sessionid_array
         description: '{{ doc("col_domain_sessionid_array") }}'
       - name: play_id
