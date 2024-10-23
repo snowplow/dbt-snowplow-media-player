@@ -1,3 +1,19 @@
+snowplow-media-player 0.9.1 (2024-10-23)
+---------------------------------------
+## Summary
+This patch release adds app_id as a new field in some of the derived tables and includes a bug fix related to user identification handling in ad_views.
+
+## Features
+- Introduced app_id field across some of the derived tables to improve application-level analytics
+
+## Fix
+- Optimized user_id aggregation, changed from GROUP BY to MAX(user_id) in queries in ad_view, because it could cause duplicates in an edge case.
+
+## Upgrading
+To upgrade, update the snowplow-media-player version in your `packages.yml` file. Please note:
+- The new app_id field will be populated for new data points automatically
+- Although this is a non-breaking change, historical data will require a [full refresh](https://docs.snowplow.io/docs/modeling-your-data/modeling-your-data-with-dbt/dbt-operation/full-or-partial-refreshes/) to include app_id values, if needed
+
 snowplow-media-player 0.9.0 (2024-10-15)
 ---------------------------------------
 ## Summary
