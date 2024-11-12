@@ -44,17 +44,39 @@ events_this_run as (
     ,ev.media_ad_break__break_id as ad_break_id
     ,ev.media_ad__ad_id as ad_id
 
+
+    {%- set non_agg_columns = [] -%}
+    {%- for identifier in var('snowplow__ad_views_passthroughs', []) -%}
+      {%- if identifier is not mapping or 'agg' not in identifier -%}
+        {%- do non_agg_columns.append(identifier) -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+
     {%- if var('snowplow__ad_views_passthroughs', []) -%}
       {%- set passthrough_names = [] -%}
+      {%- set agg_columns = [] -%}
+      
       {%- for identifier in var('snowplow__ad_views_passthroughs', []) %}
-      {# Check if it is a simple column or a sql+alias #}
-      {%- if identifier is mapping -%}
-        ,{{identifier['sql']}} as {{identifier['alias']}}
-        {%- do passthrough_names.append(identifier['alias']) -%}
-      {%- else -%}
-        ,ev.{{identifier}}
-        {%- do passthrough_names.append(identifier) -%}
-      {%- endif -%}
+        {# Check if it is a mapping with no agg attribute #}
+        {%- if identifier is mapping and 'agg' not in identifier -%}
+          ,{{identifier['sql']}} as {{identifier['alias']}}
+          {%- do passthrough_names.append(identifier['alias']) -%}
+        
+        {# Check if it is a mapping with agg attribute #}
+        {%- elif identifier is mapping and 'agg' in identifier -%}
+          {%- do agg_columns.append(identifier) -%}
+        
+        {# Handle simple column names #}
+        {%- else -%}
+          ,ev.{{identifier}}
+          {%- do passthrough_names.append(identifier) -%}
+        {%- endif -%}
+      {% endfor -%}
+
+      {# Add aggregated columns after the main selection #}
+      {%- for agg_col in agg_columns %}
+        ,{{agg_col['agg']}}({{agg_col['sql']}}) as {{agg_col['alias']}}
       {% endfor -%}
     {%- endif %}
     
@@ -73,7 +95,6 @@ events_this_run as (
     ,max(case when ev.event_type = 'adskip' then 1 else 0 end) > 0 as skipped
     ,max(case when ev.event_type = 'adcomplete' or (ev.event_type = 'adquartile' and ev.ad_quartile_event__percent_progress >= 25) then 1 else 0 end) > 0 as percent_reached_25
     ,max(case when ev.event_type = 'adcomplete' or (ev.event_type = 'adquartile' and ev.ad_quartile_event__percent_progress >= 50) then 1 else 0 end) > 0 as percent_reached_50
-    ,max(case when ev.event_type = 'adcomplete' or (ev.event_type = 'adquartile' and ev.ad_quartile_event__percent_progress >= 75) then 1 else 0 end) > 0 as percent_reached_75
     ,max(case when ev.event_type = 'adcomplete' then 1 else 0 end) > 0 as percent_reached_100
 
     ,min(ev.start_tstamp) as viewed_at
@@ -81,7 +102,7 @@ events_this_run as (
     ,{{ snowplow_utils.get_string_agg('original_session_identifier', 'ev', is_distinct=True) }} as domain_sessionid_array
 
   from events_this_run as ev
-  {{ dbt_utils.group_by(n=9+(var('snowplow__ad_views_passthroughs', [])|length)) }}
+  {{ dbt_utils.group_by(n=9+non_agg_columns|length) }}
 
 
 )
