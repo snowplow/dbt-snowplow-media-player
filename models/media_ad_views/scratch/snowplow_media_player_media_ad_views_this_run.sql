@@ -95,6 +95,7 @@ events_this_run as (
     ,max(case when ev.event_type = 'adskip' then 1 else 0 end) > 0 as skipped
     ,max(case when ev.event_type = 'adcomplete' or (ev.event_type = 'adquartile' and ev.ad_quartile_event__percent_progress >= 25) then 1 else 0 end) > 0 as percent_reached_25
     ,max(case when ev.event_type = 'adcomplete' or (ev.event_type = 'adquartile' and ev.ad_quartile_event__percent_progress >= 50) then 1 else 0 end) > 0 as percent_reached_50
+    ,max(case when ev.event_type = 'adcomplete' or (ev.event_type = 'adquartile' and ev.ad_quartile_event__percent_progress >= 75) then 1 else 0 end) > 0 as percent_reached_75
     ,max(case when ev.event_type = 'adcomplete' then 1 else 0 end) > 0 as percent_reached_100
 
     ,min(ev.start_tstamp) as viewed_at
