@@ -145,6 +145,10 @@ select
     {%- for col in passthrough_names %}
       , p.{{col}}
     {%- endfor -%}
+    {%- for agg_col in agg_columns %}
+      , p.{{agg_col['alias']}}
+    {%- endfor -%}
+
   {%- endif %}
 
 from prep as p

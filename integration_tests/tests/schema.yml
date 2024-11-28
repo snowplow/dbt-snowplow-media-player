@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: snowplow_media_player_media_ad_views_this_run
+    tests:
+      - assert_media_ad_views_passthrough
+    columns:
+      - name: media_ad_id
+        tests:
+          - not_null
+          - unique
+      - name: v_collector
+        tests:
+          - not_null
+      - name: tracker_app_id
+        tests:
+          - not_null
+
+    config:
+      tags: ['this_run']
