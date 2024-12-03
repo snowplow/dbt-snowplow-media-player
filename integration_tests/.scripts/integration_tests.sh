@@ -68,17 +68,19 @@ for db in ${DATABASES[@]}; do
   eval "dbt test --target $db" || exit 1;
 
   echo "Snowplow media player integration tests: Testing ad views passthrough - mixed configuration"
-  eval "dbt run --target $db --full-refresh --vars '{
+  eval "dbt run --select +snowplow_media_player_media_ad_views_this_run --target $db --full-refresh --vars '{
     snowplow__allow_refresh: true,
     snowplow__enable_media_ad: true,
     snowplow__backfill_limit_days: 999,
     snowplow__ad_views_passthroughs: [
       \"v_collector\",
-      {\"sql\": \"v_tracker || app_id\", \"alias\": \"tracker_app_id\", \"agg\": \"max\"}
+      {\"sql\": \"v_tracker || app_id\", \"alias\": \"tracker_app_id\", \"agg\": \"max\"},
+      {\"sql\": \"v_tracker || app_id\", \"alias\": \"tracker_app_id_1\", \"agg\": \"min\"},
+      {\"sql\": \"v_collector\", \"alias\": \"tracker_app_id_1\", \"agg\": \"min\"}
     ]
   }'" || exit 1;
 
-  eval "dbt test --target $db --select test_type:singular tag:ad_views_passthrough" || exit 1;
+  eval "dbt test --target $db --select snowplow_media_player_media_ad_views_this_run" || exit 1;
 
   echo "Snowplow media player integration tests: All tests passed"
 
