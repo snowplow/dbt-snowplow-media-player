@@ -45,8 +45,6 @@ for db in ${DATABASES[@]}; do
 
   eval "dbt run --target $db --vars '{snowplow__enable_youtube: false, snowplow__enable_whatwg_media: false, snowplow__enable_whatwg_video: false, snowplow__enable_media_player_v1: false}'" || exit 1;
 
-
-
   echo "Snowplow media player integration tests: Execute models - run 1/6"
 
   eval "dbt run --target $db --full-refresh --vars '{snowplow__allow_refresh: true}'" || exit 1;
@@ -68,6 +66,21 @@ for db in ${DATABASES[@]}; do
   echo "Snowplow media player integration tests: Test models"
 
   eval "dbt test --target $db" || exit 1;
+
+  echo "Snowplow media player integration tests: Testing ad views passthrough - mixed configuration"
+  eval "dbt run --select +snowplow_media_player_media_ad_views_this_run --target $db --full-refresh --vars '{
+    snowplow__allow_refresh: true,
+    snowplow__enable_media_ad: true,
+    snowplow__backfill_limit_days: 999,
+    snowplow__ad_views_passthroughs: [
+      \"v_collector\",
+      {\"sql\": \"v_tracker || app_id\", \"alias\": \"tracker_app_id\", \"agg\": \"max\"},
+      {\"sql\": \"v_tracker || app_id\", \"alias\": \"tracker_app_id_1\", \"agg\": \"min\"},
+      {\"sql\": \"v_collector\", \"alias\": \"tracker_app_id_2\", \"agg\": \"min\"}
+    ]
+  }'" || exit 1;
+
+  eval "dbt test --target $db --select snowplow_media_player_media_ad_views_this_run" || exit 1;
 
   echo "Snowplow media player integration tests: All tests passed"
 
