@@ -76,7 +76,7 @@ for db in ${DATABASES[@]}; do
       \"v_collector\",
       {\"sql\": \"v_tracker || app_id\", \"alias\": \"tracker_app_id\", \"agg\": \"max\"},
       {\"sql\": \"v_tracker || app_id\", \"alias\": \"tracker_app_id_1\", \"agg\": \"min\"},
-      {\"sql\": \"v_collector\", \"alias\": \"tracker_app_id_1\", \"agg\": \"min\"}
+      {\"sql\": \"v_collector\", \"alias\": \"tracker_app_id_2\", \"agg\": \"min\"}
     ]
   }'" || exit 1;
 
