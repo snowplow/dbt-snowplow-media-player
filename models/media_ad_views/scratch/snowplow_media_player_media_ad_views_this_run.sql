@@ -45,17 +45,17 @@ events_this_run as (
     ,ev.media_ad__ad_id as ad_id
 
 
-    {%- set non_agg_columns = [] -%}
+    {%- set non_agg_identifiers = [] -%}
     {%- for identifier in var('snowplow__ad_views_passthroughs', []) -%}
       {%- if identifier is not mapping or 'agg' not in identifier -%}
-        {%- do non_agg_columns.append(identifier) -%}
+        {%- do non_agg_identifiers.append(identifier) -%}
       {%- endif -%}
     {%- endfor -%}
 
 
     {%- if var('snowplow__ad_views_passthroughs', []) -%}
       {%- set passthrough_names = [] -%}
-      {%- set agg_columns = [] -%}
+      {%- set agg_identifiers = [] -%}
       
       {%- for identifier in var('snowplow__ad_views_passthroughs', []) %}
         {# Check if it is a mapping with no agg attribute #}
@@ -65,7 +65,7 @@ events_this_run as (
         
         {# Check if it is a mapping with agg attribute #}
         {%- elif identifier is mapping and 'agg' in identifier -%}
-          {%- do agg_columns.append(identifier) -%}
+          {%- do agg_identifiers.append(identifier) -%}
         
         {# Handle simple column names #}
         {%- else -%}
@@ -75,7 +75,7 @@ events_this_run as (
       {% endfor -%}
 
       {# Add aggregated columns after the main selection #}
-      {%- for agg_col in agg_columns %}
+      {%- for agg_col in agg_identifiers %}
         ,{{agg_col['agg']}}({{agg_col['sql']}}) as {{agg_col['alias']}}
       {% endfor -%}
     {%- endif %}
@@ -103,7 +103,7 @@ events_this_run as (
     ,{{ snowplow_utils.get_string_agg('original_session_identifier', 'ev', is_distinct=True) }} as domain_sessionid_array
 
   from events_this_run as ev
-  {{ dbt_utils.group_by(n=9+non_agg_columns|length) }}
+  {{ dbt_utils.group_by(n=9+non_agg_identifiers|length) }}
 
 
 )
@@ -145,7 +145,7 @@ select
     {%- for col in passthrough_names %}
       , p.{{col}}
     {%- endfor -%}
-    {%- for agg_col in agg_columns %}
+    {%- for agg_col in agg_identifiers %}
       , p.{{agg_col['alias']}}
     {%- endfor -%}
 
