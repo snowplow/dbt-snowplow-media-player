@@ -1,3 +1,29 @@
+snowplow-media-player 0.9.2 (2024-12-10)
+---------------------------------------
+## Summary  
+This patch release includes enhancements to resolve an issue related to passthrough field aggregation in ad_views.
+
+
+## Features  
+
+- *Improved Aggregation Logic*:
+  Resolved a possible erroneous state in the media_player_media_ad_views model by introducing dynamic aggregation for passthrough fields. Aggregation logic (e.g., MAX, MIN) can now be applied to passthrough fields, preventing cardinality violations while maintaining compatibility for non-aggregation fields.
+
+Example configuration:
+```yaml
+snowplow__ad_views_passthroughs: [
+  "v_collector",
+  {"sql": "v_tracker || app_id", "alias": "tracker_app_id", "agg": "max"},
+  {"sql": "v_collector", "alias": "v_collector_alias", "agg": "min"}
+]
+```
+## Upgrading  
+
+Update the snowplow-media-player version in your packages.yml file.
+
+
+
+
 snowplow-media-player 0.9.1 (2024-10-23)
 ---------------------------------------
 ## Summary
