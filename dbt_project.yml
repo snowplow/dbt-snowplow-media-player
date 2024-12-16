@@ -108,7 +108,7 @@ on-run-start:
 
 # Update manifest table with last event consumed per successfully executed node/model
 on-run-end:
-  - '{{ snowplow_utils.snowplow_incremental_post_hook("snowplow_media_player", "snowplow_media_player_incremental_manifest", "snowplow_media_player_base_events_this_run", var("snowplow__session_tstamp", "collector_tstamp")) }}'
+  - '{{ snowplow_utils.snowplow_incremental_post_hook("snowplow_media_player", "snowplow_media_player_incremental_manifest", "snowplow_media_player_base_events_this_run", var("snowplow__session_timestamp", "collector_tstamp")) }}'
   - "{{ snowplow_utils.grant_usage_on_schemas_built_into(var('snowplow__grant_schemas', true)) }}"
 
 models:
