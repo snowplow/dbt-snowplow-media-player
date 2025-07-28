@@ -48,6 +48,7 @@ models:
       +enabled: true
 
 vars:
+  snowplow__license_accepted: true
   snowplow__enable_media_ad: true
 
   snowplow_media_player:
