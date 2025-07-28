@@ -37,6 +37,7 @@ vars:
     snowplow__grant_schema_usage: true
 
     # Variables - Operation and logic
+    snowplow__license_accepted: false
     snowplow__complete_play_rate: 0.99
     snowplow__max_media_pv_window: 10
     snowplow__valid_play_sec: 30
