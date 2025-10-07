@@ -96,3 +96,6 @@ macros:
 
   - name: config_check
     description: '{{ doc("macro_config_check") }}'
+    
+  - name: play_time_secs_base_this_run
+    description: '{{ doc("macro_play_time_secs_base_this_run") }}'

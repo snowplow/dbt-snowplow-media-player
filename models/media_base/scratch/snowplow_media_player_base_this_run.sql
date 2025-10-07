@@ -195,10 +195,6 @@ events_this_run as (
 
 )
 
-{% set play_time_secs -%}
-  coalesce(s.media_session_time_played, d.play_time_secs)
-{%- endset %}
-
 select
   d.play_id,
   pv.page_view_id,
@@ -235,7 +231,7 @@ select
   ) as avg_playback_rate,
 
   -- time spent
-  {{ play_time_secs }} as play_time_secs,
+  {{ play_time_secs_base_this_run() }} as play_time_secs,
   coalesce(s.media_session_time_played_muted, d.play_time_muted_secs) as play_time_muted_secs,
   s.media_session_time_paused as paused_time_secs,
   s.media_session_time_buffering as buffering_time_secs,
@@ -251,7 +247,7 @@ select
   -- playback progress
   d.plays > 0 as is_played,
   case
-    when {{ play_time_secs }} > {{ var("snowplow__valid_play_sec") }} then true else
+    when {{ play_time_secs_base_this_run() }} > {{ var("snowplow__valid_play_sec") }} then true else
       false
   end as is_valid_play,
   case
