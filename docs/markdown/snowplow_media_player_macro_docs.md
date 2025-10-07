@@ -196,3 +196,11 @@ A macro that checks if at least one of the platform enabling variables is true a
 
 {% endraw %}
 {% enddocs %}
+
+{% docs macro_play_time_secs_base_this_run %}
+{% raw %}
+
+A macro for users to optionally configure how the play_time_secs is calculated in the snowplow_media_player_base_this_run table. E.g. to avoid edge cases depending on tracking behaviour.
+
+{% endraw %}
+{% enddocs %}
