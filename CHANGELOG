@@ -1,3 +1,14 @@
+snowplow-media-player 0.9.4 (2025-10-09)
+---------------------------------------
+## Summary
+There has been a request from users to be able to decide how to calculate the `play_time_secs` within the base_this_run table to handle edge cases in tracking. This is enabled via a new dispatch macro called `play_time_secs_base_this_run()` where users will be free to override the reference.
+
+## Features
+- Make play_time_secs reference configurable
+
+## Upgrading  
+Update the snowplow-media-player version in your packages.yml file.
+
 snowplow-media-player 0.9.3 (2025-07-28)
 ---------------------------------------
 ## Summary
