@@ -2,16 +2,16 @@ version: 2
 
 models:
   - name: snowplow_media_player_media_ad_views
-    +tags: "snowplow_media_player_incremental"
     description: '{{ doc("table_base") }}'
     columns:
       - name: media_ad_view_id
         description: The primary key of this table
-        tags:
-          - primary-key
         tests:
           - unique
           - not_null
+        config:
+          tags:
+            - primary-key
       - name: media_ad_id
         description: '{{ doc("col_media_ad_id") }}'
         tests:
@@ -70,3 +70,6 @@ models:
         description: '{{ doc("col_last_event") }}'
       - name: domain_sessionid_array
         description: '{{ doc("col_domain_sessionid_array") }}'
+    config:
+      meta:
+        +tags: "snowplow_media_player_incremental"

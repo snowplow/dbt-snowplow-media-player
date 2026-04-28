@@ -2,16 +2,16 @@ version: 2
 
 models:
   - name: snowplow_media_player_plays_by_pageview
-    +tags: "snowplow_media_player_incremental"
     description: '{{ doc("table_plays_by_pageview") }}'
     columns:
       - name: play_id
         description: '{{ doc("col_play_id") }}'
-        tags:
-          - primary-key
         tests:
           - unique
           - not_null
+        config:
+          tags:
+            - primary-key
       - name: page_view_id
         description: '{{ doc("col_page_view_id") }}'
       - name: page_view_id_array
@@ -101,3 +101,6 @@ models:
         description: '{{ doc("col_content_watched_secs") }}'
       - name: content_watched_percent
         description: '{{ doc("col_content_watched_percent") }}'
+    config:
+      meta:
+        +tags: "snowplow_media_player_incremental"

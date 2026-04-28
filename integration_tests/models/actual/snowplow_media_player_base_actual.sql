@@ -14,7 +14,9 @@ select
         'avg_playback_rate',
         'retention_rate',
         'content_watched_secs',
-        'content_watched_percent'
+        'content_watched_percent',
+        '_partitiontime',
+        '_partitiondate'
     ] %}{{ col.name }}, {% endfor %}
 
     round(cast(play_time_secs as {{ type_numeric() }}), 3) as play_time_secs,

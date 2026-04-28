@@ -2,16 +2,16 @@ version: 2
 
 models:
   - name: snowplow_media_player_session_stats
-    +tags: "snowplow_media_player_incremental"
     description: '{{ doc("table_session_stats") }}'
     columns:
       - name: domain_sessionid
         description: 'The first domain_sessionid from domain_sessionid_array'
-        tags:
-          - primary-key
         tests:
           - unique
           - not_null
+        config:
+          tags:
+            - primary-key
       - name: user_identifier
         description: '{{ doc("col_user_identifier") }}'
       - name: impressions
@@ -45,17 +45,20 @@ models:
       - name: complete_plays
         description: '{{ doc("col_complete_plays") }}'
 
+    config:
+      meta:
+        +tags: "snowplow_media_player_incremental"
   - name: snowplow_media_player_user_stats
-    +tags: "snowplow_media_player_incremental"
     description: '{{ doc("table_user_stats") }}'
     columns:
       - name: user_identifier
         description: '{{ doc("col_user_identifier") }}'
-        tags:
-          - primary-key
         tests:
           - unique
           - not_null
+        config:
+          tags:
+            - primary-key
       - name: first_play
         description: '{{ doc("col_first_play") }}'
       - name: last_play
@@ -78,3 +81,6 @@ models:
         description: '{{ doc("col_avg_session_play_time_mins") }}'
       - name: avg_percent_played
         description: '{{ doc("col_avg_percent_played") }}'
+    config:
+      meta:
+        +tags: "snowplow_media_player_incremental"
