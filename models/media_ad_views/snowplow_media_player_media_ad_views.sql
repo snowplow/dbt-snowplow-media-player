@@ -5,28 +5,25 @@ and you may not use this file except in compliance with the Snowplow Personal an
 You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 at https://docs.snowplow.io/personal-and-academic-license-1.0/
 #}
 
-{{
-  config(
-    materialized= "incremental",
-    unique_key= 'media_ad_view_id',
-    upsert_date_key='last_event',
-    sort = 'last_event',
-    dist = 'media_ad_id',
-    tags=["derived"],
-    partition_by = snowplow_utils.get_value_by_target_type(bigquery_val={
+{{ config(
+    materialized="incremental", 
+    unique_key='media_ad_view_id', 
+    sort='last_event', 
+    dist='media_ad_id', 
+    tags=["derived"], 
+    partition_by=snowplow_utils.get_value_by_target_type(bigquery_val={
       "field": "viewed_at",
       "data_type": "timestamp"
-    }, databricks_val='viewed_at_date'),
-    cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["media_ad_id"]),
-    sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt')),
+    }, databricks_val='viewed_at_date'), 
+    cluster_by=snowplow_utils.get_value_by_target_type(bigquery_val=["media_ad_id"]), 
+    sql_header=snowplow_utils.set_query_tag(var('snowplow__query_tag', 'snowplow_dbt')), 
     tblproperties={
       'delta.autoOptimize.optimizeWrite' : 'true',
       'delta.autoOptimize.autoCompact' : 'true'
-    },
-    snowplow_optimize=true,
-    enabled=var('snowplow__enable_media_ad', false)
-  )
-}}
+    }, 
+    enabled=var('snowplow__enable_media_ad', false), 
+    meta={'upsert_date_key': 'last_event', 'snowplow_optimize': true}
+) }}
 
 select *
 

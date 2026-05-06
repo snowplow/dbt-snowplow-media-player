@@ -14,11 +14,12 @@ models:
     columns:
       - name: session_identifier
         description: '{{ doc("col_session_identifier") }}'
-        tags:
-          - primary-key
         tests:
           - unique
           - not_null
+        config:
+          tags:
+            - primary-key
       - name: user_identifier
         description: '{{ doc("col_user_identifier") }}'
       - name: start_tstamp
@@ -31,11 +32,12 @@ models:
     columns:
       - name: event_id
         description: '{{ doc("col_event_id") }}'
-        tags:
-          - primary-key
         tests:
           - unique
           - not_null
+        config:
+          tags:
+            - primary-key
       - name: page_view_id
         description: '{{ doc("col_page_view_id") }}'
       - name: original_session_identifier
@@ -58,7 +60,8 @@ models:
         description: '{{ doc("col_duration_secs") }}'
         tests:
           - dbt_utils.expression_is_true:
-              expression: "> 0"
+              arguments:
+                expression: "> 0"
       - name: media_type
         description: '{{ doc("col_media_type") }}'
       - name: media_player_type
@@ -155,10 +158,11 @@ models:
     columns:
       - name: percent_progress
         description: '{{ doc("col_percent_progress") }}'
-        tags:
-          - primary-key
         tests:
           - unique
           - not_null
+        config:
+          tags:
+            - primary-key
       - name: weight_rate
         description: '{{ doc("col_weight_rate") }}'
