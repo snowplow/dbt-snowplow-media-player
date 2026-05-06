@@ -6,11 +6,12 @@ models:
     columns:
       - name: media_ad_view_id
         description: The primary key of this table
-        tags:
-          - primary-key
         tests:
           - unique
           - not_null
+        config:
+          tags:
+            - primary-key
       - name: media_ad_id
         description: '{{ doc("col_media_ad_id") }}'
         tests:

@@ -17,7 +17,9 @@ select
         'paused_time_secs',
         'buffering_time_secs',
         'ads_time_secs',
-        'content_watched_percent'
+        'content_watched_percent',
+        '_partitiontime',
+        '_partitiondate'
     ] and not col.name.lower().endswith('_date') %}{{ col.name }}, {% endfor %}
 
     round(cast(play_time_secs as {{ type_numeric() }}), 3) as play_time_secs,

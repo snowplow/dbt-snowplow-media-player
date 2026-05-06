@@ -30,8 +30,6 @@ Check [dbt Hub](https://hub.getdbt.com/snowplow/snowplow_media_player/latest/) f
 
 We welcome all ideas, questions and contributions!
 
-For support requests, please use our community support [Discourse][discourse] forum.
-
 If you find a bug, please report an issue on GitHub.
 
 # Copyright and license
@@ -72,9 +70,6 @@ limitations under the License.
 [selectors-yml-file]: https://github.com/
 
 [dbt-package-docs]: https://docs.getdbt.com/docs/building-a-dbt-project/package-management
-
-[discourse-image]: https://img.shields.io/discourse/posts?server=https%3A%2F%2Fdiscourse.snowplow.io%2F
-[discourse]: http://discourse.snowplow.io/
 
 [snowplow-media-player-docs]: https://snowplow.github.io/dbt-snowplow-media-player/#!/overview/snowplow_media_player
 

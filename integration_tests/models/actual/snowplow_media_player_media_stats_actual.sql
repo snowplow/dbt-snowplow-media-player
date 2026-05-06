@@ -16,7 +16,9 @@ select
         'avg_percent_played',
         'play_rate',
         'completion_rate_by_plays',
-        'avg_retention_rate'
+        'avg_retention_rate',
+        '_partitiontime',
+        '_partitiondate'
     ] %}{{ col.name }}, {% endfor %}
 
     round(cast(play_time_mins as {{ type_numeric() }}), 3) as play_time_mins,

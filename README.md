@@ -1,4 +1,4 @@
-[![early-release]][tracker-classification] [![License][license-image]][license] [![Discourse posts][discourse-image]][discourse]
+[![early-release]][tracker-classification] [![License][license-image]][license]
 
 ![snowplow-logo](https://raw.githubusercontent.com/snowplow/dbt-snowplow-utils/main/assets/snowplow_logo.png)
 
@@ -67,8 +67,6 @@ Please refer to the [dbt doc site][snowplow-media-player-docs-dbt] for details o
 
 We welcome all ideas, questions and contributions!
 
-For support requests, please use our community support [Discourse][discourse] forum.
-
 If you find a bug, please report an issue on GitHub.
 
 # Copyright and license
@@ -116,9 +114,6 @@ limitations under the License.
 [mobile-tracking]: https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/mobile-trackers/tracking-events/media-tracking/
 
 [dbt-package-docs]: https://docs.getdbt.com/docs/building-a-dbt-project/package-management
-
-[discourse-image]: https://img.shields.io/discourse/posts?server=https%3A%2F%2Fdiscourse.snowplow.io%2F
-[discourse]: http://discourse.snowplow.io/
 
 [snowplow-media-player-docs-dbt]: https://snowplow.github.io/dbt-snowplow-media-player/#!/overview/snowplow_media_player
 [snowplow-media-player-docs]: https://docs.snowplow.io/docs/modeling-your-data/modeling-your-data-with-dbt/dbt-models/dbt-media-player-data-model/
