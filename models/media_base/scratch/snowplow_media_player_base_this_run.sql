@@ -37,15 +37,15 @@ events_this_run as (
   select
     i.play_id
     ,i.media_identifier
-    ,i.player_id
-    ,i.media_label
+    ,nullif(i.player_id, '') as player_id
+    ,nullif(i.media_label, '') as media_label
     ,i.session_identifier
     ,i.app_id
     ,i.user_identifier
     ,i.user_id
     ,i.platform
-    ,i.media_type
-    ,i.media_player_type
+    ,nullif(i.media_type, '') as media_type
+    ,nullif(i.media_player_type, '') as media_player_type
     ,i.page_referrer
     ,i.page_url
     ,i.geo_region_name
