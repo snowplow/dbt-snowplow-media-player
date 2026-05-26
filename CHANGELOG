@@ -1,3 +1,15 @@
+snowplow-media-player 1.0.1 (2026-05-26)
+---------------------------------------
+## Summary
+This release fixes an inconsistent tracker behavior which produces NULL / "" values for the same media element which may result in duplicate values in the `snowplow_media_player_media_stats` table. It also fixes an inconsistency in the manifest table update due to a typo in the on-run-end hook.
+
+## Fixes
+- Normalize empty strings to null for surrogate key dims (Fix #93)
+- Update dbt_project.yml
+
+## Upgrading  
+Update the snowplow-media-player version in your packages.yml file.
+
 snowplow-media-player 1.0.0 (2026-05-06)
 ---------------------------------------
 ## Summary
