@@ -1,3 +1,33 @@
+snowplow-media-player 1.1.0 (2026-08-06)
+---------------------------------------
+## Summary
+This release normalises empty strings to NULL for the surrogate key dimensions (`media_label`,
+`player_id`, `media_type`, `media_player_type`) **before** `media_identifier` and `play_id` are
+computed in `snowplow_media_player_base_events_this_run`. The 1.0.1 release applied `nullif` only
+in the downstream `base_this_run` model (display columns), leaving the surrogate keys themselves
+vulnerable to divergence when a tracker emits `""` instead of omitting the field.
+
+## 🚨 Breaking Changes 🚨
+Any existing rows whose surrogate key was computed with `""` will produce a different
+`media_identifier` / `play_id` after this upgrade (the key now uses `NULL` rather than `""`).
+To avoid duplicate or orphaned rows, run a full refresh after upgrading:
+
+```
+dbt run --full-refresh --select snowplow_media_player_base snowplow_media_player_media_stats
+```
+
+`snowplow_media_player_base_events_this_run` and `snowplow_media_player_base_this_run` are
+this-run scratch tables that recompute each run; they do not require `--full-refresh`.
+
+## Fixes
+- Normalise empty strings to NULL for surrogate key dimensions in `base_events_this_run` so that
+  `media_identifier` and `play_id` are stable regardless of whether the tracker emits `""` or omits
+  the optional field entirely (Fix #94)
+
+## Upgrading
+Update the snowplow-media-player version in your `packages.yml` file, then run the full-refresh
+command above.
+
 snowplow-media-player 1.0.1 (2026-05-26)
 ---------------------------------------
 ## Summary
