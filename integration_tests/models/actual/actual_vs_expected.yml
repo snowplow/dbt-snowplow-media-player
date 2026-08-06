@@ -2,6 +2,27 @@ version: 2
 
 models:
   - name: snowplow_media_player_base_actual
+    columns:
+      - name: media_label
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "is null or media_label != ''"
+      - name: player_id
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "is null or player_id != ''"
+      - name: media_type
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "is null or media_type != ''"
+      - name: media_player_type
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "is null or media_player_type != ''"
     tests:
       - dbt_utils.equal_rowcount:
           arguments:
