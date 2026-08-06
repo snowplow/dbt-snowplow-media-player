@@ -239,16 +239,16 @@ with base_query as (
     , coalesce(p.domain_sessionid, p.mobile_session__session_id) as original_session_identifier
 
     --combined media properties
-    , coalesce(p.media_player_v2__label, p.media_player_event__label) as media_label
+    , nullif(coalesce(p.media_player_v2__label, p.media_player_event__label), '') as media_label
     , round(coalesce(p.media_player_v2__duration, p.media_player_v1__duration)) as duration_secs
     , coalesce(p.media_player_v2__current_time, p.media_player_v1__current_time) as player_current_time
     , coalesce(p.media_player_v2__playback_rate, p.media_player_v1__playback_rate, 1.0) as playback_rate
     , coalesce(p.media_player_v2__muted, p.media_player_v1__muted) as is_muted
     , cast({{ percent_progress_field() }} as {{ type_int() }}) as percent_progress
-    , coalesce(p.youtube__player_id, p.html5_media_element__html_id) as player_id
-    , {{ media_player_type_field() }} as media_player_type
+    , nullif(coalesce(p.youtube__player_id, p.html5_media_element__html_id), '') as player_id
+    , nullif({{ media_player_type_field() }}, '') as media_player_type
     , coalesce(p.youtube__url, p.html5_media_element__current_src) as source_url
-    , {{ media_type_field() }} as media_type
+    , nullif({{ media_type_field() }}, '') as media_type
     , {{ playback_quality_field() }} as playback_quality
     , {{ media_event_type_field() }} as event_type
 
