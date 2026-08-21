@@ -52,7 +52,7 @@ models:
         description: '{{ doc("col_platform") }}'
 
       - name: duration_secs
-        description: '{{ doc("col_duration_secs") }}'
+        description: '{{ doc("col_resolved_duration_secs") }}'
       - name: media_type
         description: '{{ doc("col_media_type") }}'
       - name: media_player_type

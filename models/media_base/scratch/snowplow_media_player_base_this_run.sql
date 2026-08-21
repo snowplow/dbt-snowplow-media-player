@@ -183,6 +183,7 @@ events_this_run as (
 )
 
 -- for correcting NULLs in case of 'ready' events only where the metadata showing the duration_secs is usually missing as the event fires before it has time to load
+-- Note this is scoped to events_this_run, so the fallback can only be sourced from other plays of the same media processed in the same run.
 , duration_fix as (
 
   select
@@ -192,6 +193,24 @@ events_this_run as (
   from events_this_run as f
 
   group by 1
+
+)
+
+-- The duration reported by the play's own events takes precedence, falling back to the media level maximum only where the play itself reported none.
+, resolved_duration as (
+
+  select
+    d.play_id,
+    coalesce(d.duration_secs, f.duration_secs) as duration_secs
+
+  from dedupe as d
+
+  left join duration_fix as f
+    on f.media_identifier = d.media_identifier
+
+  {% if target.type in ['postgres','spark'] %}
+    where d.duplicate_count = 1
+  {% endif %}
 
 )
 
@@ -218,7 +237,7 @@ select
   d.platform,
 
   -- media information
-  f.duration_secs,
+  rd.duration_secs,
   d.media_type,
   d.media_player_type,
 
@@ -252,7 +271,7 @@ select
   end as is_valid_play,
   case
     when
-      coalesce(s.media_session_content_watched, d.play_time_secs) / nullif(f.duration_secs, 0)
+      coalesce(s.media_session_content_watched, d.play_time_secs) / nullif(rd.duration_secs, 0)
       >= {{ var("snowplow__complete_play_rate") }}
       then true else
       false
@@ -266,9 +285,9 @@ select
   p.percent_progress_reached,
   s.media_session_content_watched as content_watched_secs,
   case
-    when d.duration_secs is not null and s.media_session_content_watched is not null and d.duration_secs > 0
+    when rd.duration_secs is not null and s.media_session_content_watched is not null and rd.duration_secs > 0
     then least(
-      s.media_session_content_watched / d.duration_secs,
+      s.media_session_content_watched / rd.duration_secs,
       1.0
     )
   end as content_watched_percent
@@ -289,8 +308,8 @@ from dedupe as d
 left join retention_rate as r
   on r.play_id = d.play_id
 
-left join duration_fix as f
-  on f.media_identifier = d.media_identifier
+left join resolved_duration as rd
+  on rd.play_id = d.play_id
 
 left join media_sessions as s
   on s.media_session_id = d.play_id
