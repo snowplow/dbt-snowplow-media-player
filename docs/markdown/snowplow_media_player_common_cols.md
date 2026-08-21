@@ -92,6 +92,12 @@ Client operating system timezone e.g. `Europe/London`.
 Total length of media in seconds e.g. it's a 5:32 youtube video so the duration is 332 seconds.
 {% enddocs %}
 
+{% docs col_resolved_duration_secs %}
+Total length of media in seconds e.g. it's a 5:32 youtube video so the duration is 332 seconds.
+
+This is the duration reported by the play's own events. Where a play never reported one (typically a play made up of 'ready' events only, as the event fires before the metadata has had time to load) it falls back to the maximum duration reported for the same `media_identifier`. The fallback only considers events processed in the same run, so a play with no duration of its own is only filled in if another play of the same media happens to be processed alongside it.
+{% enddocs %}
+
 {% docs col_playback_rate %}
 Playback rate (1 is normal speed).
 {% enddocs %}
