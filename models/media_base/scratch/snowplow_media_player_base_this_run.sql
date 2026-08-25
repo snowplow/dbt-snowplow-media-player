@@ -47,7 +47,7 @@ events_this_run as (
     ,nullif(i.media_type, '') as media_type
     ,nullif(i.media_player_type, '') as media_player_type
     ,i.page_referrer
-    ,i.page_url
+    ,{{ dbt.split_part('i.page_url', "'#'", 1) }} as page_url
     ,i.geo_region_name
     ,i.br_name
     ,i.dvce_type

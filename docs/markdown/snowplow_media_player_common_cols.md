@@ -61,7 +61,7 @@ URL of the referrer e.g. `http://www.referrer.com`.
 {% enddocs %}
 
 {% docs col_page_url %}
-The page URL e.g. `http://www.example.com`.
+The page URL e.g. `http://www.example.com`, with any `#fragment` stripped so that in-page anchor navigation mid-play does not split a single play across rows.
 {% enddocs %}
 
 {% docs col_source_url %}
