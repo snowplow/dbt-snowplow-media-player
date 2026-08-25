@@ -1,3 +1,28 @@
+snowplow-media-player 1.0.2 (2026-08-27)
+---------------------------------------
+## Summary
+This release fixes two issues in `snowplow_media_player_base`. `duration_secs` was being overwritten by the maximum duration reported for the same `media_identifier`, even where a play had already reported its own duration; the media level value is now only used as a fallback for plays that reported none, matching the `duration_fix` CTE's documented intent, and `is_complete_play`/`content_watched_percent` now divide by the same resolved duration instead of disagreeing on which value to use. Separately, a play could be silently split into multiple rows in `prep` if `page_url` changed mid-play due to an in-page anchor (e.g. `#comments`), causing data loss for the discarded row(s); `page_url` is now normalized to drop the fragment before grouping. It also addresses a missing `on_schema_change='append_new_columns'` config which is needed for passthrough fields.
+
+## Fixes
+- Only apply the media level duration where the play reported none, and use the same resolved duration for `is_complete_play` and `content_watched_percent`
+- Stop URL fragment drift from splitting media plays
+- Add append on_schema_change to incremental tables
+
+## Upgrading
+Update the snowplow-media-player version in your packages.yml file.
+
+Neither fix rewrites existing historical rows on a normal incremental run — new data
+is correct going forward regardless. Both issues depend on specific conditions and
+may not apply to your historical data at all:
+- The duration fix affects `duration_secs`, `is_complete_play`, and
+  `content_watched_percent` where a play's own duration was missing or inconsistent
+  with other plays of the same media.
+- The URL fragment fix affects plays on pages where the URL can change mid-playback,
+  e.g. via an in-page anchor link.
+
+If you want to correct already-processed historical data for either issue, see the
+[full or partial refreshes guide](https://docs.snowplow.io/docs/modeling-your-data/modeling-your-data-with-dbt/dbt-operation/full-or-partial-refreshes/).
+
 snowplow-media-player 1.0.1 (2026-05-26)
 ---------------------------------------
 ## Summary
