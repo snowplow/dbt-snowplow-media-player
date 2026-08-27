@@ -10,7 +10,8 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
     unique_key='media_ad_view_id', 
     sort='last_event', 
     dist='media_ad_id', 
-    tags=["derived"], 
+    tags=["derived"],
+    on_schema_change="append_new_columns",
     partition_by=snowplow_utils.get_value_by_target_type(bigquery_val={
       "field": "viewed_at",
       "data_type": "timestamp"
