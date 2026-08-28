@@ -117,7 +117,13 @@ models:
     +materialized: table
     +incremental_strategy: "{{ none if target.type not in ['spark'] else 'merge' }}"
     +file_format: "{{ 'delta' if target.type not in ['spark'] else 'iceberg'}}"
+    +persist_docs:
+      relation: true
+      columns: true
     base:
+      +persist_docs:
+        relation: false
+        columns: false
       manifest:
         +schema: "snowplow_manifest"
       scratch:
@@ -139,6 +145,9 @@ models:
       scratch:
         +schema: 'scratch'
         +tags: 'scratch'
+        +persist_docs:
+          relation: false
+          columns: false
     media_plays:
       +schema: 'derived'
       +tags: 'snowplow_media_player_incremental'
@@ -149,12 +158,18 @@ models:
       +schema: 'scratch'
       +tags: 'snowplow_media_player_incremental'
       +enabled: false
+      +persist_docs:
+        relation: false
+        columns: false
     media_ad_views:
       +schema: 'derived'
       +tags: 'snowplow_media_player_incremental'
       scratch:
         +schema: 'scratch'
         +tags: 'scratch'
+        +persist_docs:
+          relation: false
+          columns: false
     media_ads:
       +schema: 'derived'
       +tags: 'snowplow_media_player_incremental'
