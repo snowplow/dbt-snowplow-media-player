@@ -68,7 +68,7 @@ events_this_run as (
       {% endfor -%}
     {%- endif %}
 
-    ,max(i.source_url) as source_url
+    ,max(nullif(i.source_url, '')) as source_url
     ,max(i.duration_secs) as duration_secs
     ,min(start_tstamp) as start_tstamp
     ,max(start_tstamp) as end_tstamp
