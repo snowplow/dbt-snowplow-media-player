@@ -92,16 +92,6 @@ This macro is used to determine if a full-refresh is allowed (depending on the e
 {% endraw %}
 {% enddocs %}
 
-{% docs macro_event_name_filter %}
-{% raw %}
-This macro is used to add a filter on `event_name` if provided.
-
-#### Returns
-
-Filter for `event_name` values inputted `event_names` list or `lower(event_vendor) = 'com.snowplowanalytics.snowplow.media'`
-{% endraw %}
-{% enddocs %}
-
 {% docs macro_get_percentage_boundaries %}
 {% raw %}
 This macro gets the list of percentage boundaries which are set in the tracker.
