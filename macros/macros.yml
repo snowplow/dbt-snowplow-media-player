@@ -74,13 +74,6 @@ macros:
   - name: allow_refresh
     description: '{{ doc("macro_allow_refresh") }}'
 
-  - name: event_name_filter
-    description: '{{ doc("macro_event_name_filter") }}'
-    arguments:
-      - name: event_names
-        type: list
-        description: List of event_name values to filter by
-
   - name: get_percentage_boundaries
     description: '{{ doc("macro_get_percentage_boundaries") }}'
     arguments:
