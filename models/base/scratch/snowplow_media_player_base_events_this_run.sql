@@ -65,6 +65,18 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
 {# Media events: the configured event names (v1) plus everything from the media vendor (v2). Applied in the scan of the events table. #}
 {% set media_event_names = var('snowplow__media_event_names', ['media_player_event']) %}
 {% set media_filter = "(event_name in ('" ~ media_event_names | join("','") ~ "') or event_vendor = 'com.snowplowanalytics.snowplow.media')" if media_event_names | length else none %}
+{# The event names of the v2 media schemas in Iglu Central. Listing them lets the warehouse skip data for other events,
+   e.g. the partitions of a Databricks events table partitioned by event_name, which the vendor condition can't do.
+   A media event whose name isn't listed here is only included if it is added to snowplow__media_event_names. #}
+{% set media_v2_event_names = [
+  'ad_break_end_event', 'ad_break_start_event', 'ad_click_event', 'ad_complete_event', 'ad_pause_event',
+  'ad_quartile_event', 'ad_resume_event', 'ad_skip_event', 'ad_start_event', 'buffer_end_event',
+  'buffer_start_event', 'end_event', 'error_event', 'fullscreen_change_event', 'pause_event',
+  'percent_progress_event', 'picture_in_picture_change_event', 'ping_event', 'play_event',
+  'playback_rate_change_event', 'quality_change_event', 'ready_event', 'seek_end_event', 'seek_start_event',
+  'volume_change_event'
+] %}
+{% set media_names_filter = media_event_names + media_v2_event_names if media_event_names | length else none %}
 
 {% set base_events_query = snowplow_utils.base_create_snowplow_events_this_run(
     sessions_this_run_table='snowplow_media_player_base_sessions_this_run',
@@ -80,6 +92,7 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
     snowplow_events_table=var('snowplow__events_table', 'events'),
     entities_or_sdes=contexts,
     custom_sql=var('snowplow__custom_sql', ''),
+    event_names=media_names_filter,
     custom_filter=media_filter
 ) %}
 
