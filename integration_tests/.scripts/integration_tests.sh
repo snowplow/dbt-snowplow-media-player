@@ -45,27 +45,30 @@ for db in ${DATABASES[@]}; do
 
   eval "dbt run --target $db --vars '{snowplow__enable_youtube: false, snowplow__enable_whatwg_media: false, snowplow__enable_whatwg_video: false, snowplow__enable_media_player_v1: false}'" || exit 1;
 
-  echo "Snowplow media player integration tests: Execute models - run 1/6"
+  # The second pass sets the v2 name list, keeping the mixed-case v1 config, and must give the same results.
+  for v2_vars in "snowplow__media_v2_event_names: null" "snowplow__media_v2_event_names: [ad_break_end_event, ad_break_start_event, ad_click_event, ad_complete_event, ad_pause_event, ad_quartile_event, ad_resume_event, ad_skip_event, ad_start_event, buffer_end_event, buffer_start_event, end_event, error_event, fullscreen_change_event, pause_event, percent_progress_event, picture_in_picture_change_event, ping_event, play_event, playback_rate_change_event, quality_change_event, ready_event, seek_end_event, seek_start_event, volume_change_event]"; do
+    echo "Snowplow media player integration tests: Execute models - run 1/6"
 
-  eval "dbt run --target $db --full-refresh --vars '{snowplow__allow_refresh: true}'" || exit 1;
+    eval "dbt run --target $db --full-refresh --vars '{snowplow__allow_refresh: true, $v2_vars}'" || exit 1;
 
-  for i in {2..3}
-  do
-    echo "Snowplow media player integration tests: Execute models - run $i/6"
+    for i in {2..3}
+    do
+      echo "Snowplow media player integration tests: Execute models - run $i/6"
 
-    eval "dbt run --target $db" || exit 1;
+      eval "dbt run --target $db --vars '{$v2_vars}'" || exit 1;
+    done
+
+    for i in {4..6}
+    do
+      echo "Snowplow media player integration tests: Execute models - run $i/6"
+
+      eval "dbt run --target $db --vars '{snowplow__backfill_limit_days: 300, $v2_vars}'" || exit 1;
+    done
+
+    echo "Snowplow media player integration tests: Test models"
+
+    eval "dbt test --target $db --vars '{$v2_vars}'" || exit 1;
   done
-
-  for i in {4..6}
-  do
-    echo "Snowplow media player integration tests: Execute models - run $i/6"
-
-    eval "dbt run --target $db --vars '{snowplow__backfill_limit_days: 300}'" || exit 1;
-  done
-
-  echo "Snowplow media player integration tests: Test models"
-
-  eval "dbt test --target $db" || exit 1;
 
   echo "Snowplow media player integration tests: Testing ad views passthrough - mixed configuration"
   eval "dbt run --select +snowplow_media_player_media_ad_views_this_run --target $db --full-refresh --vars '{

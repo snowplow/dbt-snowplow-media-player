@@ -9,8 +9,7 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
   {{ return({
     'event_names': event_names,
     'event_vendor': 'com.snowplowanalytics.snowplow.media',
-    'vendor_event_names': v2_event_names,
-    'case_sensitive': v2_event_names is not none
+    'vendor_event_names': v2_event_names
   }) }}
 {% endmacro %}
 

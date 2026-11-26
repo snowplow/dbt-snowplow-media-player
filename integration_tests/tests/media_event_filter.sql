@@ -3,8 +3,9 @@
 
 with events as (
   select 'playlist_deleted' as event_name, 'com.example' as event_vendor, true as expected_default, true as expected_listed
-  union all select 'Playlist_Deleted', 'com.example', true, false
+  union all select 'Playlist_Deleted', 'com.example', true, true
   union all select 'play_event', 'COM.SNOWPLOWANALYTICS.SNOWPLOW.MEDIA', true, true
+  union all select 'Play_Event', 'com.snowplowanalytics.snowplow.media', true, true
   union all select 'play_event', 'com.example', false, false
   union all select 'chapter_start_event', 'com.snowplowanalytics.snowplow.media', true, false
 )
