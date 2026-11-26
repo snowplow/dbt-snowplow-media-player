@@ -94,7 +94,7 @@ This macro is used to determine if a full-refresh is allowed (depending on the e
 
 {% docs macro_event_name_filter %}
 {% raw %}
-This macro is used to add a filter on `event_name` if provided.
+This macro is retained for projects that call it directly. It returns the same media event predicate used when scanning the events table.
 
 #### Returns
 

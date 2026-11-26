@@ -75,7 +75,8 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
     snowplow_events_schema=var('snowplow__atomic_schema', 'atomic'),
     snowplow_events_table=var('snowplow__events_table', 'events'),
     entities_or_sdes=contexts,
-    custom_sql=var('snowplow__custom_sql', '')
+    custom_sql=var('snowplow__custom_sql', ''),
+    event_filter=media_event_filter(var('snowplow__media_event_names', ['media_player_event']))
 ) %}
 
 with base_query as (
@@ -226,9 +227,6 @@ with base_query as (
       ]) }}
 
   from base_query ev
-
-  where
-    {{ snowplow_media_player.event_name_filter(var("snowplow__media_event_names", "['media_player_event']")) }}
 )
 
 , combined_fields as (
