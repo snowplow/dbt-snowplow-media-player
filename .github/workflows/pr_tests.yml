@@ -144,7 +144,7 @@ jobs:
           cat > ../packages.yml <<'YAML'
           packages:
             - git: https://github.com/snowplow/dbt-snowplow-utils.git
-              revision: e123d5061383d28742d558ab878fdbaf78a766e1
+              revision: 751beae95342b080c2a2a173352246c9cf3ba25b
           YAML
 
       # Install latest patch version. Upgrade if cache contains old patch version.
