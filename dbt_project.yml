@@ -41,6 +41,7 @@ vars:
     snowplow__valid_play_sec: 30
     surrogate_key_treat_nulls_as_empty_strings: true # turn on legacy behavior
     snowplow__media_event_names: ['media_player_event']
+    snowplow__media_v2_event_names: null
     snowplow__start_date: '2020-01-01'
     snowplow__backfill_limit_days: 30
     snowplow__lookback_window_hours: 6
