@@ -51,6 +51,7 @@ vars:
 
   snowplow_media_player:
     # Variables - Warehouse and tracker
+    snowplow__media_event_names: ['Media_Player_Event', 'playlist_deleted']
     snowplow__percent_progress_boundaries: [10, 25, 50, 75]
     snowplow__events: '{{ ref("snowplow_media_player_events_stg") }}'
     snowplow__events_table: 'snowplow_media_player_events_stg'

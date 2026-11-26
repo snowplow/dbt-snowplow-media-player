@@ -92,6 +92,16 @@ This macro is used to determine if a full-refresh is allowed (depending on the e
 {% endraw %}
 {% enddocs %}
 
+{% docs macro_event_name_filter %}
+{% raw %}
+This macro is retained for projects that call it directly. It returns the same media event predicate used when scanning the events table.
+
+#### Returns
+
+Filter for `event_name` values inputted `event_names` list or `lower(event_vendor) = 'com.snowplowanalytics.snowplow.media'`
+{% endraw %}
+{% enddocs %}
+
 {% docs macro_get_percentage_boundaries %}
 {% raw %}
 This macro gets the list of percentage boundaries which are set in the tracker.

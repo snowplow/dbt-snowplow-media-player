@@ -62,10 +62,6 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
   {% do contexts.append({'schema': var('snowplow__media_ad_quartile_event'), 'prefix': 'ad_quartile_event_', 'single_entity': True}) %}
 {% endif %}
 
-{# Media events: the configured event names (v1) plus everything from the media vendor (v2). Applied in the scan of the events table. #}
-{% set media_event_names = var('snowplow__media_event_names', ['media_player_event']) %}
-{% set media_filter = "(event_name in ('" ~ media_event_names | join("','") ~ "') or event_vendor = 'com.snowplowanalytics.snowplow.media')" if media_event_names | length else none %}
-
 {% set base_events_query = snowplow_utils.base_create_snowplow_events_this_run(
     sessions_this_run_table='snowplow_media_player_base_sessions_this_run',
     session_identifiers=session_identifiers(),
@@ -80,7 +76,7 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
     snowplow_events_table=var('snowplow__events_table', 'events'),
     entities_or_sdes=contexts,
     custom_sql=var('snowplow__custom_sql', ''),
-    custom_filter=media_filter
+    event_filter=media_event_filter(var('snowplow__media_event_names', ['media_player_event']))
 ) %}
 
 with base_query as (
