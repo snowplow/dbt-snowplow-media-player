@@ -13,5 +13,5 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
 {% endmacro %}
 
 {% macro event_name_filter(event_names) %}
-  {{ snowplow_utils.event_scan_filter(media_event_filter(event_names)) }}
+  {{ snowplow_utils.event_scan_filter(snowplow_media_player.media_event_filter(event_names)) }}
 {% endmacro %}
