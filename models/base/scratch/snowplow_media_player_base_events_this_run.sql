@@ -76,7 +76,10 @@ You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 
     snowplow_events_table=var('snowplow__events_table', 'events'),
     entities_or_sdes=contexts,
     custom_sql=var('snowplow__custom_sql', ''),
-    event_filter=media_event_filter(var('snowplow__media_event_names', ['media_player_event']))
+    event_filter=media_event_filter(
+      var('snowplow__media_event_names', ['media_player_event']),
+      var('snowplow__media_v2_event_names', none)
+    )
 ) %}
 
 with base_query as (

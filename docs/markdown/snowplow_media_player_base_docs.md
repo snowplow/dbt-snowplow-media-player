@@ -22,6 +22,10 @@ This table contains the lower and upper timestamp limits for the given run of th
 
 For any given run, this table contains all required events to be consumed by subsequent nodes in the Snowplow dbt media package. This is a cleaned, deduped dataset, containing all columns from the raw events table as well as having the `page_view_id` joined in from the page view context, and all of the fields parsed from the various media contexts.
 
+By default, the scan includes the names in `snowplow__media_event_names` and all events from the `com.snowplowanalytics.snowplow.media` vendor. Matching is case-insensitive.
+
+For tables partitioned by `event_name`, set `snowplow__media_v2_event_names` to the complete list of v2 event names you use. The scan then filters on both name lists, still case-insensitively, so the warehouse can prune other event-name partitions. The v2 names also require the media vendor. Add new v2 event names to this list as you adopt them, or leave it unset to pick them up automatically. An empty v2 list selects only v1 names. An empty `snowplow__media_event_names` disables the filter entirely.
+
 **Note: This table should be used as the input to any custom modules that require event level data, rather than selecting straight from `atomic.events`**
 
 {% enddocs %}

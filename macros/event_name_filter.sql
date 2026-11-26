@@ -5,10 +5,11 @@ and you may not use this file except in compliance with the Snowplow Personal an
 You may obtain a copy of the Snowplow Personal and Academic License Version 1.0 at https://docs.snowplow.io/personal-and-academic-license-1.0/
 #}
 
-{% macro media_event_filter(event_names) %}
+{% macro media_event_filter(event_names, v2_event_names=none) %}
   {{ return({
     'event_names': event_names,
-    'event_vendor': 'com.snowplowanalytics.snowplow.media'
+    'event_vendor': 'com.snowplowanalytics.snowplow.media',
+    'vendor_event_names': v2_event_names
   }) }}
 {% endmacro %}
 
