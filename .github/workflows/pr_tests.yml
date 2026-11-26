@@ -138,6 +138,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-${{ matrix.dbt_version }}-${{env.WAREHOUSE_PLATFORM}}
 
+      - name: Test the candidate from snowplow/dbt-snowplow-utils#235
+        if: github.event.pull_request.number == 108 || github.event.pull_request.number == 109
+        run: |
+          cat > ../packages.yml <<'YAML'
+          packages:
+            - git: https://github.com/snowplow/dbt-snowplow-utils.git
+              revision: e123d5061383d28742d558ab878fdbaf78a766e1
+          YAML
+
       # Install latest patch version. Upgrade if cache contains old patch version.
       - name: Install dependencies
         run: |
